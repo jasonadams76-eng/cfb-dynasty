@@ -174,7 +174,9 @@ const OFF={
 'West Coast':{k:1.7,pass:.56,w:{qa:.28,wh:.26,te:.10,rb:.06,ws:.04,pb:.20,rk:.06},tempo:1,var:.95,d:'Timing routes, short passing. Needs a precise QB, sure-handed WRs and TE, and pass protection.'},
 'Pro Style':{k:1.4,pass:.5,w:{qa:.20,qs:.05,rb:.14,wh:.10,ws:.04,te:.10,tb:.05,pb:.10,rk:.18,fbb:.04},tempo:.97,var:.9,d:'Balanced under-center offense. Leans on the offensive line, run blocking especially.'},
 'Power Run':{k:1.9,pass:.35,w:{qa:.08,qs:.04,rb:.10,rpw:.14,rs:.06,wh:.04,te:.06,tb:.08,pb:.04,rk:.30,fbb:.06},tempo:.9,var:.85,d:'Smash-mouth. Grinds clock, low variance. Needs a bruising RB, blocking TEs and road-grader linemen.'},
-'Triple Option':{k:2.0,pass:.2,w:{qa:.04,qs:.26,rb:.12,rpw:.10,rs:.12,ws:.02,tb:.04,rk:.27,fbb:.03},tempo:.88,var:1.1,d:'Option running attack. Slow pace. Needs a fast, running QB, quick RBs and run-blocking linemen; passing talent is wasted.'}};
+'Triple Option':{k:1.6,pass:.2,w:{qs:.26,rs:.10,rpw:.08,rb:.08,fbu:.26,fbb:.04,rk:.22,tb:.06},neg:{qa:.12,wh:.08},tempo:.88,var:1.1,d:'Rare option running attack. Slow pace. Only worth running with a fast running QB who is a poor passer, weak receivers, and a strong running fullback who can carry the load. A good passing roster is wasted, and costs you here.'}};
+/* league-wide calibration so each scheme is the best fit for a realistic share of rosters (Spread/Pro Style common, Triple Option rare) */
+const OFFB={'Spread':1.4,'Air Raid':-.1,'West Coast':.6,'Pro Style':1.55,'Power Run':-.3,'Triple Option':9.8};
 const DEF={
 '4-3 Multiple':{k:1.8,pw:{dp:.30,lc:.15,cm:.15,cz:.15,sc:.25},rw:{dr:.35,lr:.38,sr:.17,cz:.10},agg:1,lean:0,d:'Balanced base defense.'},
 '3-4 Attack':{k:2.9,pw:{dp:.20,lc:.18,lr:.12,cm:.12,cz:.12,sc:.26},rw:{dr:.28,lr:.50,sr:.12,cz:.10},agg:1.15,lean:-.3,d:'Linebacker-driven blitz scheme. Needs athletic, physical LBs. Better vs run.'},
@@ -622,7 +624,7 @@ function ratingCard0(p,hide){if(hide==='pros'){const r=rt(p),col=v=>v>=90?'var(-
  RKEYS.map(([g,L])=>'<div><div class=a style="font-weight:600;margin-bottom:4px">'+g+'</div>'+L.map(([k,n])=>'<div class=row style="justify-content:space-between;gap:6px"><span class=m>'+n+'</span><b style="color:'+col(r[k])+'">'+r[k]+'</b></div>').join('')+'</div>').join('')+'</div></div>'}
 const GEN=u=>u.qb*.27+u.rb*.16+u.wr*.2+u.te*.07+u.ol*.3,GEND=u=>u.dl*.31+u.lb*.28+u.cb*.23+u.s*.18;
 /* scheme fit: weighted skills, amplified around the roster's generic strength so style fit swings ratings */
-function offEff(t,pb,u){u=u||units(t);const w=OFF[pb||t.po].w,g=GEN(u);return g+OFF[pb||t.po].k*(Object.keys(w).reduce((s,k)=>s+u[k]*w[k],0)-g)}
+function offEff(t,pb,u){u=u||units(t);const sc=pb||t.po,o=OFF[sc],w=o.w,g=GEN(u);let s=Object.keys(w).reduce((a,k)=>a+u[k]*w[k],0);if(o.neg)for(const k in o.neg)s-=u[k]*o.neg[k];return g+o.k*(s-g)+(OFFB[sc]||0)}
 function defEff(t,pb,oppPass,u){const sch=pb||t.pd;if(!u||u.sch!==sch)u=units(t,sch);const D=DEF[pb||t.pd],f=w=>{let x=0;for(const k in w)x+=u[k]*w[k];return x};const g=GEND(u);return g+D.k*(oppPass*f(D.pw)+(1-oppPass)*f(D.rw)-g)+D.lean*(oppPass-.5)*8}
 const stPts=u=>(u.k-70)*.055+(u.p-70)*.03;
 const tOvr=t=>{const u=units(t);return(offEff(t,t.po,u)+defEff(t,t.pd,.5,u))/2+stPts(u)/.72};
