@@ -1897,7 +1897,7 @@ function importText(txt,tid){const miss=new Set(),by={};let n=0;const forced=tid
 function applyRosterData(){const D=typeof ROSTER_DATA!=='undefined'?ROSTER_DATA:null;if(!D)return 0;let n=0;
  for(const k in D){const t=findTeam(k),rows=D[k];if(!t||rows.length<11)continue;
   t.roster=rows.slice(0,85).map(r=>({id:S.nid++,name:r[0],pos:r[1],yr:r[2],ovr:r[3],dev:guessDev(r[3]),stars:r[3]>=88?5:r[3]>=80?4:r[3]>=70?3:2,home:r[4]||t.region,db:pick(MOT),inj:0,xp:0,st:{},nc:0}));
-  convTeam(t);fillRoster(t);[t.po,t.pd]=bestPB(t);t.real=true;n++}return n}
+  t.roster.forEach(p=>{if(!p.arch&&SLOTS[GP(p.pos)]&&POS.includes(p.pos))p.arch=style(p).n});convTeam(t);fillRoster(t);[t.po,t.pd]=bestPB(t);t.real=true;n++}return n}
 function impMsg(r){toast(r.n+' team(s) imported'+(r.miss.length?'; unmatched team names: '+r.miss.slice(0,6).join(', '):''))}
 function impRun(){impMsg(importText(SU.txt,SU.imt));setup()}
 function impFiles(fl){const arr=[...fl];let done=0,tot={n:0,miss:new Set()};arr.forEach(f=>{const rd=new FileReader();rd.onload=()=>{const r=importText(rd.result,SU.imt);tot.n+=r.n;r.miss.forEach(x=>tot.miss.add(x));if(++done===arr.length){impMsg({n:tot.n,miss:[...tot.miss]});setup()}};rd.readAsText(f)})}
