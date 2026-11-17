@@ -115,6 +115,66 @@ body{background:radial-gradient(1200px 700px at 78% 30%,hsl(var(--th,350) 55% 24
 .hmsg{margin-top:14px;padding:10px 14px;border-radius:8px;background:#ef5b5b1a;border:1px solid #ef5b5b55;color:#ffb3b3;font-weight:600}
 .hfoot{text-align:center;color:var(--m);font-size:12px;margin-top:26px;letter-spacing:.5px}
 @media(max-width:560px){.hjoin .grid{grid-template-columns:1fr}.hc{padding:18px 16px}.bt{flex:1 1 auto}}
+
+/* ===== unified premium theme (applies to every screen) ===== */
+:root{--gold1:#ffbf47;--gold2:#e8940e;--line:#ffffff14;--panel:linear-gradient(180deg,#1b212bf2,#141920f2)}
+html{scrollbar-color:#3a4556 #0e1116;scrollbar-width:thin}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#3a4556;border-radius:8px;border:2px solid #0e1116}::-webkit-scrollbar-track{background:#0e1116}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px;box-shadow:inset 4px 0 0 var(--a),0 10px 30px #0007}
+.card>h2:first-child,.card>.row:first-child>h2:first-child{margin:0 0 12px;font-size:20px;font-weight:800;letter-spacing:.3px;color:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card h2{font-size:20px;font-weight:800;letter-spacing:.3px;color:#fff}
+h3{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--a);font-weight:800;margin:16px 0 8px}
+.card p{line-height:1.5}
+.tag{background:#f5a5241f;border:1px solid #f5a52444;color:#ffd58a;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;letter-spacing:.4px}
+button{font-family:inherit;transition:transform .12s,box-shadow .12s,background .12s,border-color .12s,filter .12s}
+button.b{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1a1100;border:1px solid #ffd27a;padding:9px 20px;border-radius:10px;font-weight:800;letter-spacing:.3px;box-shadow:0 6px 18px #f5a52433,inset 0 1px 0 #fff6}
+button.b:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 10px 24px #f5a52455,inset 0 1px 0 #fff8}
+button.b:active:not(:disabled){transform:translateY(0)}
+button.s{background:#ffffff0d;color:var(--t);border:1px solid #ffffff26;padding:8px 16px;border-radius:9px;font-weight:600;letter-spacing:.2px}
+button.s:hover:not(:disabled){transform:translateY(-2px);background:#ffffff1a;border-color:#ffffff44;box-shadow:0 8px 18px #0006}
+button.s:active:not(:disabled){transform:translateY(0)}
+button:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+select,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea{background:#0b0f14;color:var(--t);border:1px solid #ffffff26;border-radius:9px;padding:8px 11px;font:inherit;outline:none;transition:border-color .12s,box-shadow .12s}
+select:focus,input:focus,textarea:focus{border-color:var(--a);box-shadow:0 0 0 3px #f5a52433}
+input[type=checkbox],input[type=radio],input[type=range]{accent-color:var(--a)}
+table{border-radius:10px}th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--m);font-weight:700;border-bottom:1px solid #ffffff22}
+td{border-bottom:1px solid #ffffff0d}
+tbody tr{transition:background .1s}tr.clk:hover{background:#f5a5241a}tr.me{background:#f5a52424;box-shadow:inset 3px 0 0 var(--a)}
+.lt th,.ts2 th{text-transform:uppercase}.lt tr:hover td{background:#ffffff08}
+.chip{transition:background .12s}
+.recbar,.dbk,.stat{border:1px solid var(--line);box-shadow:0 6px 18px #0006}
+.recbar{background:var(--panel);border-radius:12px}
+.stat{background:linear-gradient(180deg,#0c0f14f2,#0a0d12f2);border-radius:12px}
+.ttl{position:relative;padding-bottom:14px;letter-spacing:.5px}.ttl:after{content:"";position:absolute;left:22px;bottom:4px;width:84px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--a),transparent)}
+.tabs{gap:8px}.tabs .t{border-radius:9px;padding:7px 15px;color:#d7c9c9;transition:background .12s,color .12s,transform .12s}.tabs .t:hover{background:#ffffff14;color:#fff;transform:translateY(-1px)}
+.tabs .t.on,.rt.on,.ptb.on{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1a1100;font-weight:800;box-shadow:0 6px 16px #f5a52440,inset 0 1px 0 #fff6}
+.tabs .t.on:hover,.rt.on:hover,.ptb.on:hover{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1a1100;transform:none}.rt,.ptb{border-radius:9px}.rt:hover,.ptb:hover{background:#ffffff14;color:#fff}
+.tabs .bump{background:linear-gradient(180deg,#fff,#e6e6e6);border-radius:6px}
+.it{border-radius:12px;background:linear-gradient(180deg,#1b212bf0,#141920f0);border:1px solid var(--line);transition:transform .12s,background .12s,border-color .12s,box-shadow .12s}
+.it:hover{transform:translateX(3px);background:linear-gradient(180deg,#242c38,#1a212b);border-color:#f5a52455}
+.it.on{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1a1100;border-color:#ffd27a;border-left:6px solid #fff8;box-shadow:0 8px 22px #f5a52440,inset 0 1px 0 #fff6}
+.it.on small{color:#4a3300}.it.on:hover{transform:none}
+.it .ck{border-radius:6px}
+.sepl{background:linear-gradient(90deg,#f5a52488,transparent)}
+.rp{border-radius:10px;border:1px solid var(--line);transition:background .12s,transform .12s}.rp:hover{background:#242c38}
+.rp.on{background:linear-gradient(90deg,#ffe3aa,#f5c46a);color:#1a1100;border-left-color:var(--a)}
+.pb{border-radius:10px;transition:background .12s,border-color .12s,transform .12s}.pb:hover{border-color:#f5a52466}
+.gt{border-radius:10px;transition:transform .12s,border-color .12s}.gt:hover{transform:translateY(-2px)}.gt.on{border-color:var(--a)}
+.mrow{border-radius:8px;transition:background .1s}.mrow:hover{background:#ffffff0d}
+.atg>div,.atg1>div{border:1px solid var(--line);border-radius:10px}
+.bar{height:8px;border-radius:5px;background:#ffffff14}.bar i{background:linear-gradient(90deg,#3f87e0,#6bb2ff);border-radius:5px}
+.secbar{border-radius:3px}
+.pbf{background:linear-gradient(90deg,#c9a24a,#f0c968)}
+#toast{background:linear-gradient(180deg,#1b212bf8,#11151bf8);border:1px solid #f5a52466;color:#fff;border-radius:12px;padding:11px 20px;font-weight:600;box-shadow:0 12px 34px #000b;backdrop-filter:blur(6px)}
+button.t{background:#ffffff0d;color:var(--t);border:1px solid #ffffff26;border-radius:9px;cursor:pointer;font-weight:600}button.t:hover{background:#ffffff1a;border-color:#ffffff44}button.t.on{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1a1100;border-color:#ffd27a;font-weight:800}.tabs button.t{border:0;background:none}.tabs button.t.on{background:linear-gradient(180deg,var(--gold1),var(--gold2))}input[type=file]{font:inherit;color:var(--m);max-width:100%}input[type=file]::file-selector-button{font:inherit;font-weight:700;background:#ffffff14;color:var(--t);border:1px solid #ffffff2a;border-radius:8px;padding:6px 12px;margin-right:10px;cursor:pointer}input[type=file]::file-selector-button:hover{background:#ffffff26}.bt:disabled{transform:none;box-shadow:none;filter:grayscale(.6)}.hm.wide{max-width:1180px}.hm.wide .hc{margin-bottom:18px}
+.hc table{border-radius:10px}
+.hc .row{gap:10px}
+.hc p.m,.hc p{margin-bottom:14px}
+.hc textarea{width:100%;margin-top:8px}
+.hc .hin,.hc select,.hc input:not([type=checkbox]):not([type=file]){font-size:15px}
+.hc>.hhd+.row{margin-bottom:12px}
+@media(max-width:560px){.card{padding:14px 14px}.hm.wide{padding:24px 10px 40px}}
 </style></head><body><div id="app"></div><div id="toast"></div>
 <script src="rosters-data.js"></script>
 <script>
@@ -1904,9 +1964,9 @@ function impMsg(r){toast(r.n+' team(s) imported'+(r.miss.length?'; unmatched tea
 function impRun(){impMsg(importText(SU.txt,SU.imt));setup()}
 function impFiles(fl){const arr=[...fl];let done=0,tot={n:0,miss:new Set()};arr.forEach(f=>{const rd=new FileReader();rd.onload=()=>{const r=importText(rd.result,SU.imt);tot.n+=r.n;r.miss.forEach(x=>tot.miss.add(x));if(++done===arr.length){impMsg({n:tot.n,miss:[...tot.miss]});setup()}};rd.readAsText(f)})}
 function setup(){const ts=S.teams.filter(t=>!SU.cf||t.conf===SU.cf).sort((a,b)=>b.prestige-a.prestige||tOvr(b)-tOvr(a));
- $('app').innerHTML='<div class=pg><div class=card><h2>🏈 CFB Dynasty — New Dynasty</h2><div class=row><label>Coach name <input value="'+SU.name+'" onchange="SU.name=this.value"></label><label>Backstory <select onchange="SU.back=this.value">'+Object.keys(BACK).map(b=>'<option'+(SU.back===b?' selected':'')+'>'+b+'</option>').join('')+'</select></label></div><p class=m>Recruiter, Tactician and Motivator trees are open from the start (Recruiter: recruiting · Tactician: schemes &amp; game plan · Motivator: development &amp; retention); your backstory archetype is 3 Coach Points cheaper per tier. Advanced archetypes unlock through career achievements.</p></div>'+
- '<div class=card><h2>Real rosters</h2><p class=m><b>'+S.teams.filter(t=>t.real).length+' of '+S.teams.length+' teams</b> load with built-in CFB 27 rosters (from <code>rosters-data.js</code>); the rest get generated rosters. Optional import to replace or add a team: Paste or upload roster rows. Accepts the CFB Labs roster JSON (one team or a combined file; the team is read from each player), or CSV/tab text with a header row (<code>team,name,pos,class,ovr,dev</code>; team/class/dev optional). To import one team into a school regardless of its name, select that team in the dropdown first. Teams you skip keep generated rosters. Do this before starting your dynasty.</p><div class=row><select onchange="SU.imt=this.value"><option value="">Whole league (first column = team)</option>'+S.teams.map(t=>'<option value='+t.id+(SU.imt==t.id?' selected':'')+'>'+t.name+'</option>').join('')+'</select><input type=file multiple accept=".json,.csv,.tsv,.txt" onchange="impFiles(this.files)"></div><textarea rows=4 style="width:100%;margin-top:8px;background:var(--p2);color:var(--t)" oninput="SU.txt=this.value">'+SU.txt+'</textarea><div class=row style="margin-top:8px"><button class=s onclick="impRun()">Import</button><span class=m>'+S.teams.filter(t=>t.real).length+' of '+S.teams.length+' teams have real rosters</span></div></div>'+
- '<div class=card><h2>Pick your school ('+S.teams.length+' FBS teams)</h2><div class=row><select onchange="SU.cf=this.value;setup()"><option value="">All conferences</option>'+CONFS.map(c=>'<option'+(SU.cf===c?' selected':'')+'>'+c+'</option>').join('')+'</select><button class=b '+(SU.team==null?'disabled':'')+' onclick="startNew()">Start Dynasty as '+(SU.team!=null?S.teams[SU.team].name:'…')+'</button><button class=s onclick="ask(\'reroll\',()=>{buildLeague();render()})">'+(CF==='reroll'?'Click again to re-roll':'Re-roll league')+'</button></div>'+tbl(['School','Conf','Prestige','OVR','Roster','Best offense','Best defense','Budget (DP)',''],ts.map(t=>{const u=units(t);let bo='',so=0,bd='',sd=0;for(const k in OFF){const e=offEff(t,k,u);if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u);if(e>sd){sd=e;bd=k}}return'<tr class="clk '+(SU.team===t.id?'me':'')+'" onclick="SU.team='+t.id+';setup()"><td>'+t.name+'</td><td>'+t.conf+'</td><td>'+'★'.repeat(t.prestige)+'</td><td>'+tOvr(t).toFixed(1)+'</td><td>'+(t.real?'real':'generated')+'</td><td>'+bo+'</td><td>'+bd+'</td><td>'+baseDP(t)+'</td><td>'+(SU.team===t.id?'✔':'')+'</td></tr>'}))+'</div></div>'}
+ $('app').innerHTML='<div class="hm wide"><div class=hero><div class=hball>🏈</div><h1>CFB <b>Dynasty</b></h1><div class=hsub>New dynasty · Choose your coach and school</div><div class=hline></div></div><div class="hc hot"><div class=hhd><div class=hic>🎓</div><div><div class=hk>Step 1</div><h2>Create your coach</h2></div></div><div class=row><label>Coach name <input value="'+SU.name+'" onchange="SU.name=this.value"></label><label>Backstory <select onchange="SU.back=this.value">'+Object.keys(BACK).map(b=>'<option'+(SU.back===b?' selected':'')+'>'+b+'</option>').join('')+'</select></label></div><p class=m>Recruiter, Tactician and Motivator trees are open from the start (Recruiter: recruiting · Tactician: schemes &amp; game plan · Motivator: development &amp; retention); your backstory archetype is 3 Coach Points cheaper per tier. Advanced archetypes unlock through career achievements.</p></div>'+
+ '<div class=hc><div class=hhd><div class=hic>📋</div><div><div class=hk>Step 2 · Optional</div><h2>Rosters</h2></div></div><p class=m><b>'+S.teams.filter(t=>t.real).length+' of '+S.teams.length+' teams</b> load with built-in CFB 27 rosters (from <code>rosters-data.js</code>); the rest get generated rosters. Optional import to replace or add a team: Paste or upload roster rows. Accepts the CFB Labs roster JSON (one team or a combined file; the team is read from each player), or CSV/tab text with a header row (<code>team,name,pos,class,ovr,dev</code>; team/class/dev optional). To import one team into a school regardless of its name, select that team in the dropdown first. Teams you skip keep generated rosters. Do this before starting your dynasty.</p><div class=row><select onchange="SU.imt=this.value"><option value="">Whole league (first column = team)</option>'+S.teams.map(t=>'<option value='+t.id+(SU.imt==t.id?' selected':'')+'>'+t.name+'</option>').join('')+'</select><input type=file multiple accept=".json,.csv,.tsv,.txt" onchange="impFiles(this.files)"></div><textarea rows=4 oninput="SU.txt=this.value">'+SU.txt+'</textarea><div class=row style="margin-top:8px"><button class=bt onclick="impRun()">Import</button><span class=m>'+S.teams.filter(t=>t.real).length+' of '+S.teams.length+' teams have real rosters</span></div></div>'+
+ '<div class=hc><div class=hhd><div class=hic>🏟️</div><div><div class=hk>Step 3</div><h2>Pick your school ('+S.teams.length+' FBS teams)</h2></div></div><div class=row><select onchange="SU.cf=this.value;setup()"><option value="">All conferences</option>'+CONFS.map(c=>'<option'+(SU.cf===c?' selected':'')+'>'+c+'</option>').join('')+'</select><button class="bt pri" '+(SU.team==null?'disabled':'')+' onclick="startNew()">Start Dynasty as '+(SU.team!=null?S.teams[SU.team].name:'…')+'</button><button class=bt onclick="ask(\'reroll\',()=>{buildLeague();render()})">'+(CF==='reroll'?'Click again to re-roll':'Re-roll league')+'</button></div>'+tbl(['School','Conf','Prestige','OVR','Roster','Best offense','Best defense','Budget (DP)',''],ts.map(t=>{const u=units(t);let bo='',so=0,bd='',sd=0;for(const k in OFF){const e=offEff(t,k,u);if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u);if(e>sd){sd=e;bd=k}}return'<tr class="clk '+(SU.team===t.id?'me':'')+'" onclick="SU.team='+t.id+';setup()"><td>'+t.name+'</td><td>'+t.conf+'</td><td>'+'★'.repeat(t.prestige)+'</td><td>'+tOvr(t).toFixed(1)+'</td><td>'+(t.real?'real':'generated')+'</td><td>'+bo+'</td><td>'+bd+'</td><td>'+baseDP(t)+'</td><td>'+(SU.team===t.id?'✔':'')+'</td></tr>'}))+'</div></div>'}
 function matAll(){if(!S||!S.teams||S.mv===2)return;S.teams.forEach(t=>t.roster.forEach(p=>{if(OWN[p.pos])mat(p)}));S.mv=2}
 function startNew(){matAll();S.uid=SU.team;S.coach={name:SU.name,back:SU.back,xp:0,cp:100,ab:{},unl:[],sp:{},st:{},v2:1,wins:0,losses:0,titles:0,prestige:.4};Object.assign(S,{htv:2,hist:[],log:[],board:[],staff:[],practice:'bal',plan:'bal',facUpg:0,facTarget:U().fac,sec:70,fired:false,pros:[],keepPros:false});S.facStart=U().fac;S.hum=[S.uid];S.users={};S.pa=S.uid;
  S.stage='pre';startSeason(true);save();TAB='actions';SUB.actions='stage';render()}
