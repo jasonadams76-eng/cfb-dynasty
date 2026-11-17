@@ -73,6 +73,14 @@ body{background:radial-gradient(1200px 700px at 78% 30%,hsl(var(--th,350) 55% 24
 @media(max-width:1100px){.lst{grid-template-columns:1fr}.lside{position:static}}
 @media(max-width:800px){.rbd{grid-template-columns:1fr}
 .gts{grid-template-columns:repeat(2,1fr)}}
+
+.sp{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:24px 24px 9vh;background:url(splash.jpg) center/contain no-repeat,#0a0e14}
+.sp h1{font-size:clamp(34px,8vw,68px);letter-spacing:2px;margin:6px 0;line-height:1.05}.sp h1 b{color:var(--a)}
+.sp .sptag{color:var(--m);font-size:clamp(14px,2.4vw,19px);max-width:560px;margin:8px 0 28px}
+.sp .big{font-size:18px;padding:14px 56px;border-radius:10px;background:var(--a);color:#111;border-color:var(--a);font-weight:700;box-shadow:0 6px 24px #000a}
+.sp .ball{font-size:64px;filter:drop-shadow(0 6px 14px #000a)}
+.sp .ver{position:fixed;bottom:12px;color:var(--m);font-size:12px}
+.hm{max-width:720px;margin:0 auto;padding:22px 14px}.hm .card{margin-bottom:14px}
 </style></head><body><div id="app"></div><div id="toast"></div>
 <script src="rosters-data.js"></script>
 <script>
@@ -310,8 +318,9 @@ function eachH(fn,pros){const o=S.uid,r=[];for(const h of humans().slice()){useU
 function coachOf(t){const s=slice(t);return s&&s.coach}
 function staffOf(t){const s=slice(t);return(s&&s.staff)||[]}
 function noteU(t,m){const s=slice(t);if(!s)return;if(t===S.uid)return note(m);s.log=s.log||[];s.log.unshift(S.year+' '+m);s.log=s.log.slice(0,60)}
-function hasOff(p,t){if(t===S.uid)return!!p.offer;if(isH(t)){const u=p.U&&p.U[t];return!!(u&&u.offer)}return(p.offs||[]).includes(t)}
-function nilOf(p,t){if(t===S.uid)return p.offer?p.offer.nil:null;if(isH(t)){const u=p.U&&p.U[t];return u&&u.offer?u.offer.nil:null}return p.cn&&p.cn[t]!=null?p.cn[t]:null}
+const isAuto=t=>!!(S.auto&&S.auto.includes(t)),isHR=t=>isH(t)&&!isAuto(t);
+function hasOff(p,t){if(isH(t)){let o;if(t===S.uid)o=!!p.offer;else{const u=p.U&&p.U[t];o=!!(u&&u.offer)}return o||(isAuto(t)&&(p.offs||[]).includes(t))}return(p.offs||[]).includes(t)}
+function nilOf(p,t){if(isH(t)){let o=null;if(t===S.uid)o=p.offer?p.offer.nil:null;else{const u=p.U&&p.U[t];o=u&&u.offer?u.offer.nil:null}if(o==null&&isAuto(t)&&p.cn&&p.cn[t]!=null)o=p.cn[t];return o}return p.cn&&p.cn[t]!=null?p.cn[t]:null}
 function addHuman(tid,name,back){if(isH(tid))return false;const base=S.coach||{};const sl={};PUK.forEach(k=>{sl[k]=undefined});const t=S.teams[tid];
  Object.assign(sl,{coach:{name:name,back:back,xp:0,cp:60,ab:{},unl:[],sp:{},st:{},v2:1,wins:0,losses:0,titles:0,prestige:.4},board:[],staff:[],practice:'bal',plan:'bal',facUpg:0,facTarget:t.fac,facStart:t.fac,sec:70,hist:[],log:[],htv:2,fired:false,boxes:[],hu:0,xfer:[],grads:[],train:[],jobs:null,dg:{},gp:0});
  S.users=S.users||{};S.hum=humans().slice();S.hum.push(tid);S.users[tid]=sl;
@@ -705,8 +714,8 @@ function mkProspect(){const r=F(),stars=r<.01?5:r<.09?4:r<.56?3:2,mean={5:79,4:7
  if(stars>=3){const r2=F();if(p.dev>=2&&r2<.7)p.tag='gem';else if(p.dev===1&&r2<.06)p.tag='gem';else if(stars>=4&&p.dev===0&&(stars===5||r2<.4)){p.tag='bust';p.ovr=Math.min(93,p.ovr+4)}}
  return p}
 function cpuNeed(p,t){const n=t.roster.filter(x=>x.pos===p.pos&&x.yr<4&&x.id!==p.id).length;return clamp((START[p.pos]+1-n)*.3,-.4,.6)}
-const rateFor=(p,t)=>.55+t.prestige*.1+proxD(t,p)*.35+F()*.3+(isH(t.id)?0:sgT(p,t)*.14+cpuNeed(p,t)*.06)+(fit(p,t)-.45)*.3;
-const schoolScore0=(p,t)=>t.prestige*.6+proxD(t,p)*2+F()*2+(p.stars>=4?t.prestige*.5:0)-Math.abs(2+t.prestige*.5-p.stars)*.8+(isH(t.id)?0:sgT(p,t)*2.6+cpuNeed(p,t)*1.5);
+const rateFor=(p,t)=>.55+t.prestige*.1+proxD(t,p)*.35+F()*.3+(isHR(t.id)?0:sgT(p,t)*.14+cpuNeed(p,t)*.06)+(fit(p,t)-.45)*.3;
+const schoolScore0=(p,t)=>t.prestige*.6+proxD(t,p)*2+F()*2+(p.stars>=4?t.prestige*.5:0)-Math.abs(2+t.prestige*.5-p.stars)*.8+(isHR(t.id)?0:sgT(p,t)*2.6+cpuNeed(p,t)*1.5);
 /* every recruit starts with a Top 10 of interested schools (built-in influence), everyone else has a trace; each school keeps a candidate list for its board */
 const schoolScore=(p,t)=>fit(p,t)*3+schoolScore0(p,t);
 function candScores(p){const sc=S.teams.filter(t=>t.id!==p.from).map(t=>({id:t.id,s:schoolScore0(p,t)})).sort((a,b)=>b.s-a.s).slice(0,90);sc.slice(0,45).forEach(x=>x.s+=fit(p,S.teams[x.id])*3);sc.sort((a,b)=>b.s-a.s);return sc}
@@ -747,22 +756,22 @@ function stageCheck(p){if(p.stage==='signed'||p.stage==='gone')return;const T=th
 function cpuBudget(t){const rn=t.roster.filter(p=>p.yr<4).reduce((a,p)=>a+expRoster(p,t)*.9,0);return Math.max(0,Math.round(1200+t.prestige*380+t.g.brand*150+t.g.tradition*120-FACM[t.fac]-Math.min(5,t.prestige)*60+Math.max(0,t.prestige-2)*80-rn))}
 const CW={open:.3,top8:.4,top5:.55,top3:.8,verbal:1,hard:1};/* an outstanding offer counts toward the budget by how likely it is to convert */
 function cpuBid(p,t,room){const e=Math.max(5,expNil(p,t)),gm=favGate(p),m0=1+clamp((1-(gm?gm(t.id):1))*1.6,0,.8);for(const m of [m0,1,.8,.6]){const b=Math.max(5,r5(e*m));if(b*(CW[p.stage]||.3)<=room)return b}return null}
-const OFFCAP=50;/* CPU schools may hold extra offers because only about 60% of them convert; the class itself is capped at 35 signees */
+const OFFCAP=35;/* same limits as a human coach: 35 scholarship offers (including players already signed) and a 50-man board */
 /* CPU coaches plan their class: how many signees they need, and which recruits would actually crack the 85 */
 function cpuPlan(t){const early=['pre','reg','cc','cfp','recap'].includes(S.stage),ret=t.roster.filter(p=>p.yr<4),cnt={};ret.forEach(p=>cnt[p.pos]=(cnt[p.pos]||0)+1);
  const gro=[0,4.5,3.2,2.2],proj=p=>p.new?p.ovr:p.ovr+(gro[p.yr]||0);let sur=ret.filter(p=>cnt[p.pos]>NEED[p.pos]).map(proj).sort((a,b)=>a-b);if(sur.length<3)sur=ret.map(proj).sort((a,b)=>a-b);
  return{slots:Math.max(0,Math.round(85-ret.length*(early?.93:1))),cnt,cutl:sur.length?sur[Math.min(2,sur.length-1)]:0}}
 function cpuBoards(){const pm=new Map(S.pros.map(p=>[p.id,p])),dead=['signed','gone','hard'];const LEFT=S.stage==='portal'&&S.pw>=1?S.pros.filter(p=>!['signed','gone','verbal','hard'].includes(p.stage)&&!(p.offs||[]).length&&!p.offer).sort((a,b)=>b.ovr-a.ovr):null;
- for(const t of S.teams){if(isH(t.id))continue;t.fb=cpuBudget(t);t.board=(t.board||[]).filter(id=>{const p=pm.get(id);const ok=p&&!dead.includes(p.stage)&&(!p.top||p.top.includes(t.id))&&(p.act||[]).includes(t.id)&&!(['verbal','hard'].includes(p.stage)&&p.vt!==t.id);if(!ok&&p)unboard(p,t.id);return ok});
-  const has=new Set(t.board);if(t.board.length<70&&t.rcl)for(const id of t.rcl){if(t.board.length>=70)break;if(has.has(id))continue;const p=pm.get(id);if(!p||dead.includes(p.stage))continue;if(p.top&&!p.top.includes(t.id))continue;if(p.type==='tr'&&p.from===t.id)continue;
+ for(const t of S.teams){if(isHR(t.id))continue;t.fb=cpuBudget(t);t.board=(t.board||[]).filter(id=>{const p=pm.get(id);const ok=p&&!dead.includes(p.stage)&&(!p.top||p.top.includes(t.id))&&(p.act||[]).includes(t.id)&&!(['verbal','hard'].includes(p.stage)&&p.vt!==t.id);if(!ok&&p)unboard(p,t.id);return ok});
+  const has=new Set(t.board);if(t.board.length<50&&t.rcl)for(const id of t.rcl){if(t.board.length>=50)break;if(has.has(id))continue;const p=pm.get(id);if(!p||dead.includes(p.stage))continue;if(p.top&&!p.top.includes(t.id))continue;if(p.type==='tr'&&p.from===t.id)continue;
    t.board.push(id);has.add(id);(p.act=p.act||[]).push(t.id);if(p.rate[t.id]==null)p.rate[t.id]=rateFor(p,t);if(p.infl[t.id]==null)p.infl[t.id]=Math.min(.5,.3*p.rate[t.id])}
   if(S.stage==='pre')continue;let n=0,cmt=0;for(const id of t.board){const p=pm.get(id);if(p.offs.includes(t.id)){n++;cmt+=((p.cn&&p.cn[t.id])||0)*(CW[p.stage]||.3)}}t.cmt=cmt;
   if(cmt>t.fb){const L=t.board.map(id=>pm.get(id)).filter(p=>p.offs.includes(t.id)&&['open','top8'].includes(p.stage)).sort((a,b)=>((b.cn&&b.cn[t.id])||0)-((a.cn&&a.cn[t.id])||0));for(const p of L){if(t.cmt<=t.fb)break;t.cmt-=((p.cn&&p.cn[t.id])||0)*(CW[p.stage]||.3);p.offs=p.offs.filter(x=>x!==t.id);if(p.cn)delete p.cn[t.id];n--}}const pl=cpuPlan(t),want=Math.min(OFFCAP,Math.max(40,Math.ceil(pl.slots/.55))),pc=Object.assign({},pl.cnt);let q=8;for(const id of t.board){const p=pm.get(id);if(p.offs.includes(t.id))pc[p.pos]=(pc[p.pos]||0)+.62}
-  const nCls=t.roster.filter(p=>p.cls).length;for(const id of t.board){if(n+nCls>=OFFCAP||q<=0)break;const p=pm.get(id);if(p.offs.includes(t.id))continue;if((n>=want||(pc[p.pos]||0)>=NEED[p.pos]+1)&&p.ovr<pl.cutl+1)continue;p.offs.push(t.id);const b=cpuBid(p,t,t.fb-t.cmt);if(b==null){p.offs.pop();continue}(p.cn=p.cn||{})[t.id]=b;t.cmt+=b*(CW[p.stage]||.3);n++;q--;pc[p.pos]=(pc[p.pos]||0)+.62}
+  const nCls=t.roster.filter(p=>p.cls).length;for(const id of t.board){if(n>=OFFCAP||q<=0)break;const p=pm.get(id);if(p.offs.includes(t.id))continue;if((n>=want||(pc[p.pos]||0)>=NEED[p.pos]+1)&&p.ovr<pl.cutl+1)continue;p.offs.push(t.id);const b=cpuBid(p,t,t.fb-t.cmt);if(b==null){p.offs.pop();continue}(p.cn=p.cn||{})[t.id]=b;t.cmt+=b*(CW[p.stage]||.3);n++;q--;pc[p.pos]=(pc[p.pos]||0)+.62}
   /* late push: schools still short of a full class offer leftover recruits at positions of need */
-  if(LEFT){let pv=0;for(const id of t.board){const p=pm.get(id);if(p.offs.includes(t.id)){if(['verbal','hard'].includes(p.stage)){pv+=p.vt===t.id?1:0;continue}const ix=['top3','top5'].includes(p.stage)?ranked(p).findIndex(x=>x[0]===t.id):9;pv+=p.stage==='top3'?[.85,.4,.15][ix]||.05:p.stage==='top5'?[.55,.3][ix]||.1:.1}}let gap=Math.min(Math.round(pl.slots-pv),35-nCls),k=0;for(let i=0;i<LEFT.length&&gap>0&&k<8;i++){const p=LEFT[i];if(!p||(p.offs||[]).length||(p.type==='tr'&&p.from===t.id)||(pc[p.pos]||0)>=NEED[p.pos]+1)continue;const b=cpuBid(p,t,t.fb-t.cmt);if(b==null)continue;p.offs.push(t.id);(p.act=p.act||[]).push(t.id);(p.cn=p.cn||{})[t.id]=b;t.cmt+=b*(CW[p.stage]||.3);p.rate[t.id]=rateFor(p,t);p.infl[t.id]=Math.max(p.infl[t.id]||0,thr(p).vt*.4);t.board.push(p.id);LEFT[i]=null;pc[p.pos]=(pc[p.pos]||0)+1;gap--;k++}}}
+  if(LEFT){let pv=0;for(const id of t.board){const p=pm.get(id);if(p.offs.includes(t.id)){if(['verbal','hard'].includes(p.stage)){pv+=p.vt===t.id?1:0;continue}const ix=['top3','top5'].includes(p.stage)?ranked(p).findIndex(x=>x[0]===t.id):9;pv+=p.stage==='top3'?[.85,.4,.15][ix]||.05:p.stage==='top5'?[.55,.3][ix]||.1:.1}}let gap=Math.min(Math.round(pl.slots-pv),OFFCAP-n,35-nCls),k=0;for(let i=0;i<LEFT.length&&gap>0&&k<8;i++){const p=LEFT[i];if(!p||(p.offs||[]).length||(p.type==='tr'&&p.from===t.id)||(pc[p.pos]||0)>=NEED[p.pos]+1)continue;const b=cpuBid(p,t,t.fb-t.cmt);if(b==null)continue;p.offs.push(t.id);(p.act=p.act||[]).push(t.id);(p.cn=p.cn||{})[t.id]=b;t.cmt+=b*(CW[p.stage]||.3);p.rate[t.id]=rateFor(p,t);p.infl[t.id]=Math.max(p.infl[t.id]||0,thr(p).vt*.4);t.board.push(p.id);LEFT[i]=null;pc[p.pos]=(pc[p.pos]||0)+1;gap--;k++}}}
  /* CPU schools that trail a recruit in his final stages raise their NIL offer if the budget allows */
- for(const p of S.pros){if(!['top5','top3','verbal'].includes(p.stage)||!p.cn)continue;const rk=ranked(p),lead=rk[0]&&rk[0][0];for(const tid of (p.top||[])){if(isH(tid)||tid===lead||p.cn[tid]==null||!(p.offs||[]).includes(tid))continue;const t=S.teams[tid],e=Math.max(5,expNil(p,t)),room=(t.fb||0)-(t.cmt||0),add=Math.min(Math.max(5,r5(e*.2)),Math.max(0,r5(e*2.2)-p.cn[tid]));if(add>0&&add*(CW[p.stage]||.3)<=room){p.cn[tid]+=add;t.cmt+=add*(CW[p.stage]||.3)}}}}
+ for(const p of S.pros){if(!['top5','top3','verbal'].includes(p.stage)||!p.cn)continue;const rk=ranked(p),lead=rk[0]&&rk[0][0];for(const tid of (p.top||[])){if(isHR(tid)||tid===lead||p.cn[tid]==null||!(p.offs||[]).includes(tid))continue;const t=S.teams[tid],e=Math.max(5,expNil(p,t)),room=(t.fb||0)-(t.cmt||0),add=Math.min(Math.max(5,r5(e*.2)),Math.max(0,r5(e*2.2)-p.cn[tid]));if(add>0&&add*(CW[p.stage]||.3)<=room){p.cn[tid]+=add;t.cmt+=add*(CW[p.stage]||.3)}}}}
 function applyQ(p){const ut=U();for(const a of(p.q||[])){
  if(a.t==='sway'){}
  else if(a.t==='soft'||a.t==='hard'){const gr=grade(ut,a.m,p),iw=intW(p,a.m),w=iw>=4?1.15:iw>=2?.85:iw>0?.3:0,eff=.12+.62*gr;if(w>0)addInf(p,S.uid,a.t==='soft'?20*eff*w*a.g:(gr>=.15?40*eff*1.12*w*a.g:-3));else addInf(p,S.uid,a.t==='soft'?-1:(F()<.7?-(6+8*F()*(1-.5*gr)):0))}
@@ -773,7 +782,7 @@ function recruitWeek(){S.rw++;
  eachH(()=>{S.hu=0;for(const p of S.pros){if(p.stage==='signed'||p.stage==='gone')continue;p.hu=0;if(S.board.includes(p.id)||p.offer)p.pr=ranked(p).map(x=>x[0])}},true);
  cpuBoards();
  for(const p of S.pros){if(p.stage==='signed'||p.stage==='gone')continue;
-  for(const tid of (p.act||[])){if(isH(tid))continue;if(p.top&&!p.top.includes(tid))continue;const off=(p.offs||[]).includes(tid);let g=(p.rate[tid]||.8)*(1.6+F()*2.4)*(off?.7:.65)*(p.type==='tr'?2.2:1);if(off){const ct=S.teams[tid],e=Math.max(1,expNil(p,ct)),ratio=((p.cn&&p.cn[tid]!=null)?p.cn[tid]:e)/e,nm=ratio<1?Math.pow(Math.max(0,ratio),1.3):1+Math.min(3.2,.8*(ratio-1));g+=.55*(2.6*nm*(p.type==='tr'?1.6:1)+fit(p,ct))}if(p.stage==='verbal'&&p.vt===tid)g*=1.15;addInf(p,tid,g)}
+  for(const tid of (p.act||[])){if(isHR(tid))continue;if(p.top&&!p.top.includes(tid))continue;const off=(p.offs||[]).includes(tid);let g=(p.rate[tid]||.8)*(1.6+F()*2.4)*(off?.7:.65)*(p.type==='tr'?2.2:1);if(off){const ct=S.teams[tid],e=Math.max(1,expNil(p,ct)),ratio=((p.cn&&p.cn[tid]!=null)?p.cn[tid]:e)/e,nm=ratio<1?Math.pow(Math.max(0,ratio),1.3):1+Math.min(3.2,.8*(ratio-1));g+=.55*(2.6*nm*(p.type==='tr'?1.6:1)+fit(p,ct))}if(p.stage==='verbal'&&p.vt===tid)g*=1.15;addInf(p,tid,g)}
  }
  eachH(()=>{const ut=U();for(const p of S.pros){if(p.stage==='signed'||p.stage==='gone')continue;const i0=p.infl[S.uid]||0;
   if(p.offer&&p.stage!=='hard'&&!p.locked){const e=Math.max(5,expNil(p,ut)),ratio=p.offer.nil/e,m=ratio<1?Math.pow(Math.max(0,ratio),1.3):1+Math.min(3.2,.8*(ratio-1));p.infl[S.uid]=(p.infl[S.uid]||0)+(2.6*m*(1+.1*abil('rain.deal'))*cI(p,'nil')*(p.type==='tr'?1.6:1)+fit(p,ut))*(p.stage==='verbal'&&p.vt===S.uid?1.15:1)}
@@ -1006,7 +1015,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
     if(r.rtd){tdScore(d);return{e:'dtd'}}return{e:'to',ny}}
    tick(sec,o);
    y+=r.yds;
-   if(r.to==='fum'){TS[o].to++;const ret=Math.round(ex(3));if(F()<.03){tdScore(d);return{e:'dtd'}}return{e:'to',ny:clamp(100-y+ret,1,99)}}
+   if(r.to==='fum'){TS[o].to++;const ret=Math.round(ex(3)),rcv=pickTk(D,false);add(d,rcv,'fr');if(F()<.03){add(d,rcv,'dtd');tdScore(d);return{e:'dtd'}}return{e:'to',ny:clamp(100-y+ret,1,99)}}
    if(r.td){tdScore(o);if(down===3)TS[o].t3c++;if(down===4)TS[o].t4c++;TS[o].fd++;return{e:'td'}}
    if(y<=0){score(d,2);return{e:'safety'}}
    if(y>=first){if(down===3)TS[o].t3c++;if(down===4)TS[o].t4c++;TS[o].fd++;down=1;first=Math.min(100,y+10);dist=first-y}
@@ -1080,7 +1089,7 @@ const WPC={};
 function winProb(a,b,neutral){const key=[a.id,b.id,neutral?1:0,a.po,a.pd,b.po,b.pd,S.year,S.week,S.plan,S.practice,JSON.stringify(S.gp||0),a.roster.filter(p=>p.inj>0).length,b.roster.filter(p=>p.inj>0).length].join('|');
  if(WPC[key]!==undefined)return WPC[key];let w=0;const n=60;for(let i=0;i<n;i++){const g=simGame(a,b,neutral,'dry');if(g.as>g.bs)w++}return WPC[key]=w/n}
 function injuries(t,mult){for(const p of t.roster){if(p.inj>0){p.inj--;continue}const r=rt(p),dur=(r.tgh+r.stm+r.inj)/3,wf=1+Math.max(0,(p.wl||0)-12)*.03*clamp(1+(74-dur)/30,.3,1.8);if(F()<.012*mult*injF(p)*wf*(t.id===S.uid&&S.coach&&la('mot',p)>=1?.9:1)){p.inj=F()<.1?R(8,14):R(1,5);if(t.id===S.uid&&S.coach&&la('mm',p)>=1)p.inj=Math.max(1,p.inj-1)}}}
-const perfO=s=>(s.py||0)/22+(s.ptd||0)*4-(s.pint||0)*3+(s.ry||0)/12+(s.rtd||0)*6+(s.cy||0)/10+(s.ctd||0)*6+(s.fgm||0)*1.5,perfD=s=>(s.tkl||0)+(s.tfl||0)*1.5+(s.sck||0)*4+(s.dint||0)*6+(s.ff||0)*3;
+const perfO=s=>(s.py||0)/22+(s.ptd||0)*4-(s.pint||0)*3+(s.ry||0)/12+(s.rtd||0)*6+(s.cy||0)/10+(s.ctd||0)*6+(s.fgm||0)*1.5,perfD=s=>(s.tkl||0)+(s.tfl||0)*1.5+(s.sck||0)*4+(s.dint||0)*6+(s.ff||0)*3+(s.dtd||0)*6;
 function weekHonors(w,before){const best={o:null,d:null,m:null};S.teams.forEach(t=>t.roster.forEach(p=>{const b=before.get(p)||{},s=p.st;if(!s||!s.g)return;const dl={};for(const k in s){const v=(s[k]||0)-(b[k]||0);if(v)dl[k]=LONGK.includes(k)?s[k]:Math.round(v*10)/10}
   if(!Object.keys(dl).length)return;const so=perfO(dl),sd=perfD(dl),def=GP(p.pos)==='DL'||GP(p.pos)==='LB'||GP(p.pos)==='CB'||GP(p.pos)==='S';const sc=def?sd:so,key=def?'d':'o';
   const rec={n:p.name,pos:p.pos,team:t.name,tid:t.id,sc,line:seasonLine({st:dl,pos:p.pos})};if(!best[key]||sc>best[key].sc)best[key]=rec;if(t.id===S.uid&&(!best.m||sc>best.m.sc))best.m=rec}));
@@ -1360,6 +1369,17 @@ function mpMerge(sub){const to=sub.uid,from=sub.from;
  S.users=S.users||{};S.users[to]=sub.slice;
  for(const p of S.pros){const u=sub.pf[p.id];if(u)(p.U=p.U||{})[to]=u;else if(p.U)delete p.U[to]}
  S.teams[to]=sub.team;UTL=null;UBV++}
+
+const MPAUTO=['pre','reg','cc','cfp','portal'];
+/* an away coach's recruiting was run by the CPU for one week: keep what it did on their board, then hand control back */
+function autoConvert(h){const t=S.teams[h];let nb=0,no=0;const off=id=>{const p=P(id);return p&&(p.offs||[]).includes(h)?0:1};const ids=(t.board||[]).slice().sort((x,y)=>off(x)-off(y));
+ for(const id of ids){const p=P(id);if(!p||p.stage==='signed'||p.stage==='gone')continue;
+  if(!S.board.includes(id)){if(S.board.length>=50)continue;S.board.push(id);nb++}
+  if((p.offs||[]).includes(h)&&!p.offer){const amt=(p.cn&&p.cn[h])||0,act=S.pros.filter(x=>x.offer&&x.stage!=='gone'&&x.stage!=='signed').length;if(amt>0&&act<35&&dpAvail()>=amt){p.offer={nil:amt};no++}}}
+ for(const p of S.pros){if(p.offs&&p.offs.includes(h))p.offs=p.offs.filter(x=>x!==h);if(p.act&&p.act.includes(h))p.act=p.act.filter(x=>x!==h);if(p.cn)delete p.cn[h]}
+ t.board=[];t.cmt=0;note('You were away this week, so the CPU ran your recruiting: '+nb+' prospect'+(nb===1?'':'s')+' added to your board'+(no?' and '+no+' offer'+(no===1?'':'s')+' made':'')+'. You have full control again.')}
+function mpPrune(members){const keep=new Set(members.map(m=>m.team));const drop=humans().filter(h=>h!==MP.team&&!keep.has(h));
+ for(const h of drop){S.hum=humans().filter(x=>x!==h);if(S.users)delete S.users[h];S.pros.forEach(p=>{if(p.U)delete p.U[h]});S.teams[h].roster.forEach(p=>{p.ut=0})}if(drop.length){UTL=null;UBV++}return drop}
 const mpSig=()=>S.year+'|'+S.stage+'|'+S.week+'|'+S.pw+'|'+(S.cfp?S.cfp.round:'');
 /* things that block the stage: unassigned Athletes, rosters over 85, fired coaches without a job */
 function mpGates(){const out=[];for(const h of humans()){const t=S.teams[h],sl=slice(h),c=sl&&sl.coach;const nm=(c?c.name:'?')+' ('+t.name+')';
@@ -1375,10 +1395,12 @@ async function mpAdvance(force){if(!MP.dyn||!MP.host||MP.busy)return{ok:false,ms
  let began=false;try{
   const b=await mpApi('/api/advance/begin',{json:{}});began=true;
   for(const m of b.members){if(m.host||!m.sub)continue;const sub=JSON.parse(await ungz(await mpGet('sub',b.version,m.sub,'&mid='+m.id)));mpMerge(sub)}
-  useUser(MP.team,true);syncUT();
+  const pr=mpPrune(b.members);useUser(MP.team,true);syncUT();
   const moves=[],gates=mpGates();if(gates.length&&!force){await mpApi('/api/advance/abort',{json:{}});MP.busy=false;MP.msg='';return{ok:false,gates}}
   if(gates.length)mpAutoFix(moves);
-  const sig=mpSig();advance();
+  const away=MPAUTO.includes(S.stage)?b.members.filter(m=>!m.host&&!m.sub&&!m.ready&&isH(m.team)).map(m=>m.team):[];
+  S.auto=away;const sig=mpSig();try{advance()}finally{S.auto=[]}
+  if(mpSig()!==sig)for(const h of away)asUser(h,()=>autoConvert(h),true);
   if(mpSig()===sig){await mpApi('/api/advance/abort',{json:{}});MP.busy=false;MP.msg='The week could not advance (see the message on screen).';return{ok:false,msg:'blocked'}}
   MP.msg='Saving the new week for everyone…';rerenderOnline();
   useUser(MP.team,true);saveNow();await mpPushSnap(b.version+1,mpStatus(),moves);
@@ -1391,6 +1413,7 @@ async function mpPoll(){if(!MP.dyn||MP.busy)return;try{const st=await mpApi('/ap
     else{useUser(MP.team,true);syncUT();saveNow();MP.msg=''}mpSave()}
    finally{MP.busy=false}render();return}
   const me=st.members.find(x=>x.id===MP.mid);if(me&&me.team!=null&&MP.team!==me.team&&MP.host)MP.team=me.team;
+  MP.newer=MP.host&&st.dyn.version>MP.ver;
  }catch(e){MP.msg=e.status===401?'This browser is no longer part of that dynasty.':'Offline — retrying…'}rerenderOnline()}
 function mpStart(){clearInterval(MP.timer);MP.timer=setInterval(mpPoll,7000);mpPoll()}
 function mpLeave(){if(!confirm('Disconnect this browser from the online dynasty? Your local copy stays as it is.'))return;clearInterval(MP.timer);Object.assign(MP,{dyn:null,mid:null,token:null,code:'',host:false,ver:0,st:null,msg:''});mpSave();render()}
@@ -1415,18 +1438,40 @@ function onlinePage(){
  h+='<div class=row><button class="'+(me&&me.ready?'s':'')+'" onclick="mpReady('+(me&&me.ready?0:1)+')">'+(me&&me.ready?'✓ Ready (click to undo)':'I\'m ready to advance')+'</button>';
  if(MP.host)h+='<input type=datetime-local id=mpdl value="'+esc(d&&d.deadline||'')+'" onchange="mpSetDeadline(this.value)"><button class=s '+(MP.busy?'disabled':'')+' onclick="mpUiAdvance()">Advance for everyone</button>';
  h+='</div>'+(MP.gate?'<div class=card style="border-color:var(--a)"><b>Some coaches have not finished this step:</b><ul>'+MP.gate.map(g=>'<li>'+esc(g.txt)+'</li>').join('')+'</ul><button class=s onclick="mpUiAdvance(true)">Finish it for them and advance</button> <button onclick="MP.gate=null;render()">Cancel</button></div>':'');
- h+='<p class=m>'+(MP.host?'Everyone’s changes are collected, the week is simulated in your browser, and the new save goes to everyone.':'Your changes are sent to the host automatically. The new week loads here when the host advances.')+'</p></div>';
- h+='<div class=card><button onclick="mpLeave()">Disconnect this browser</button></div>';return h}
+ h+='<p class=m>'+(MP.host?'Everyone’s changes are collected, the week is simulated in your browser, and the new save goes to everyone. A coach who made no changes and is not marked ready gets their recruiting run by the CPU for that week, then regains full control.':'Your changes are sent to the host automatically. The new week loads here when the host advances. If you do nothing and are not ready, the CPU runs your recruiting for that week and you get control back after.')+'</p></div>';
+ h+=(MP.newer?'<div class=card style="border-color:var(--r)"><b>The server has a newer save than this browser.</b> This can happen if you advanced from another computer.<div class=row><button class=s onclick="mpRestore()">Restore the server save here</button></div></div>':'');
+ h+='<div class=card><h2>Backup</h2><p class=m>'+(MP.host?'You hold the master copy. Download a backup now and then; if this browser\'s data is ever lost, use the restore button.':'The host holds the master copy.')+'</p><div class=row>'+(MP.host?'<button onclick="mpBackup()">Download backup</button><button onclick="mpRestore()">Restore latest server save</button>':'')+'<button onclick="mpLeave()">Disconnect this browser</button></div></div>';return h}
 async function mpUiCreate(){try{MP.msg='Creating…';render();await mpCreate(MPF.name||'Dynasty',MPF.cap);MP.msg='';toast('Online dynasty created. Share the code.')}catch(e){MP.msg=e.message;toast(e.message)}render()}
 async function mpUiLookup(){try{MP.msg='Downloading the dynasty…';render();MP.peek=await mpLookup(MPF.code);MP.peek.teams=JSON.parse(MP.peek.js).teams.map(t=>({id:t.id,name:t.name,prestige:t.prestige}));MP.msg=''}catch(e){MP.msg=e.message;MP.peek=null}render()}
-async function mpUiJoin(){if(!MPF.team)return toast('Choose a school');if(!confirm('Joining replaces the dynasty saved in this browser. Continue?'))return;try{MP.msg='Joining…';render();await mpJoin(MP.peek,MPF.cn||'Coach',MPF.back,+MPF.team);MP.peek=null;MP.msg='';toast('You joined '+S.teams[S.uid].name)}catch(e){MP.msg=e.message;toast(e.message)}render()}
+async function mpUiJoin(){if(!MPF.team)return toast('Choose a school');if(!confirm('Joining replaces the dynasty saved in this browser. Continue?'))return;try{MP.msg='Joining…';render();await mpJoin(MP.peek,MPF.cn||'Coach',MPF.back,+MPF.team);MP.peek=null;MP.msg='';GATE=false;toast('You joined '+S.teams[S.uid].name)}catch(e){MP.msg=e.message;toast(e.message)}render()}
+
+async function mpRestore(){if(!confirm('Replace this browser\'s copy with the latest save on the server?'))return;try{MP.busy=true;const st=await mpApi('/api/state');const js=await ungz(await mpGet('snap',st.dyn.version,st.dyn.snap_n));mpAdopt(js);MP.ver=st.dyn.version;if(st.me.team!=null)MP.team=st.me.team;MP.team0=MP.team;useUser(MP.team,true);syncUT();saveNow();mpSave();MP.newer=false;MP.msg='';toast('Restored save #'+MP.ver)}catch(e){toast(e.message)}finally{MP.busy=false}render()}
+async function mpBackup(){try{useUser(MP.team,true);const js=mpSnapStr();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'application/json'}));a.download='dynasty-online-'+MP.code+'-save'+MP.ver+'.json';document.body.appendChild(a);a.click();a.remove();toast('Backup downloaded')}catch(e){toast(e.message)}}
 async function mpReady(r){try{await mpApi('/api/ready',{json:{ready:!!r}});await mpPoll()}catch(e){toast(e.message)}render()}
 async function mpSetDeadline(v){try{await mpApi('/api/settings',{json:{deadline:v||''}});await mpPoll()}catch(e){toast(e.message)}}
 async function mpKick(id){if(!confirm('Remove this player? Their school goes back to the CPU only after you advance.'))return;try{await mpApi('/api/kick',{json:{mid:id}});await mpPoll()}catch(e){toast(e.message)}}
 async function mpUiAdvance(force){MP.gate=null;const r=await mpAdvance(force);if(r.gates){MP.gate=r.gates}else if(r.ok)toast('Advanced to '+mpStatus());else if(r.msg&&r.msg!=='busy')toast(MP.msg||r.msg);await mpPoll();render()}
 
+
+/* ===== splash + home (shown first) ===== */
+let GATE=!globalThis.NOBOOT,GATEP='splash';
+const hasSave=()=>!!(S&&S.stage!=='setup'&&S.coach&&S.teams);
+function enterGame(){GATE=false;if(MP.dyn)mpStart();render()}
+function gate(){const a=$('app');
+ if(GATEP==='splash'){a.innerHTML='<div class=sp><button class="s big" onclick="GATEP=\'home\';render()">Continue</button><div class=ver>Fan-made. Not affiliated with EA Sports.</div></div>';return}
+ let h='<div class=hm><div class=card style="text-align:center"><h2 style="margin:0">🏈 Dynasty Sim 27</h2></div>';
+ if(hasSave()){const t=S.teams[S.uid],stg={pre:'Preseason',reg:'Week '+S.week,cc:'Conference Championships',cfp:'Playoffs & Bowls',recap:'Season Recap',nil:'NIL',leave:'Players Leaving',portal:'Transfer Portal',sign:'Signing Day',train:'Training',cut:'Roster Cuts'}[S.stage]||S.stage;
+  h+='<div class=card><h2>'+(MP.dyn?'Signed in':'Welcome back')+', Coach '+esc(S.coach.name)+'</h2><p><b>'+esc(t.name)+'</b> · '+S.year+' · '+stg+' · '+t.w+'-'+t.l+'</p>'+(MP.dyn?'<p class=m>Online dynasty '+esc(MP.code)+' · '+(MP.host?'you are the host':'you are a player')+'</p>':'')+'<div class=row><button class=s onclick="enterGame()">'+(MP.dyn?'Load online dynasty':'Load dynasty')+'</button>'+(MP.dyn?'<button onclick="mpLeave()">Sign out of online dynasty</button>':'')+'</div></div>'}
+ if(!MP.dyn){h+='<div class=card><h2>Start a new dynasty</h2><p class=m>'+(hasSave()?'This deletes the dynasty saved in this browser.':'Pick a coach, a school and a backstory.')+'</p><button class=s onclick="gateNew()">New dynasty</button></div>';
+  h+='<div class=card><h2>Join an online dynasty</h2><p class=m>Enter the code your host sent you.'+(hasSave()?' Joining replaces the dynasty saved in this browser.':'')+'</p><div class=row><input placeholder="Join code" maxlength=6 style="width:110px;text-transform:uppercase" value="'+esc(MPF.code)+'" oninput="MPF.code=this.value"><button class=s onclick="mpUiLookup()">Look up</button></div>';
+  if(MP.peek){const taken=new Set(MP.peek.info.members.map(m=>m.team));const opts=MP.peek.teams.filter(t=>!taken.has(t.id)).sort((x,y)=>y.prestige-x.prestige||x.name.localeCompare(y.name)).map(t=>'<option value='+t.id+(String(t.id)===String(MPF.team)?' selected':'')+'>'+esc(t.name)+' (prestige '+t.prestige+')</option>').join('');
+   h+='<p><b>'+esc(MP.peek.info.name)+'</b> · '+MP.peek.info.members.length+'/'+MP.peek.info.cap+' players</p><div class=row><input placeholder="Your coach name" value="'+esc(MPF.cn)+'" oninput="MPF.cn=this.value"><select onchange="MPF.back=this.value"><option>Recruiter</option><option>Tactician</option><option>Motivator</option></select><select onchange="MPF.team=this.value"><option value="">Choose a school…</option>'+opts+'</select><button class=s onclick="mpUiJoin()">Join</button></div>'}
+  h+=(MP.msg?'<p><b>'+esc(MP.msg)+'</b></p>':'')+'</div>'}
+ a.innerHTML=h+'</div>'}
+function gateNew(){if(hasSave()&&!confirm('Start a new dynasty? This deletes the dynasty saved in this browser.'))return;GATE=false;if(hasSave())newDyn();else render()}
+document.addEventListener&&document.addEventListener('keydown',e=>{if(GATE&&GATEP==='splash'&&(e.key==='Enter'||e.key===' ')){GATEP='home';render()}});
 function advClick(){doAdv()}
-function render(){if(!S||S.stage==='setup')return setup();syncUT();if(!items(TAB))TAB='actions';const L=items(TAB);let k=SUB[TAB];if(!L.some(x=>x[0]===k))k=SUB[TAB]=L[0][0];const cur=L.find(x=>x[0]===k);let body;try{body=cur[3]()}catch(e){body='<div class=card><h2>Error</h2><p class=m>'+e.message+'</p></div>'}
+function render(){if(GATE)return gate();if(!S||S.stage==='setup')return setup();syncUT();if(!items(TAB))TAB='actions';const L=items(TAB);let k=SUB[TAB];if(!L.some(x=>x[0]===k))k=SUB[TAB]=L[0][0];const cur=L.find(x=>x[0]===k);let body;try{body=cur[3]()}catch(e){body='<div class=card><h2>Error</h2><p class=m>'+e.message+'</p></div>'}
  $('app').innerHTML=hdr()+'<div class=shell><div class=side>'+L.map(x=>'<div class="it'+(x[0]===k?' on':'')+'" onclick="SUB[TAB]=\''+x[0]+'\';render()"><span class=ic>'+x[2]+'</span>'+x[1]+'</div>').join('')+(TAB==='actions'?'<div class=sepl></div><div class="it rdy" onclick="advClick()"><span>Ready to Advance<small>→ '+advLabel()+'</small></span><span class=ck></span></div>':'')+'</div><div class=main>'+body+'</div></div>'}
 function doAdv(){if(MP.dyn){if(MP.host){mpUiAdvance();return}toast('Only the host advances the week. Use “I’m ready” on the Online page.');return}const was=S.stage;advance();save();if(was==='recap'&&S.stage==='recap'){}render();window.scrollTo&&window.scrollTo(0,0)}
 function hub(){const t=U(),g=S.sched[t.id][S.week-1];let nxt='';
@@ -1469,13 +1514,13 @@ function boxView(b){const hdr=['Team','1','2','3','4'].concat(b.pts[0][4]||b.pts
  const T=b.ts,pct=(c,a)=>a?c+'/'+a:'0/0',mm=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0'),f=n=>n||0;
  const st=[['Total yards',T[0].yd,T[1].yd],['Plays',T[0].pl,T[1].pl],['Yards / play',(T[0].yd/Math.max(1,T[0].pl)).toFixed(1),(T[1].yd/Math.max(1,T[1].pl)).toFixed(1)],['Passing yards',T[0].py,T[1].py],['Rushing yards',T[0].ry,T[1].ry],['First downs',T[0].fd,T[1].fd],['3rd down',pct(T[0].t3c,T[0].t3a),pct(T[1].t3c,T[1].t3a)],['4th down',pct(T[0].t4c,T[0].t4a),pct(T[1].t4c,T[1].t4a)],['Penalties-yards',T[0].pen+'-'+T[0].peny,T[1].pen+'-'+T[1].peny],['Turnovers',T[0].to,T[1].to],['Sacks taken',T[0].sk,T[1].sk],['Punts-avg',T[0].pn+'-'+(T[0].pn?(T[0].pny/T[0].pn).toFixed(1):'0'),T[1].pn+'-'+(T[1].pn?(T[1].pny/T[1].pn).toFixed(1):'0')],['Kick/punt returns',(T[0].kr+T[0].pr)+' for '+(T[0].kry+T[0].pry),(T[1].kr+T[1].pr)+' for '+(T[1].kry+T[1].pry)],['Time of possession',mm(T[0].top),mm(T[1].top)]].concat(b.pk?[['Defense: base / nickel / dime / heavy',[0,1].map(i=>['base','nickel','dime','heavy'].map(k=>b.pk[i][k]||0).join(' / '))[0],[0,1].map(i=>['base','nickel','dime','heavy'].map(k=>b.pk[i][k]||0).join(' / '))[1]]]:[]);
  const side=i=>{const P=b.pl[i],srt=(k)=>P.filter(r=>r.s[k]).sort((x,y)=>(y.s[k]||0)-(x.s[k]||0)),nm=r=>r.n+' <span class=m>'+r.pos+'</span>';
-  const pass=P.filter(r=>r.s.pa).sort((x,y)=>y.s.pa-x.s.pa),rush=srt('car'),rec=P.filter(r=>r.s.tgt).sort((x,y)=>(y.s.cy||0)-(x.s.cy||0)),df=P.filter(r=>r.s.tkl||r.s.dint||r.s.pd||r.s.ff||r.s.sck).sort((x,y)=>(y.s.tkl||0)-(x.s.tkl||0)),kk=P.filter(r=>r.s.fga||r.s.xpa||r.s.pn),rt_=P.filter(r=>r.s.kr||r.s.prn);
+  const pass=P.filter(r=>r.s.pa).sort((x,y)=>y.s.pa-x.s.pa),rush=srt('car'),rec=P.filter(r=>r.s.tgt).sort((x,y)=>(y.s.cy||0)-(x.s.cy||0)),df=P.filter(r=>r.s.tkl||r.s.dint||r.s.pd||r.s.ff||r.s.sck||r.s.fr||r.s.dtd).sort((x,y)=>(y.s.tkl||0)-(x.s.tkl||0)),kk=P.filter(r=>r.s.fga||r.s.xpa||r.s.pn),rt_=P.filter(r=>r.s.kr||r.s.prn);
   const av=(y,n)=>n?(y/n).toFixed(1):'0.0';
   return'<div class=card><h2>'+b.nm[i]+'</h2>'+
   (pass.length?'<h3>Passing</h3>'+tbl(['Player','C/ATT','YDS','TD','INT','SACKS','LNG'],pass.map(r=>{const s=r.s;return'<tr><td>'+nm(r)+'</td><td>'+f(s.pc)+'/'+f(s.pa)+'</td><td>'+f(s.py)+'</td><td>'+f(s.ptd)+'</td><td>'+f(s.pint)+'</td><td>'+f(s.psk)+'-'+f(s.psky)+'</td><td>'+f(s.pl)+'</td></tr>'})):'')+
   (rush.length?'<h3>Rushing</h3>'+tbl(['Player','CAR','YDS','AVG','TD','LNG','15+','TFL','FUM'],rush.map(r=>{const s=r.s;return'<tr><td>'+nm(r)+'</td><td>'+f(s.car)+'</td><td>'+f(s.ry)+'</td><td>'+av(s.ry,s.car)+'</td><td>'+f(s.rtd)+'</td><td>'+f(s.rl)+'</td><td>'+f(s.rbig)+'</td><td>'+f(s.rneg)+'</td><td>'+f(s.fum)+'</td></tr>'})):'')+
   (rec.length?'<h3>Receiving</h3>'+tbl(['Player','REC','TGT','YDS','AVG','TD','LNG','20+'],rec.map(r=>{const s=r.s;return'<tr><td>'+nm(r)+'</td><td>'+f(s.rec)+'</td><td>'+f(s.tgt)+'</td><td>'+f(s.cy)+'</td><td>'+av(s.cy,s.rec)+'</td><td>'+f(s.ctd)+'</td><td>'+f(s.cl)+'</td><td>'+f(s.cbig)+'</td></tr>'})):'')+
-  (df.length?'<h3>Defense</h3>'+tbl(['Player','TKL','TFL','SACK','INT','PD','FF'],df.map(r=>{const s=r.s;return'<tr><td>'+nm(r)+'</td><td>'+f(s.tkl)+'</td><td>'+f(s.tfl)+'</td><td>'+f(s.sck)+'</td><td>'+f(s.dint)+'</td><td>'+f(s.pd)+'</td><td>'+f(s.ff)+'</td></tr>'})):'')+
+  (df.length?'<h3>Defense</h3>'+tbl(['Player','TKL','TFL','SACK','INT','PD','FF','FR','TD'],df.map(r=>{const s=r.s;return'<tr><td>'+nm(r)+'</td><td>'+f(s.tkl)+'</td><td>'+f(s.tfl)+'</td><td>'+f(s.sck)+'</td><td>'+f(s.dint)+'</td><td>'+f(s.pd)+'</td><td>'+f(s.ff)+'</td><td>'+f(s.fr)+'</td><td>'+(s.dtd?'<b>'+s.dtd+'</b>':0)+'</td></tr>'})):'')+
   (kk.length?'<h3>Kicking &amp; Punting</h3>'+tbl(['Player','FG','LNG','XP','PUNTS','AVG','IN20'],kk.map(r=>{const s=r.s;return'<tr><td>'+nm(r)+'</td><td>'+f(s.fgm)+'/'+f(s.fga)+'</td><td>'+f(s.fgl)+'</td><td>'+f(s.xpm)+'/'+f(s.xpa)+'</td><td>'+f(s.pn)+'</td><td>'+av(s.pny,s.pn)+'</td><td>'+f(s.pin)+'</td></tr>'})):'')+
   (P.some(r=>r.s.pen)?'<h3>Penalties</h3>'+tbl(['Player','PEN','YDS'],P.filter(r=>r.s.pen).map(r=>'<tr><td>'+nm(r)+'</td><td>'+f(r.s.pen)+'</td><td>'+f(r.s.peny)+'</td></tr>')):'')+
   (rt_.length?'<h3>Returns</h3>'+tbl(['Player','KR','KR YDS','PR','PR YDS'],rt_.map(r=>{const s=r.s;return'<tr><td>'+nm(r)+'</td><td>'+f(s.kr)+'</td><td>'+f(s.kry)+'</td><td>'+f(s.prn)+'</td><td>'+f(s.pry)+'</td></tr>'})):'')+'</div>'};
