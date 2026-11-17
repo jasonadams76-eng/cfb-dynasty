@@ -1,0 +1,4 @@
+mp/node_modules/
+mp/public/
+mp/.wrangler/
+*.bak*
