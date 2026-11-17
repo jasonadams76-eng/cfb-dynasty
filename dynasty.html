@@ -176,6 +176,7 @@ const OFF={
 'Power Run':{k:1.9,pass:.35,w:{qa:.08,qs:.04,rb:.10,rpw:.14,rs:.06,wh:.04,te:.06,tb:.08,pb:.04,rk:.30,fbb:.06},tempo:.98,var:.85,d:'Smash-mouth. Grinds clock, low variance. Needs a bruising RB, blocking TEs and road-grader linemen.'},
 'Triple Option':{k:1.6,pass:.2,w:{qs:.26,rs:.10,rpw:.08,rb:.08,fbu:.26,fbb:.04,rk:.22,tb:.06},neg:{qa:.12,wh:.08},tempo:.94,var:1.1,d:'Rare option running attack. Slow pace. Only worth running with a fast running QB who is a poor passer, weak receivers, and a strong running fullback who can carry the load. A good passing roster is wasted, and costs you here.'}};
 /* league-wide calibration so each scheme is the best fit for a realistic share of rosters (Spread/Pro Style common, Triple Option rare) */
+const DEFB={'4-3 Multiple':2.15,'3-4 Attack':2.15,'Nickel 4-2-5':-1.25,'Tampa 2':0.85,'46 Pressure':1.85,'3-3-5 Stack':2.15},DEFPOP={'4-3 Multiple':1.5,'3-4 Attack':-0.3,'Nickel 4-2-5':0.7,'Tampa 2':-0.6,'46 Pressure':-1.0,'3-3-5 Stack':-0.3};
 const OFFB={'Spread':1.4,'Air Raid':-.1,'West Coast':.6,'Pro Style':1.55,'Power Run':-.3,'Triple Option':9.8};
 const DEF={
 '4-3 Multiple':{k:1.8,pw:{dp:.30,lc:.15,cm:.15,cz:.15,sc:.25},rw:{dr:.35,lr:.38,sr:.17,cz:.10},agg:1,lean:0,d:'Balanced base defense.'},
@@ -625,11 +626,11 @@ function ratingCard0(p,hide){if(hide==='pros'){const r=rt(p),col=v=>v>=90?'var(-
 const GEN=u=>u.qb*.27+u.rb*.16+u.wr*.2+u.te*.07+u.ol*.3,GEND=u=>u.dl*.31+u.lb*.28+u.cb*.23+u.s*.18;
 /* scheme fit: weighted skills, amplified around the roster's generic strength so style fit swings ratings */
 function offEff(t,pb,u){u=u||units(t);const sc=pb||t.po,o=OFF[sc],w=o.w,g=GEN(u);let s=Object.keys(w).reduce((a,k)=>a+u[k]*w[k],0);if(o.neg)for(const k in o.neg)s-=u[k]*o.neg[k];return g+o.k*(s-g)+(OFFB[sc]||0)}
-function defEff(t,pb,oppPass,u){const sch=pb||t.pd;if(!u||u.sch!==sch)u=units(t,sch);const D=DEF[pb||t.pd],f=w=>{let x=0;for(const k in w)x+=u[k]*w[k];return x};const g=GEND(u);return g+D.k*(oppPass*f(D.pw)+(1-oppPass)*f(D.rw)-g)+D.lean*(oppPass-.5)*8}
+function defEff(t,pb,oppPass,u){const sch=pb||t.pd;if(!u||u.sch!==sch)u=units(t,sch);const D=DEF[pb||t.pd],f=w=>{let x=0;for(const k in w)x+=u[k]*w[k];return x};const g=GEND(u);return g+D.k*(oppPass*f(D.pw)+(1-oppPass)*f(D.rw)-g)+D.lean*(oppPass-.5)*8+(DEFB[sch]||0)}
 const stPts=u=>(u.k-70)*.055+(u.p-70)*.03;
 const tOvr=t=>{const u=units(t);return(offEff(t,t.po,u)+defEff(t,t.pd,.5,u))/2+stPts(u)/.72};
 function stickyPB(t){const[bo,bd]=bestPB(t);if(!t.po||!t.pd){t.po=bo;t.pd=bd;return}const u=units(t);if(offEff(t,bo,u)-offEff(t,t.po,u)>2.5)t.po=bo;if(defEff(t,bd,.5,u)-defEff(t,t.pd,.5,u)>2.5)t.pd=bd}
-function bestPB(t){const u=units(t);let bo=null,bd=null,so=-1,sd=-1;for(const k in OFF){const e=offEff(t,k,u)+F()*1.2;if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u)+F()*1.2;if(e>sd){sd=e;bd=k}}return[bo,bd]}
+function bestPB(t){const u=units(t);let bo=null,bd=null,so=-1,sd=-1;for(const k in OFF){const e=offEff(t,k,u)+F()*1.2;if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u)+(DEFPOP[k]||0)+F()*1.2;if(e>sd){sd=e;bd=k}}return[bo,bd]}
 function buildLeague(){S={nid:1,year:2026,stage:'setup',teams:[]};let id=0;TD.forEach(([c,l])=>l.forEach(([n,p,r])=>{const t={id:id++,name:n,conf:c,prestige:p,region:r,fac:clamp(p-2,0,4),g:gFor(n,p)};t.fac0=t.fac;t.g0conf=t.g.conference;genRoster(t);[t.po,t.pd]=bestPB(t);S.teams.push(t)}));S.sched=null;applyRosterData();S.teams.forEach(seedDr)}
 /* ===== real hometowns and campuses: recruits come from real places; distance drives Proximity to Home and visit cost ===== */
 const STREG={SE:'AL FL GA SC NC TN KY MS LA',SW:'TX OK AR NM',MW:'OH MI IN IL WI MN IA MO KS NE SD ND',NE:'PA NJ NY MD DC DE VA WV CT MA',W:'CA OR WA AZ UT CO NV ID HI MT WY'};
