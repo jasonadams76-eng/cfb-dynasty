@@ -810,20 +810,22 @@ const QCF=.35,UP=2.6,DN=.5,UK=['fbb','qa','qs','rb','rs','rpw','wh','ws','te','t
 function uRef(){if(UREF&&UREFY===S.year&&UREF.n===S.teams.length)return UREF.m;const m={};const us=S.teams.map(t=>units(t));for(const k of UK){const v=us.map(u=>u[k]||0).sort((x,y)=>x-y);m[k]=v[Math.floor(v.length*.55)]}UREF={m,n:S.teams.length};UREFY=S.year;return m}
 const QC=new WeakMap();function qcap(p){const r=rt(p);let c=QC.get(p);if(c&&c.r===r)return c.e;const e=Object.assign({},er(p));for(const k of['sac','mac','dac','thp','pac','tup','tor','bsk'])if(e[k]>80)e[k]=80+(e[k]-80)*QCF;QC.set(p,{r,e});return e}
 const WC=new WeakMap();function wcap(p){const r=rt(p);let c=WC.get(p);if(c&&c.r===r)return c.e;const e=Object.assign({},er(p));for(const k of['cth','cit','spc','srr','mrr','drr','rel'])if(e[k]>82)e[k]=82+(e[k]-82)*.55;WC.set(p,{r,e});return e}
-function mkSide(t,hf){
+function mkSide(t,hf,C,OA){OA=OA||{};
  const ok=t.roster.filter(p=>p.inj<=0),by=(pos,n)=>{if(SLOTS[pos])return slotsPick(ok,pos,true);const a=ok.filter(p=>p.pos===pos).sort((x,y)=>y.ovr-x.ovr).slice(0,n);while(a.length<n)a.push(ghost(pos));return a};
- const isU=t.id===S.uid,u=Object.assign({},units(t));
+ const isU=!!C,u=Object.assign({},units(t));
  const UR=uRef();for(const k in UR){const d=u[k]-UR[k];u[k]=UR[k]+(d>0?d*UP:d*DN)}
- const bo=(isU?cb('off')+({full:.6,bal:0,lim:-.4}[S.practice]||0):0)+hf+gauss()*FORM,bd=(isU?cb('def'):0)+hf+gauss()*FORM;
+ const bo=(isU?cb('off')+({full:.6,bal:0,lim:-.4}[C.prac]||0):0)+hf+gauss()*FORM,bd=(isU?cb('def'):0)+hf+gauss()*FORM;
  for(const k of['qa','qs','rb','rs','rpw','wh','ws','te','tb','pb','rk'])u[k]+=bo;
  for(const k of['dp','dr','lr','lc','cm','cz','sc','sr'])u[k]+=bd;
- const cg=GCX&&S.coach?coachAdj(isU):{};for(const k in cg)if(u[k]!=null)u[k]+=cg[k];
+ const cg=Object.assign({},C?C.own:{});for(const k in OA)cg[k]=(cg[k]||0)+OA[k];for(const k in cg)if(u[k]!=null)u[k]+=cg[k];
  const pk={};for(const nm in PKGS[t.pd]){const g=dpkg(ok,t.pd,nm,true,t),c={cm:u.cm,cz:u.cz};for(const k of['dp','dr','lr','lc','sc','sr']){const d=g.c[k]-UR[k];c[k]=UR[k]+(d>0?d*UP:d*DN)+bd+(cg[k]||0)}pk[nm]={dl:g.dl,lb:g.lb,cb:g.cb,sf:g.sf,c,cov:g.cov,box:g.box}}
- return{t,u,isU,O:OFF[t.po],D:DEF[t.pd],DS:isU?tweakDS(DSC[t.pd]):DSC[t.pd],OS:OSC[t.po],qb:by('QB',1)[0],fb:by('FB',1)[0],rb:by('RB',3),wr:by('WR',4),te:by('TE',2),ol:by('OL',5),dl:pk.base.dl,lb:pk.base.lb,cb:pk.base.cb,sf:pk.base.sf,pk,seen:new Set(),cur:null,cv:0,bx:0,k:by('K',1)[0],pn:by('P',1)[0]}}
+ return{t,u,isU,O:OFF[t.po],D:DEF[t.pd],DS:isU?tweakDS(DSC[t.pd],C.gp):DSC[t.pd],plan:C?C.plan:'bal',gp:C?C.gp:null,OS:OSC[t.po],qb:by('QB',1)[0],fb:by('FB',1)[0],rb:by('RB',3),wr:by('WR',4),te:by('TE',2),ol:by('OL',5),dl:pk.base.dl,lb:pk.base.lb,cb:pk.base.cb,sf:pk.base.sf,pk,seen:new Set(),cur:null,cv:0,bx:0,k:by('K',1)[0],pn:by('P',1)[0]}}
 function abil_any_mot4(){return GN.some(([g])=>abil('mot.'+g)>=4)}
 function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncUT();GCX=gctx(a,b,neutral);
+ /* each human coach brings his own game plan, practice setting, abilities and clutch bonuses */
+ const CX=[a,b].map(t=>isH(t.id)?asUser(t.id,()=>{if(!S.coach)return null;const g0=GCX;GCX=gctx(a,b,neutral);try{return{prac:S.practice,plan:S.plan,gp:gpl(),own:coachAdj(true),opp:coachAdj(false)}}finally{GCX=g0}}):null);
  const halfAdj=()=>{for(const Xs of X)if(Xs.isU&&S.coach){const b=0;for(const k of['qa','qs','rb','rs','rpw','wh','ws','te','tb','pb','rk','dp','dr','lr','lc','cm','cz','sc','sr']){Xs.u[k]+=b;for(const nm in Xs.pk)if(Xs.pk[nm].c[k]!=null)Xs.pk[nm].c[k]+=b}}};
- const X=[mkSide(a,neutral?0:6),mkSide(b,0)];
+ const X=[mkSide(a,neutral?0:6,CX[0],CX[1]?CX[1].opp:null),mkSide(b,0,CX[1],CX[0]?CX[0].opp:null)];
  const PC=[{},{}];
  const setPkg=(d,nm)=>{const T=X[d],P=T.pk[nm]||T.pk.base;if(T.cur===P)return;T.cur=P;T.dl=P.dl;T.lb=P.lb;T.cb=P.cb;T.sf=P.sf;Object.assign(T.u,P.c);T.cv=P.cov;T.bx=P.box;for(const L of[P.dl,P.lb,P.cb,P.sf])for(const p of L)T.seen.add(p)};
  setPkg(0,'base');setPkg(1,'base');
@@ -840,7 +842,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
  const mxs=(i,p,k,v)=>{const m=sa(i,p);if(v>(m[k]||0)){if(jr)jr.push([m,k,m[k],k in m]);m[k]=v}};
  const snapTS=()=>TS.map(x=>Object.assign({},x,{pts:x.pts.slice()})),restTS=sn=>TS.forEach((x,i)=>{Object.assign(x,sn[i]);x.pts=sn[i].pts.slice()});
  const score=(i,pts)=>{sc[i]+=pts;TS[i].pts[Math.min(q,5)-1]+=pts};
- let CLD=null,CLon=false;const clutchChk=()=>{if(!S.coach)return;const ui=X[0].isU?0:X[1].isU?1:-1;if(ui<0)return;if(CLD===null){CLD={};if(abil_any_mot4()){const t=X[ui].t;CLUTCH=false;const a=units(t);CLUTCH=true;const b=units(t);CLUTCH=false;for(const k in b)if(typeof b[k]==='number'&&b[k]!==a[k])CLD[k]=b[k]-a[k]}}if(!Object.keys(CLD).length)return;const on=Math.abs(sc[0]-sc[1])<=8;if(on===CLon)return;CLon=on;const sg=on?1:-1,T=X[ui];for(const k in CLD){const d=CLD[k]*UP*sg;if(T.u[k]!=null)T.u[k]+=d;for(const nm in T.pk)if(T.pk[nm].c[k]!=null&&T.pk[nm].c!==T.u)T.pk[nm].c[k]+=d}};
+ let CLD=[null,null],CLon=[false,false];const clutchChk=()=>{for(const ui of[0,1]){if(!CX[ui])continue;const T=X[ui];if(CLD[ui]===null){CLD[ui]={};if(asUser(T.t.id,abil_any_mot4)){CLUTCH=false;const c0=units(T.t);CLUTCH=true;const c1=units(T.t);CLUTCH=false;for(const k in c1)if(typeof c1[k]==='number'&&c1[k]!==c0[k])CLD[ui][k]=c1[k]-c0[k]}}if(!Object.keys(CLD[ui]).length)continue;const on=Math.abs(sc[0]-sc[1])<=8;if(on===CLon[ui])continue;CLon[ui]=on;const sg=on?1:-1;for(const k in CLD[ui]){const d=CLD[ui][k]*UP*sg;if(T.u[k]!=null)T.u[k]+=d;for(const nm in T.pk)if(T.pk[nm].c[k]!=null&&T.pk[nm].c!==T.u)T.pk[nm].c[k]+=d}}};
  const tick=(sec,o)=>{t-=sec;if(o!==undefined)TS[o].top+=sec;if(t<=0){if(q===1){q=2;t+=900}else if(q===3){q=4;t+=900}}};
  const tdScore=(i)=>{score(i,6);TS[i].td++;const K=X[i].k,rk=er(K);add(i,K,'xpa');if(F()<clamp(.955+.0012*(rk.kac-70),.85,.995)){add(i,K,'xpm');score(i,1)}};
  const defPool=D=>[...D.dl.map(p=>[p,.9]),...D.lb.map(p=>[p,1.6]),...D.cb.map((p,i)=>[p,i<2?.5:.25]),...D.sf.map(p=>[p,.95])];
@@ -961,7 +963,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   if(r.to&&pn.i!==o)pn.acc=true;
   return pn}
  function drive(o,yd0,ot){
-  const O=X[o],D=X[1-o],d=1-o,pl=O.isU?S.plan:'bal',ag=pl==='agg'?1:pl==='con'?-1:0;
+  const O=X[o],D=X[1-o],d=1-o,pl=O.isU?O.plan:'bal',ag=pl==='agg'?1:pl==='con'?-1:0;
   let down=1,y=yd0,first=Math.min(100,y+10),dist=first-y;
   const applyPen=pn=>{logPen(pn,true);
    if(pn.i===o){const back=Math.max(1,Math.min(pn.y,Math.floor((y-1)/2)));y-=back;dist=first-y}
@@ -992,7 +994,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
      else if(rr<STM*(.03+.065)){stP(d,'Illegal block',10,'Punt return');ny=Math.max(1,ny-10)}
      else if(rr<STM*(.03+.065+.017)){stP(d,F()<.5?'Offside':'Running into the kicker',5,'Punt');ny=Math.max(1,ny-5)}}
     tick(10,o);return{e:'punt',ny}}
-   let pp=O.O.pass+(O.isU?gpl().pass/100:0);const u=O.u;
+   let pp=O.O.pass+(O.isU?O.gp.pass/100:0);const u=O.u;
    pp+=clamp(.003*((u.qa+u.wh)/2-(u.rb+u.rk)/2),-.06,.06);
    pp+=down===3?(dist>=10?.3:dist>=7?.24:dist>=4?.12:dist<=2?-.2:0):down===2?(dist>=8?.1:dist<=2?-.15:0):down===4?(dist>=4?.25:-.2):0;
    pp+=ag*.05+.06;if(y>=92)pp-=.12;
@@ -1490,7 +1492,7 @@ const inSeason=()=>['reg','cc','cfp'].includes(S.stage);
 const GPD={agg:0,lean:0,pass:0},gpl=()=>Object.assign({},GPD,S.gp||{});
 function setPB(k,v){if((k==='po'||k==='pd')&&U()[k]!==v&&inSeason())return toast('Schemes can only be changed in the offseason. Adjust this week\'s game plan instead.');U()[k]=v;save();render()}
 function setGP(k,v){S.gp=gpl();S.gp[k]=+v;save();render()}
-const tweakDS=(ds)=>{const g=gpl(),d=Object.assign({},ds);d.blitz=ds.blitz*(1+.22*g.agg);d.box=ds.box+.04*g.agg;d.man=clamp(ds.man+.25*g.lean,.02,.95);d.shell=clamp(ds.shell-.1*g.lean,.05,.95);return d};
+const tweakDS=(ds,g0)=>{const g=g0||gpl(),d=Object.assign({},ds);d.blitz=ds.blitz*(1+.22*g.agg);d.box=ds.box+.04*g.agg;d.man=clamp(ds.man+.25*g.lean,.02,.95);d.shell=clamp(ds.shell-.1*g.lean,.05,.95);return d};
 function play(){const t=U(),u=units(t),lk=inSeason(),lkb=lk?'<p class=m>🔒 Schemes are locked during the season. You can change them in the offseason. Use the weekly game plan below.</p>':'';return'<div class=g2><div class=card><h2>Offensive Playbook</h2>'+lkb+Object.keys(OFF).map(k=>{const e=offEff(t,k,u);return'<div class="pb '+(t.po===k?'on':'')+'" onclick="setPB(\'po\',\''+k+'\')"><div class=row><b>'+k+'</b><span class=tag>Pass '+Math.round(OFF[k].pass*100)+'%</span><span style="flex:1"></span><b class=a>'+e.toFixed(1)+'</b></div><div class=m>'+OFF[k].d+'</div></div>'}).join('<div style="height:8px"></div>')+'</div><div class=card><h2>Defensive Playbook</h2>'+Object.keys(DEF).map(k=>{const e=defEff(t,k,.5,u);return'<div class="pb '+(t.pd===k?'on':'')+'" onclick="setPB(\'pd\',\''+k+'\')"><div class=row><b>'+k+'</b><span style="flex:1"></span><b class=a>'+e.toFixed(1)+'</b></div><div class=m>'+DEF[k].d+'</div></div>'}).join('<div style="height:8px"></div>')+'</div></div><div class=card><h2>Weekly Game Plan</h2><p class=m>Adjustable any week. Formations and plays stay with your scheme.</p><div class=row><label>Defensive aggressiveness <select onchange="setGP(\'agg\',this.value)">'+[[-1,'Conservative (fewer blitzes)'],[0,'Balanced'],[1,'Aggressive (more blitzes)']].map(([v,n])=>'<option value='+v+(gpl().agg==v?' selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Coverage lean <select onchange="setGP(\'lean\',this.value)">'+[[-1,'Zone'],[0,'Balanced'],[1,'Man']].map(([v,n])=>'<option value='+v+(gpl().lean==v?' selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Offense run/pass <input type=range min=-15 max=15 step=5 value='+gpl().pass+' oninput="this.nextSibling.textContent=Math.round((OFF[U().po].pass*100)+(+this.value))+\'% pass\'" onchange="setGP(\'pass\',this.value)"><span class=tag>'+Math.round(OFF[t.po].pass*100+gpl().pass)+'% pass</span></label></div></div><div class=card><h2>Game & Practice Plan</h2><div class=row><label>Game plan <select onchange="S.plan=this.value;save();render()">'+[['agg','Aggressive (+variance)'],['bal','Balanced'],['con','Conservative (-variance)']].map(([v,n])=>'<option value='+v+(S.plan===v?' selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Practice <select onchange="S.practice=this.value;save();render()">'+[['full','Full (XP+, injuries+)'],['bal','Balanced'],['lim','Limited (safer, less XP)']].map(([v,n])=>'<option value='+v+(S.practice===v?' selected':'')+'>'+n+'</option>').join('')+'</select></label></div><p class=m>The number on each playbook is how well it fits <i>your current roster</i> (higher is better). Schemes weigh different skills: pass-blocking, arm and WR hands drive Air Raid and West Coast, while run-blocking, QB speed and RB power drive Triple Option and Power Run. Check the profile below to see what your roster is built for.</p></div><div class=card><h2>Roster Profile (starters)</h2><div class=row>'+[['QB Arm','qa'],['QB Speed','qs'],['RB Speed','rs'],['RB Power','rpw'],['WR Hands','wh'],['WR Speed','ws'],['TE Block','tb'],['OL Pass Block','pb'],['OL Run Block','rk'],['DL Pass Rush','dp'],['DL Run Stop','dr'],['LB Run','lr'],['LB Cover','lc'],['CB Man','cm'],['CB Zone','cz'],['S Cover','sc'],['S Run','sr']].map(([n,k])=>'<span class=tag>'+n+' '+u[k].toFixed(0)+'</span>').join('')+'</div></div>'}
 
 /* ===== box scores ===== */
