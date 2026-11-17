@@ -173,8 +173,8 @@ const OFF={
 'Air Raid':{k:2.0,pass:.62,w:{qa:.30,qs:.02,wh:.26,ws:.16,te:.04,pb:.22},tempo:1.12,var:1.25,d:'Max passing volume and tempo. Needs an accurate QB, quality WRs and elite pass blockers. Huge upside, high variance.'},
 'West Coast':{k:1.7,pass:.56,w:{qa:.28,wh:.26,te:.10,rb:.06,ws:.04,pb:.20,rk:.06},tempo:1,var:.95,d:'Timing routes, short passing. Needs a precise QB, sure-handed WRs and TE, and pass protection.'},
 'Pro Style':{k:1.4,pass:.5,w:{qa:.20,qs:.05,rb:.14,wh:.10,ws:.04,te:.10,tb:.05,pb:.10,rk:.18,fbb:.04},tempo:.97,var:.9,d:'Balanced under-center offense. Leans on the offensive line, run blocking especially.'},
-'Power Run':{k:1.9,pass:.35,w:{qa:.08,qs:.04,rb:.10,rpw:.14,rs:.06,wh:.04,te:.06,tb:.08,pb:.04,rk:.30,fbb:.06},tempo:.9,var:.85,d:'Smash-mouth. Grinds clock, low variance. Needs a bruising RB, blocking TEs and road-grader linemen.'},
-'Triple Option':{k:1.6,pass:.2,w:{qs:.26,rs:.10,rpw:.08,rb:.08,fbu:.26,fbb:.04,rk:.22,tb:.06},neg:{qa:.12,wh:.08},tempo:.88,var:1.1,d:'Rare option running attack. Slow pace. Only worth running with a fast running QB who is a poor passer, weak receivers, and a strong running fullback who can carry the load. A good passing roster is wasted, and costs you here.'}};
+'Power Run':{k:1.9,pass:.35,w:{qa:.08,qs:.04,rb:.10,rpw:.14,rs:.06,wh:.04,te:.06,tb:.08,pb:.04,rk:.30,fbb:.06},tempo:.98,var:.85,d:'Smash-mouth. Grinds clock, low variance. Needs a bruising RB, blocking TEs and road-grader linemen.'},
+'Triple Option':{k:1.6,pass:.2,w:{qs:.26,rs:.10,rpw:.08,rb:.08,fbu:.26,fbb:.04,rk:.22,tb:.06},neg:{qa:.12,wh:.08},tempo:.94,var:1.1,d:'Rare option running attack. Slow pace. Only worth running with a fast running QB who is a poor passer, weak receivers, and a strong running fullback who can carry the load. A good passing roster is wasted, and costs you here.'}};
 /* league-wide calibration so each scheme is the best fit for a realistic share of rosters (Spread/Pro Style common, Triple Option rare) */
 const OFFB={'Spread':1.4,'Air Raid':-.1,'West Coast':.6,'Pro Style':1.55,'Power Run':-.3,'Triple Option':9.8};
 const DEF={
@@ -837,8 +837,8 @@ const OSC={
 'Air Raid':{pz:-0.2,fb:0.1,rm:-0.11,pa:.10,keep:.05,opt:.10,tg:[.31,.28,.21,.09,.11],dp:[.30,.35,.35]},
 'West Coast':{pz:0.21,fb:0.5,rm:0.23,pa:.25,keep:.03,opt:.10,tg:[.22,.19,.14,.21,.24],dp:[.62,.30,.08]},
 'Pro Style':{pz:0.23,fb:1.2,rm:0.35,pa:.35,keep:.04,opt:.10,tg:[.24,.17,.11,.26,.22],dp:[.50,.33,.17]},
-'Power Run':{pz:0.31,fb:1.6,rm:0.89,pa:.45,keep:.06,opt:.10,tg:[.22,.14,.08,.32,.24],dp:[.40,.35,.25]},
-'Triple Option':{pz:0.21,fb:1.4,rm:1.28,pa:.30,keep:.38,opt:1,tg:[.28,.18,.06,.22,.26],dp:[.35,.30,.35]}};
+'Power Run':{pz:0.31,fb:1.6,rm:0.1,pa:.45,keep:.06,opt:.10,tg:[.22,.14,.08,.32,.24],dp:[.40,.35,.25]},
+'Triple Option':{pz:0.21,fb:1.4,rm:0.5,pa:.30,keep:.38,opt:1,tg:[.28,.18,.06,.22,.26],dp:[.35,.30,.35]}};
 const FORM=16,PNM=.94,STM=1.55,GS=.4,GI=.55,sg=x=>1/(1+Math.exp(-x)),ex=m=>-m*Math.log(1-F()+1e-12);
 let GID=-1;
 const ghost=pos=>({id:GID--,name:'(none)',pos,ovr:48,yr:1,inj:0,st:{},dev:0,ghost:1});
