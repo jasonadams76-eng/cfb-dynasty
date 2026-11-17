@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dynasty Sim 27</title>
+<title>CFB Dynasty</title>
 <style>
 :root{--bg:#0e1116;--p:#171c24;--p2:#1f2630;--t:#e6e9ee;--m:#8b95a5;--a:#f5a524;--g:#3ecf8e;--r:#ef5b5b;--b:#4c9aff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px system-ui,sans-serif}
@@ -80,7 +80,41 @@ body{background:radial-gradient(1200px 700px at 78% 30%,hsl(var(--th,350) 55% 24
 .sp .big{font-size:18px;padding:14px 56px;border-radius:10px;background:var(--a);color:#111;border-color:var(--a);font-weight:700;box-shadow:0 6px 24px #000a}
 .sp .ball{font-size:64px;filter:drop-shadow(0 6px 14px #000a)}
 .sp .ver{position:fixed;bottom:12px;color:var(--m);font-size:12px}
-.hm{max-width:720px;margin:0 auto;padding:22px 14px}.hm .card{margin-bottom:14px}
+/* home / login screen */
+.hm{max-width:760px;margin:0 auto;padding:44px 16px 56px}
+.hero{text-align:center;margin-bottom:30px}
+.hball{width:84px;height:84px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;background:radial-gradient(circle at 32% 28%,#ffcf6b,#f5a524 46%,#a8650a);box-shadow:0 0 0 4px #f5a52433,0 12px 36px #000b,0 0 54px #f5a52444}
+.hero h1{margin:0;font-size:clamp(38px,9vw,64px);letter-spacing:5px;font-weight:900;line-height:1;text-transform:uppercase;color:#fff;text-shadow:0 4px 24px #000c}
+.hero h1 b{color:var(--a)}
+.hsub{margin-top:12px;color:var(--m);font-size:15px;letter-spacing:1.5px;text-transform:uppercase}
+.hline{width:84px;height:3px;margin:16px auto 0;border-radius:3px;background:linear-gradient(90deg,transparent,var(--a),transparent)}
+.hc{position:relative;overflow:hidden;background:linear-gradient(180deg,#1b212bf2,#141920f2);border:1px solid #ffffff14;border-radius:14px;padding:22px 24px;margin-bottom:16px;box-shadow:0 10px 34px #0008}
+.hc:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--a),#a8650a)}
+.hc.hot{border-color:#f5a52455;box-shadow:0 10px 34px #0008,0 0 0 1px #f5a52422}
+.hhd{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.hic{flex:none;width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:#f5a5241f;border:1px solid #f5a52444}
+.hk{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--a);font-weight:700}
+.hc h2{margin:0;font-size:22px;letter-spacing:.3px;color:#fff}
+.hc p{margin:0 0 16px;color:var(--m);line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.chip{background:#ffffff0f;border:1px solid #ffffff1a;border-radius:20px;padding:5px 13px;font-size:13px;color:var(--t)}
+.chip.a{background:#f5a5241f;border-color:#f5a52455;color:#ffd58a;font-weight:700}
+.hrow{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.bt{font:inherit;font-size:16px;font-weight:700;letter-spacing:.4px;padding:13px 28px;border-radius:10px;cursor:pointer;border:1px solid #ffffff26;background:#ffffff0d;color:var(--t);transition:transform .12s,box-shadow .12s,background .12s,border-color .12s}
+.bt:hover{transform:translateY(-2px);background:#ffffff1a;border-color:#ffffff44;box-shadow:0 8px 20px #0007}
+.bt:active{transform:translateY(0)}
+.bt.pri{background:linear-gradient(180deg,#ffbf47,#e8940e);color:#1a1100;border-color:#ffd27a;box-shadow:0 6px 20px #f5a52440,inset 0 1px 0 #fff6}
+.bt.pri:hover{background:linear-gradient(180deg,#ffcb66,#f5a524);box-shadow:0 10px 26px #f5a52466,inset 0 1px 0 #fff8}
+.hin{font:inherit;font-size:16px;padding:12px 14px;border-radius:10px;border:1px solid #ffffff26;background:#0b0f14;color:var(--t);outline:none;min-width:0}
+.hin:focus{border-color:var(--a);box-shadow:0 0 0 3px #f5a52433}
+.hin.code{width:150px;text-align:center;letter-spacing:6px;font-weight:800;font-size:18px;text-transform:uppercase}
+.hjoin{margin-top:18px;padding-top:16px;border-top:1px solid #ffffff14}
+.hjoin .nm{font-size:17px;color:#fff;margin-bottom:12px}
+.hjoin .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.hjoin .grid .full{grid-column:1/-1}
+.hmsg{margin-top:14px;padding:10px 14px;border-radius:8px;background:#ef5b5b1a;border:1px solid #ef5b5b55;color:#ffb3b3;font-weight:600}
+.hfoot{text-align:center;color:var(--m);font-size:12px;margin-top:26px;letter-spacing:.5px}
+@media(max-width:560px){.hjoin .grid{grid-template-columns:1fr}.hc{padding:18px 16px}.bt{flex:1 1 auto}}
 </style></head><body><div id="app"></div><div id="toast"></div>
 <script src="rosters-data.js"></script>
 <script>
@@ -1461,15 +1495,15 @@ const hasSave=()=>!!(S&&S.stage!=='setup'&&S.coach&&S.teams);
 function enterGame(){GATE=false;if(MP.dyn)mpStart();render()}
 function gate(){const a=$('app');
  if(GATEP==='splash'){a.innerHTML='<div class=sp><button class="s big" onclick="GATEP=\'home\';render()">Continue</button><div class=ver>Fan-made. Not affiliated with EA Sports.</div></div>';return}
- let h='<div class=hm><div class=card style="text-align:center"><h2 style="margin:0">🏈 Dynasty Sim 27</h2></div>';
+ let h='<div class=hm><div class=hero><div class=hball>🏈</div><h1>CFB <b>Dynasty</b></h1><div class=hsub>Build a program · Recruit the nation · Win a title</div><div class=hline></div></div>';
  if(hasSave()){const t=S.teams[S.uid],stg={pre:'Preseason',reg:'Week '+S.week,cc:'Conference Championships',cfp:'Playoffs & Bowls',recap:'Season Recap',nil:'NIL',leave:'Players Leaving',portal:'Transfer Portal',sign:'Signing Day',train:'Training',cut:'Roster Cuts'}[S.stage]||S.stage;
-  h+='<div class=card><h2>'+(MP.dyn?'Signed in':'Welcome back')+', Coach '+esc(S.coach.name)+'</h2><p><b>'+esc(t.name)+'</b> · '+S.year+' · '+stg+' · '+t.w+'-'+t.l+'</p>'+(MP.dyn?'<p class=m>Online dynasty '+esc(MP.code)+' · '+(MP.host?'you are the host':'you are a player')+'</p>':'')+'<div class=row><button class=s onclick="enterGame()">'+(MP.dyn?'Load online dynasty':'Load dynasty')+'</button>'+(MP.dyn?'<button onclick="mpLeave()">Sign out of online dynasty</button>':'')+'</div></div>'}
- if(!MP.dyn){h+='<div class=card><h2>Start a new dynasty</h2><p class=m>'+(hasSave()?'This deletes the dynasty saved in this browser.':'Pick a coach, a school and a backstory.')+'</p><button class=s onclick="gateNew()">New dynasty</button></div>';
-  h+='<div class=card><h2>Join an online dynasty</h2><p class=m>Enter the code your host sent you.'+(hasSave()?' Joining replaces the dynasty saved in this browser.':'')+'</p><div class=row><input placeholder="Join code" maxlength=6 style="width:110px;text-transform:uppercase" value="'+esc(MPF.code)+'" oninput="MPF.code=this.value"><button class=s onclick="mpUiLookup()">Look up</button></div>';
+  h+='<div class="hc hot"><div class=hhd><div class=hic>🏆</div><div><div class=hk>'+(MP.dyn?'Signed in':'Welcome back')+'</div><h2>Coach '+esc(S.coach.name)+'</h2></div></div><div class=chips><span class="chip a">'+esc(t.name)+'</span><span class=chip>'+S.year+' season</span><span class=chip>'+esc(stg)+'</span><span class=chip>'+t.w+'-'+t.l+'</span></div>'+(MP.dyn?'<p>Online dynasty <b>'+esc(MP.code)+'</b> · '+(MP.host?'you are the host':'you are a player')+'</p>':'')+'<div class=hrow><button class="bt pri" onclick="enterGame()">▶ '+(MP.dyn?'Load online dynasty':'Load dynasty')+'</button>'+(MP.dyn?'<button class=bt onclick="mpLeave()">Sign out of online dynasty</button>':'')+'</div></div>'}
+ if(!MP.dyn){h+='<div class=hc><div class=hhd><div class=hic>🏟️</div><div><div class=hk>Single player</div><h2>Start a new dynasty</h2></div></div><p>'+(hasSave()?'This deletes the dynasty saved in this browser.':'Pick a coach, a school and a backstory, then build your program from the ground up.')+'</p><div class=hrow><button class="bt'+(hasSave()?'':' pri')+'" onclick="gateNew()">New dynasty</button></div></div>';
+  h+='<div class=hc><div class=hhd><div class=hic>🌐</div><div><div class=hk>Multiplayer</div><h2>Join an online dynasty</h2></div></div><p>Enter the code your host sent you.'+(hasSave()?' Joining replaces the dynasty saved in this browser.':'')+'</p><div class=hrow><input class="hin code" placeholder="CODE" maxlength=6 value="'+esc(MPF.code)+'" oninput="MPF.code=this.value"><button class="bt pri" onclick="mpUiLookup()">Look up</button></div>';
   if(MP.peek){const taken=new Set(MP.peek.info.members.map(m=>m.team));const opts=MP.peek.teams.filter(t=>!taken.has(t.id)).sort((x,y)=>y.prestige-x.prestige||x.name.localeCompare(y.name)).map(t=>'<option value='+t.id+(String(t.id)===String(MPF.team)?' selected':'')+'>'+esc(t.name)+' (prestige '+t.prestige+')</option>').join('');
-   h+='<p><b>'+esc(MP.peek.info.name)+'</b> · '+MP.peek.info.members.length+'/'+MP.peek.info.cap+' players</p><div class=row><input placeholder="Your coach name" value="'+esc(MPF.cn)+'" oninput="MPF.cn=this.value"><select onchange="MPF.back=this.value"><option>Recruiter</option><option>Tactician</option><option>Motivator</option></select><select onchange="MPF.team=this.value"><option value="">Choose a school…</option>'+opts+'</select><button class=s onclick="mpUiJoin()">Join</button></div>'}
-  h+=(MP.msg?'<p><b>'+esc(MP.msg)+'</b></p>':'')+'</div>'}
- a.innerHTML=h+'</div>'}
+   h+='<div class=hjoin><div class=nm><b>'+esc(MP.peek.info.name)+'</b> · '+MP.peek.info.members.length+'/'+MP.peek.info.cap+' players</div><div class=grid><input class=hin placeholder="Your coach name" value="'+esc(MPF.cn)+'" oninput="MPF.cn=this.value"><select class=hin onchange="MPF.back=this.value"><option>Recruiter</option><option>Tactician</option><option>Motivator</option></select><select class="hin full" onchange="MPF.team=this.value"><option value="">Choose a school…</option>'+opts+'</select></div><button class="bt pri" onclick="mpUiJoin()">Join dynasty</button></div>'}
+  h+=(MP.msg?'<div class=hmsg>'+esc(MP.msg)+'</div>':'')+'</div>'}
+ a.innerHTML=h+'<div class=hfoot>CFB Dynasty · Fan-made. Not affiliated with EA Sports.</div></div>'}
 function gateNew(){if(hasSave()&&!confirm('Start a new dynasty? This deletes the dynasty saved in this browser.'))return;GATE=false;if(hasSave())newDyn();else render()}
 document.addEventListener&&document.addEventListener('keydown',e=>{if(GATE&&GATEP==='splash'&&(e.key==='Enter'||e.key===' ')){GATEP='home';render()}});
 function advClick(){doAdv()}
@@ -1866,7 +1900,7 @@ function impMsg(r){toast(r.n+' team(s) imported'+(r.miss.length?'; unmatched tea
 function impRun(){impMsg(importText(SU.txt,SU.imt));setup()}
 function impFiles(fl){const arr=[...fl];let done=0,tot={n:0,miss:new Set()};arr.forEach(f=>{const rd=new FileReader();rd.onload=()=>{const r=importText(rd.result,SU.imt);tot.n+=r.n;r.miss.forEach(x=>tot.miss.add(x));if(++done===arr.length){impMsg({n:tot.n,miss:[...tot.miss]});setup()}};rd.readAsText(f)})}
 function setup(){const ts=S.teams.filter(t=>!SU.cf||t.conf===SU.cf).sort((a,b)=>b.prestige-a.prestige||tOvr(b)-tOvr(a));
- $('app').innerHTML='<div class=pg><div class=card><h2>🏈 Dynasty Sim 27 — New Dynasty</h2><div class=row><label>Coach name <input value="'+SU.name+'" onchange="SU.name=this.value"></label><label>Backstory <select onchange="SU.back=this.value">'+Object.keys(BACK).map(b=>'<option'+(SU.back===b?' selected':'')+'>'+b+'</option>').join('')+'</select></label><label><input type=checkbox '+(SU.bonus?'checked':'')+' onchange="SU.bonus=this.checked"> +100 bonus Coach Points</label></div><p class=m>Recruiter, Tactician and Motivator trees are open from the start (Recruiter: recruiting · Tactician: schemes &amp; game plan · Motivator: development &amp; retention); your backstory archetype is 3 Coach Points cheaper per tier. Advanced archetypes unlock through career achievements.</p></div>'+
+ $('app').innerHTML='<div class=pg><div class=card><h2>🏈 CFB Dynasty — New Dynasty</h2><div class=row><label>Coach name <input value="'+SU.name+'" onchange="SU.name=this.value"></label><label>Backstory <select onchange="SU.back=this.value">'+Object.keys(BACK).map(b=>'<option'+(SU.back===b?' selected':'')+'>'+b+'</option>').join('')+'</select></label><label><input type=checkbox '+(SU.bonus?'checked':'')+' onchange="SU.bonus=this.checked"> +100 bonus Coach Points</label></div><p class=m>Recruiter, Tactician and Motivator trees are open from the start (Recruiter: recruiting · Tactician: schemes &amp; game plan · Motivator: development &amp; retention); your backstory archetype is 3 Coach Points cheaper per tier. Advanced archetypes unlock through career achievements.</p></div>'+
  '<div class=card><h2>Real rosters</h2><p class=m><b>'+S.teams.filter(t=>t.real).length+' of '+S.teams.length+' teams</b> load with built-in CFB 27 rosters (from <code>rosters-data.js</code>); the rest get generated rosters. Optional import to replace or add a team: Paste or upload roster rows. Accepts the CFB Labs roster JSON (one team or a combined file; the team is read from each player), or CSV/tab text with a header row (<code>team,name,pos,class,ovr,dev</code>; team/class/dev optional). To import one team into a school regardless of its name, select that team in the dropdown first. Teams you skip keep generated rosters. Do this before starting your dynasty.</p><div class=row><select onchange="SU.imt=this.value"><option value="">Whole league (first column = team)</option>'+S.teams.map(t=>'<option value='+t.id+(SU.imt==t.id?' selected':'')+'>'+t.name+'</option>').join('')+'</select><input type=file multiple accept=".json,.csv,.tsv,.txt" onchange="impFiles(this.files)"></div><textarea rows=4 style="width:100%;margin-top:8px;background:var(--p2);color:var(--t)" oninput="SU.txt=this.value">'+SU.txt+'</textarea><div class=row style="margin-top:8px"><button class=s onclick="impRun()">Import</button><span class=m>'+S.teams.filter(t=>t.real).length+' of '+S.teams.length+' teams have real rosters</span></div></div>'+
  '<div class=card><h2>Pick your school ('+S.teams.length+' FBS teams)</h2><div class=row><select onchange="SU.cf=this.value;setup()"><option value="">All conferences</option>'+CONFS.map(c=>'<option'+(SU.cf===c?' selected':'')+'>'+c+'</option>').join('')+'</select><button class=b '+(SU.team==null?'disabled':'')+' onclick="startNew()">Start Dynasty as '+(SU.team!=null?S.teams[SU.team].name:'…')+'</button><button class=s onclick="ask(\'reroll\',()=>{buildLeague();render()})">'+(CF==='reroll'?'Click again to re-roll':'Re-roll league')+'</button></div>'+tbl(['School','Conf','Prestige','OVR','Roster','Best offense','Best defense','Budget (DP)',''],ts.map(t=>{const u=units(t);let bo='',so=0,bd='',sd=0;for(const k in OFF){const e=offEff(t,k,u);if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u);if(e>sd){sd=e;bd=k}}return'<tr class="clk '+(SU.team===t.id?'me':'')+'" onclick="SU.team='+t.id+';setup()"><td>'+t.name+'</td><td>'+t.conf+'</td><td>'+'★'.repeat(t.prestige)+'</td><td>'+tOvr(t).toFixed(1)+'</td><td>'+(t.real?'real':'generated')+'</td><td>'+bo+'</td><td>'+bd+'</td><td>'+baseDP(t)+'</td><td>'+(SU.team===t.id?'✔':'')+'</td></tr>'}))+'</div></div>'}
 function matAll(){if(!S||!S.teams||S.mv===2)return;S.teams.forEach(t=>t.roster.forEach(p=>{if(OWN[p.pos])mat(p)}));S.mv=2}
