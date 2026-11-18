@@ -175,6 +175,7 @@ button.t{background:#ffffff0d;color:var(--t);border:1px solid #ffffff26;border-r
 .hc .hin,.hc select,.hc input:not([type=checkbox]):not([type=file]){font-size:15px}
 .hc>.hhd+.row{margin-bottom:12px}
 @media(max-width:560px){.card{padding:14px 14px}.hm.wide{padding:24px 10px 40px}}
+.dsl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.dsc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px;border-radius:12px;background:linear-gradient(180deg,#232b37,#1a2029);border:1px solid #ffffff1c;color:var(--t);cursor:pointer;text-align:center;transition:transform .12s,border-color .12s,box-shadow .12s}.dsc:hover:not(:disabled){transform:translateY(-2px);border-color:#f5a52488}.dsc.on{border-color:var(--a);box-shadow:0 0 0 2px #f5a52455,0 6px 18px #0006}.dsc.st{background:linear-gradient(180deg,#2c3340,#1d232c)}.dsc.em{opacity:.45;cursor:default}.dsh{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--m)}.dsh em{font-style:normal;color:var(--g);margin-left:4px}.dso{font-size:30px;font-weight:800;color:var(--a);line-height:1.1}.dsn{font-weight:700;font-size:14px}.dsm{font-size:11px;color:var(--m)}
 </style></head><body><div id="app"></div><div id="toast"></div>
 <script src="rosters-data.js"></script>
 <script>
@@ -188,6 +189,8 @@ const FN='James,Marcus,Jalen,Tyler,Caleb,Devin,Isaiah,Brady,Cameron,Malik,Trey,J
 const LN='Johnson,Williams,Brown,Jones,Davis,Miller,Wilson,Moore,Taylor,Anderson,Thomas,Jackson,White,Harris,Martin,Thompson,Garcia,Robinson,Clark,Lewis,Lee,Walker,Hall,Allen,Young,King,Wright,Scott,Green,Baker,Adams,Nelson,Hill,Campbell,Mitchell,Carter,Roberts,Turner,Phillips,Evans'.split(',');
 const nm=()=>pick(FN)+' '+pick(LN);
 /* ===== data ===== */
+/* coach-set depth chart: p.dd = depth rank within a position (1 = first string); unranked players follow by overall */
+const dcmp=(x,y)=>(x.dd||999)-(y.dd||999)||y.ovr-x.ovr;
 const POS=['QB','RB','FB','WR','TE','OT','OG','C','LE','RE','DT','SAM','WILL','MIKE','CB','FS','SS','K','P'];
 const NEED={QB:4,RB:6,FB:2,WR:10,TE:5,OT:5,OG:5,C:3,LE:4,RE:4,DT:6,SAM:3,WILL:3,MIKE:3,CB:8,FS:3,SS:3,K:2,P:2},START={QB:1,RB:1,FB:1,WR:3,TE:1,OT:2,OG:2,C:1,LE:1,RE:1,DT:2,SAM:1,WILL:1,MIKE:1,CB:2,FS:1,SS:1,K:1,P:1};
 /* rating groups: OT/OG/C share OL ratings & archetypes, LE/RE/DT share DL, SAM/WILL/MIKE share LB, FS/SS share S */
@@ -199,7 +202,7 @@ SAM:{'Lurker':1.5,'Thumper':1,'Signal Caller':.6},WILL:{'Lurker':1.5,'Signal Cal
 FS:{'Coverage Specialist':2,'Hybrid':1,'Box Specialist':.3},SS:{'Box Specialist':2,'Hybrid':1,'Coverage Specialist':.4}};
 /* starters for a rating group, honoring slot counts (2 OT, 2 OG, 1 C ...); short slots are filled by the best remaining player in the group */
 function slotsOrd(list,g,ghostFill){const sl=SLOTS[g],used=new Set(),out=[];
- for(const [k,c] of sl){const a=list.filter(p=>p.pos===k&&!used.has(p)).sort((x,y)=>y.ovr-x.ovr).slice(0,c);a.forEach(x=>used.add(x));for(let i=0;i<c;i++)out.push(a[i]||null)}
+ for(const [k,c] of sl){const a=list.filter(p=>p.pos===k&&!used.has(p)).sort(dcmp).slice(0,c);a.forEach(x=>used.add(x));for(let i=0;i<c;i++)out.push(a[i]||null)}
  const rest=list.filter(p=>GP(p.pos)===g&&!used.has(p)).sort((x,y)=>y.ovr-x.ovr);
  for(let i=0;i<out.length;i++)if(!out[i])out[i]=rest.length?rest.shift():(ghostFill?ghost(sl[0][0]):null);
  return out}
@@ -573,7 +576,7 @@ function bodyPen(p,X){ensureHW(p);const r=HWR[X];if(!r)return 0;const eh=Math.ma
 function ovrAt(p,X){mat(p);if(X===p.pos)return p.ovr;const C=ocal(),r=rt(p);return clamp(Math.round(p.ovr+C[X].a*fOvr(r,X)+C[X].b-(C[p.pos].a*fOvr(r,p.pos)+C[p.pos].b)-(bodyPen(p,X)-bodyPen(p,p.pos))+xtB(p,X)),20,99)}
 /* if the new position does not use his archetype, pick the one his ratings fit best */
 function repick(p,X){const A=ARCH[GP(X)];if(!A||A.some(e=>e[0]===p.arch))return;const r=rt(p);let best=A[0][0],bs=-1e9;for(const e of A){const sh=e[2];let num=0,den=0;for(const k in sh){num+=sh[k]*(r[k]-baseRt(k,X,p.ovr));den+=sh[k]*sh[k]}const a=(AFF[X]&&AFF[X][e[0]]!=null?AFF[X][e[0]]:1),sc=(den?num/Math.sqrt(den):0)+Math.log(a*e[1]+.01)*2;if(sc>bs){bs=sc;best=e[0]}}p.arch=best}
-function setPos(p,X){if(p.hwp==null){ensureHW(p);p.hwp=p.pos}const o=ovrAt(p,X);p.pos=X;p.ovr=o;p.pcy=S.year;delete p.ath;RC.delete(p);SX.delete(p);repick(p,X);SX.delete(p)}
+function setPos(p,X){delete p.dd;if(p.hwp==null){ensureHW(p);p.hwp=p.pos}const o=ovrAt(p,X);p.pos=X;p.ovr=o;p.pcy=S.year;delete p.ath;RC.delete(p);SX.delete(p);repick(p,X);SX.delete(p)}
 /* offseason training: whatever he gains in overall goes only into the ratings his position's overall is made of */
 function bump(p,d){if(!d||!p.r)return;const w=OWN[p.pos],C=ocal()[p.pos],dF=d/C.a,ks=Object.keys(w),r=p.r.slice();let den=0;for(const k of ks){const i=ALLK.indexOf(k);if(d>0?r[i]<99:r[i]>25)den+=w[k]*w[k]}if(!den)return;
  for(const k of ks){const i=ALLK.indexOf(k);r[i]=clamp(Math.round(r[i]+dF*(.5+.5*w[k]/den)*(1+.3*gauss())),20,99)}p.r=r}
@@ -599,7 +602,7 @@ function styleTag(p){const x=style(p);if(!x.n)return'';const c=comp(p);return x.
 const CAL={qa:2.8,qs:6.1,rb:1.4,rs:-2.5,rpw:3,wh:1.2,ws:-1.7,te:6.5,tb:5.2,pb:-1.8,rk:1,dp:.2,dr:-.2,lr:0,lc:2.6,cm:-2.3,cz:1.3,sc:1.2,sr:5,k:1,p:1.2,fbb:-7.6,fbu:3,lp:7.5};
 /* corners: outside vs slot grades */
 const cbOut=p=>{const r=er(p);return r.mcv*.25+r.zcv*.08+r.prs*.2+r.spd*.2+r.jmp*.07+r.str*.1+r.cth*.03+r.tak*.07},cbSlot=p=>{const r=er(p);return r.mcv*.18+r.zcv*.2+r.agi*.18+r.acc*.1+r.cod*.07+r.tak*.1+r.pur*.05+r.prc*.12-1};
-function cbLine(H,nc,gf){const top=H.filter(p=>p.pos==='CB').sort((a,b)=>b.ovr-a.ovr).slice(0,nc);if(gf)while(top.length<nc)top.push(ghost('CB'));
+function cbLine(H,nc,gf){const top=H.filter(p=>p.pos==='CB').sort(dcmp).slice(0,nc);if(gf)while(top.length<nc)top.push(ghost('CB'));
  const ns=Math.max(0,nc-2),slot=top.slice().sort((a,b)=>(cbSlot(b)-cbOut(b)+(b.ghost?-99:0))-(cbSlot(a)-cbOut(a)+(a.ghost?-99:0))).slice(0,ns).sort((a,b)=>cbSlot(b)-cbSlot(a));
  const out=top.filter(p=>!slot.includes(p)).sort((a,b)=>cbOut(b)-cbOut(a));return[...out,...slot]}
 /* offensive line: scheme fit by archetype, and slot-weighted pass/run grades */
@@ -635,7 +638,7 @@ function dpkg(H,sch,name,gf,tm){const R=ROLES[sch],P=PKGS[sch][name]||PKGS[sch].
  if(tm){const mb=L=>{const a=L.filter(Boolean);return a.length?a.reduce((x,p)=>x+sxB(p,tm),0)/a.length:0},bd=mb(dl),bl2=mb(lb),bs=mb(sf);c.dp+=bd;c.dr+=bd;c.lr+=bl2;c.lc+=bl2;c.sc+=bs;c.sr+=bs}
  const m=PKM[PKGS[sch][name]?name:'base'];
  return{dl:dl.filter(Boolean),lb:lb.filter(Boolean),cb:cbs,sf:sf.filter(Boolean),c,cov:m.cov,box:m.box}}
-function units(t,sch){sch=sch||t.pd||'4-3 Multiple';const by={};for(const p of t.roster){if(p.inj>0)continue;(by[p.pos]=by[p.pos]||[]).push(p)}for(const k in by)by[k].sort((a,b)=>b.ovr-a.ovr);for(const g in SLOTS)by[g]=slotsPick(t.roster.filter(p=>p.inj<=0),g,false);
+function units(t,sch){sch=sch||t.pd||'4-3 Multiple';const by={};for(const p of t.roster){if(p.inj>0)continue;(by[p.pos]=by[p.pos]||[]).push(p)}for(const k in by)by[k].sort(dcmp);for(const g in SLOTS)by[g]=slotsPick(t.roster.filter(p=>p.inj<=0),g,false);
  const av=(pos,n)=>{const a=(by[pos]||[]).slice(0,n).map(p=>p.ovr);while(a.length<n)a.push(48);return a.reduce((s,x)=>s+x,0)/n};
  const u={qb:av('QB',1),fb:av('FB',1),rb:0,wr:av('WR',3),te:0,ol:av('OL',5),dl:av('DL',4),lb:av('LB',3),cb:av('CB',2),s:av('S',2),k:0,p:0};
  const cm=(pos,n,keys)=>{const L=(by[pos]||[]).slice(0,n),o={};for(const k of keys){let s=0;for(let i=0;i<n;i++)s+=i<L.length?comp(L[i])[k]:48;o[k]=s/n+(CAL[k]||0)}return o};
@@ -910,7 +913,7 @@ function uRef(){if(UREF&&UREFY===S.year&&UREF.n===S.teams.length)return UREF.m;c
 const QC=new WeakMap();function qcap(p){const r=rt(p);let c=QC.get(p);if(c&&c.r===r)return c.e;const e=Object.assign({},er(p));for(const k of['sac','mac','dac','thp','pac','tup','tor','bsk'])if(e[k]>80)e[k]=80+(e[k]-80)*QCF;QC.set(p,{r,e});return e}
 const WC=new WeakMap();function wcap(p){const r=rt(p);let c=WC.get(p);if(c&&c.r===r)return c.e;const e=Object.assign({},er(p));for(const k of['cth','cit','spc','srr','mrr','drr','rel'])if(e[k]>82)e[k]=82+(e[k]-82)*.55;WC.set(p,{r,e});return e}
 function mkSide(t,hf,C,OA){OA=OA||{};
- const ok=t.roster.filter(p=>p.inj<=0),by=(pos,n)=>{if(SLOTS[pos])return slotsPick(ok,pos,true);const a=ok.filter(p=>p.pos===pos).sort((x,y)=>y.ovr-x.ovr).slice(0,n);while(a.length<n)a.push(ghost(pos));return a};
+ const ok=t.roster.filter(p=>p.inj<=0),by=(pos,n)=>{if(SLOTS[pos])return slotsPick(ok,pos,true);const a=ok.filter(p=>p.pos===pos).sort(dcmp).slice(0,n);while(a.length<n)a.push(ghost(pos));return a};
  const isU=!!C,u=Object.assign({},units(t));
  const UR=uRef();for(const k in UR){const d=u[k]-UR[k];u[k]=UR[k]+(d>0?d*UP:d*DN)}
  const bo=(isU?cb('off')+({full:.6,bal:0,lim:-.4}[C.prac]||0):0)+hf+gauss()*FORM,bd=(isU?cb('def'):0)+hf+gauss()*FORM;
@@ -1151,7 +1154,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
 /* ===== Player XP / Training Points (your roster only) ===== */
 const PXL=l=>80+20*(l-1),TPC=r=>r<70?1:r<80?2:r<88?3:r<94?4:5,TPLV=10;
 function pxp(p,amt){if(!amt||!S.coach)return;const g=POSG[p.pos];if(abil('mm.'+g)>=4)amt*=1.15;if(!p.plv)p.plv=1;p.pxp=(p.pxp||0)+amt;while(p.plv<20&&p.pxp>=PXL(p.plv)){p.pxp-=PXL(p.plv);p.plv++;p.ptp=(p.ptp||0)+TPLV}}
-function awardXP(g,win,opp,post){const ut=U(),side=g.box?g.box.ids[0]===S.uid?0:1:0,lines=g.box?g.box.pl[side]:[],starters=new Set();for(const pos of POS)ut.roster.filter(x=>x.pos===pos&&x.inj<=0).sort((x,y)=>y.ovr-x.ovr).slice(0,START[pos]||1).forEach(x=>starters.add(x));
+function awardXP(g,win,opp,post){const ut=U(),side=g.box?g.box.ids[0]===S.uid?0:1:0,lines=g.box?g.box.pl[side]:[],starters=new Set();for(const pos of POS)ut.roster.filter(x=>x.pos===pos&&x.inj<=0).sort(dcmp).slice(0,START[pos]||1).forEach(x=>starters.add(x));
  const by={};lines.forEach(l=>by[l.pos+'|'+l.n]=l.s);const rk=(S.rk&&S.rk[opp.id])||99;
  for(const p of ut.roster){if(p.inj>0||p.new)continue;const s=by[p.pos+'|'+p.name];let x=starters.has(p)?6:s?4:1;if(s){const def=isDefP(p),sc=def?perfD(s):perfO(s);x+=clamp(sc*.6,0,12)}if(win){x+=4;if(rk<=25)x+=3;if(post)x+=3}pxp(p,x)}}
 const GRPN={thp:'Arm Strength',sac:'Accuracy',mac:'Accuracy',dac:'Accuracy',pac:'Accuracy',tup:'Poise',tor:'Poise',bsk:'Poise',spd:'Quickness',acc:'Quickness',agi:'Quickness',cod:'Quickness',jmp:'Quickness',bcv:'Elusiveness',btk:'Elusiveness',jkm:'Elusiveness',spm:'Elusiveness',str:'Power',trk:'Power',sfa:'Power',car:'Ball Carrying',cth:'Hands',cit:'Hands',spc:'Hands',srr:'Route Running',mrr:'Route Running',drr:'Route Running',rel:'Route Running',rbk:'Run Blocking',rbp:'Run Blocking',rbf:'Run Blocking',imp:'Run Blocking',lbk:'Run Blocking',pbk:'Pass Blocking',pbp:'Pass Blocking',pbf:'Pass Blocking',pmv:'Pass Rush',fmv:'Pass Rush',bsh:'Pass Rush',tak:'Tackling',hpw:'Tackling',pur:'Tackling',mcv:'Coverage',zcv:'Coverage',prs:'Coverage',awr:'IQ',prc:'IQ',tgh:'Toughness',kpw:'Kicking',kac:'Kicking'},TPK=10;
@@ -1328,7 +1331,7 @@ function capRoster(){S.teams.forEach(t=>{if(t.roster.length<=85)return;const cut
   if(isH(t.id))noteU(t.id,'Roster limit 85: released '+cut.map(p=>p.name+' ('+p.pos+' '+p.ovr+')').join(', '))})}
 /* Offseason Training: every player develops (new signees do not), then the league talent anchor nudges next year's progression */
 function trainAll(){if(!S.gadj){S.gadj=Object.assign({},GPRI);S.eadj=-.2}eachH(()=>{S.train=[]});
- S.teams.forEach(tm=>forTeam(tm,()=>{let STS=new Set();if(tm.id===S.uid){for(const pos of POS){tm.roster.filter(x=>x.pos===pos&&!x.new).sort((x,y)=>y.ovr-x.ovr).slice(0,START[pos]||1).forEach(x=>STS.add(x))}}tm.roster.forEach(p=>{ensureSk(p);if(p.r&&OWN[p.pos]&&!(p.hwp!=null&&p.hwp!==p.pos))p.ovr=ovrFromR(p)+(p.tbo||0);if(p.new)return;const o0=p.ovr;p.yr=Math.min(4,p.yr+1);ensureHW(p);{const r=HWR[p.hwp||p.pos]||HWR.WR;p.wt=Math.min(r[7],p.wt+Math.round(2+F()*5))}mat(p);
+ S.teams.forEach(tm=>forTeam(tm,()=>{let STS=new Set();if(tm.id===S.uid){for(const pos of POS){tm.roster.filter(x=>x.pos===pos&&!x.new).sort(dcmp).slice(0,START[pos]||1).forEach(x=>STS.add(x))}}tm.roster.forEach(p=>{ensureSk(p);if(p.r&&OWN[p.pos]&&!(p.hwp!=null&&p.hwp!==p.pos))p.ovr=ovrFromR(p)+(p.tbo||0);if(p.new)return;const o0=p.ovr;p.yr=Math.min(4,p.yr+1);ensureHW(p);{const r=HWR[p.hwp||p.pos]||HWR.WR;p.wt=Math.min(r[7],p.wt+Math.round(2+F()*5))}mat(p);
   const base=[4.5,3.2,2.2,1][p.yr-2]||1.5,dm=(1+.25*p.dev)*(p.tag==='bust'?.8:1),xpb=tm.id===S.uid?(p.xp-9)*.06:0,fb=tm.fac*.3,tr=tm.id===S.uid&&S.staff.find(s=>s.r==='trainer')?(S.staff.find(s=>s.r==='trainer').t+1)*.3:0;
   {const sc=isDefP(p)?(tm.pd0||tm.pd):(tm.po0||tm.po);p.scx=p.scx&&p.scx.s===sc?{s:sc,n:p.scx.n+1}:{s:sc,n:2}}
   if(tm.id===S.uid){const pre=base*dm*TUNE.pg,tp=Math.max(0,Math.round(10*(pre+fb+xpb+tr+(S.gadj&&S.gadj[GP(p.pos)]||0)+trainB(p,STS)+(S.coach&&la('mot',p)>=3?.15*Math.max(0,pre):0))));p.ptp=(p.ptp||0)+tp;p.o0t=o0;p.mpk=0;if(S.coach&&abil('ceo.gainz')&&p.dev<3&&F()<.08)p.dev++;S.train.push({id:p.id,name:p.name,pos:p.pos,yr:p.yr,o0,o1:o0,tp,dev:p.dev});return}
@@ -1921,12 +1924,36 @@ function recordsPage(){const H=S.hist||[];if(!H.length)return'<div class=card><h
 function trophyPage(){const H=S.hist||[],T=H.filter(h=>h.tit),C=H.filter(h=>h.cc),P=H.filter(h=>h.cfp);const sec=(n,L,t)=>'<div class=card><h2>'+n+' ('+L.length+')</h2>'+(L.length?'<div class=row>'+L.map(h=>'<span class=tag style="font-size:14px;padding:6px 12px">'+t+' '+h.year+'</span>').join('')+'</div>':'<p class=m>None yet.</p>')+'</div>';
  return sec('National Championships',T,'🏆')+sec('Conference Championships',C,'🏅')+sec('College Football Playoff Appearances',P,'🏈')+'<div class=card><h2>Heisman Winners</h2>'+(H.length?tbl(['Year','Winner'],H.map(h=>'<tr><td>'+h.year+'</td><td>'+h.heisman+'</td></tr>')):'<p class=m>None yet.</p>')+'</div>'}
 function retirePage(){return'<div class=card><h2>Retire</h2><p>Retiring ends this dynasty and deletes the save from this browser. Export a backup first from League Settings if you may want it back.</p><div class=row><button class=s onclick="ask(\'new\',newDyn)">'+(CF==='new'?'Click again to RETIRE and delete this dynasty':'Retire')+'</button>'+(CF==='new'?'<button class=s onclick="CF=null;render()">Cancel</button>':'')+'</div></div>'}
-function depthPage(){const t=U(),R=t.roster,mk=(lab,p)=>'<div class=chip><b>'+lab+'</b>'+(p?'<span class=o>'+p.ovr+'</span><i>'+p.name.split(' ').slice(-1)[0]+(p.inj>0?' <span class=l>INJ</span>':'')+'</i>':'<i>—</i>')+'</div>';
- const top=(pos,n)=>R.filter(p=>p.pos===pos).sort((a,b)=>b.ovr-a.ovr).slice(0,n),ol=slotsOrd(R,'OL',false),dl=slotsOrd(R,'DL',false),lb=slotsOrd(R,'LB',false),sf=slotsOrd(R,'S',false);
+let DPOS='QB',DSEL=null;
+const DEPN={WR:5,CB:5},DLAB={RB:'RB / HB',SAM:'SAM (OLB)',WILL:'WILL (OLB)',MIKE:'MIKE (MLB)',OT:'OT (tackle)',OG:'OG (guard)',C:'C (center)',LE:'LE (end)',RE:'RE (end)',DT:'DT (tackle)',FS:'FS (safety)',SS:'SS (safety)'};
+const ORD=['1st','2nd','3rd','4th','5th'],htStr=h=>h?Math.floor(h/12)+"'"+(h%12)+'"':'';
+function depthSet(t,pos,ids){const all=t.roster.filter(p=>p.pos===pos);all.forEach(p=>{delete p.dd});ids.forEach((id,i)=>{const p=all.find(x=>x.id===id);if(p)p.dd=i+1})}
+function depthPos(v){DPOS=v;DSEL=null;render()}
+function depthReset(){const t=U();t.roster.filter(p=>p.pos===DPOS).forEach(p=>{delete p.dd});DSEL=null;save();render()}
+function depthResetAll(){const t=U();t.roster.forEach(p=>{delete p.dd});DSEL=null;save();render()}
+function depthClick(k,v){const t=U(),pos=DPOS,N=DEPN[pos]||3,all=t.roster.filter(p=>p.pos===pos).sort(dcmp),ids=all.slice(0,N).map(p=>p.id),key=k+':'+v;
+ if(k==='s'&&+v>=ids.length)return;
+ if(!DSEL||DSEL===key){DSEL=DSEL===key?null:key;render();return}
+ const [k0,v0]=DSEL.split(':');
+ if(k0==='p'&&k==='p'){DSEL=key;render();return}
+ let si,pid;if(k0==='s'&&k==='s'){const a=+v0,b=+v;[ids[a],ids[b]]=[ids[b],ids[a]]}
+ else{si=k0==='s'?+v0:+v;pid=k0==='p'?+v0:+v;const j=ids.indexOf(pid);if(j>=0)[ids[si],ids[j]]=[ids[j],ids[si]];else ids[si]=pid}
+ depthSet(t,pos,ids);DSEL=null;save();render()}
+function depthEd(t){const pos=DPOS,N=DEPN[pos]||3,all=t.roster.filter(p=>p.pos===pos).sort(dcmp),slots=all.slice(0,N),st=START[pos]||1,sel=DSEL;
+ const dep=p=>{const i=slots.indexOf(p);return i>=0?ORD[i]:''};
+ const card=(p,i)=>{const on=sel==='s:'+i,cls='dsc'+(on?' on':'')+(p?'':' em')+(i<st?' st':'');
+  return'<button class="'+cls+'"'+(p?' onclick="depthClick(\'s\','+i+')"':' disabled')+'><span class=dsh>'+ORD[i]+' string'+(i<st?' <em>starter</em>':'')+'</span>'+(p?'<span class=dso>'+p.ovr+'</span><span class=dsn>'+p.name+'</span><span class=dsm>'+(YR[p.yr-1]||'')+(p.arch?' · '+p.arch:'')+(p.inj>0?' · <b class=l>INJ</b>':'')+'</span>':'<span class=dsm>— empty —</span>')+'</button>'};
+ let h='<div class=card><div class=row><h2 style="margin:0">Depth Chart</h2><span style="flex:1"></span><label style="margin:0">Position <select onchange="depthPos(this.value)">'+POS.map(k=>'<option value='+k+(k===pos?' selected':'')+'>'+(DLAB[k]||k)+'</option>').join('')+'</select></label><button class=s onclick="depthReset()">Reset '+pos+' to best OVR</button><button class=s onclick="depthResetAll()">Reset all</button></div>';
+ h+='<p class=m style="margin:8px 0 12px">Click a player in the top '+N+' and then another one to swap them, or click a player in the list below to put him in that spot. The '+st+' '+(st>1?'starters':'starter')+' play first; if a starter is hurt the next man in the chart steps in.</p>';
+ h+='<div class=dsl>'+Array.from({length:N},(_,i)=>card(slots[i],i)).join('')+'</div></div>';
+ h+='<div class=card><h2>All '+(DLAB[pos]||pos)+'s ('+all.length+')</h2>'+tbl(['Depth','Player','Class','OVR','Archetype','Size','Dev'],all.map(p=>{ensureHW(p);return'<tr class="clk'+(sel==='p:'+p.id?' me':'')+'" onclick="depthClick(\'p\','+p.id+')"><td>'+(dep(p)||'<span class=m>—</span>')+'</td><td>'+p.name+(p.inj>0?' <span class=l>INJ</span>':'')+'</td><td>'+(YR[p.yr-1]||'')+'</td><td><b>'+p.ovr+'</b></td><td>'+(p.arch||'')+'</td><td>'+htStr(p.ht)+' '+(p.wt||'')+'</td><td>'+(DEVS[p.dev]||'')+'</td></tr>'}))+'</div>';
+ return h}
+function depthPage(){const t=U(),R=t.roster,mk=(lab,p,ps)=>'<div class=chip style="cursor:pointer" onclick="depthPos(\''+(ps||({LT:'OT',RT:'OT',LG:'OG',RG:'OG',HB:'RB'}[lab])||lab)+'\')"><b>'+lab+'</b>'+(p?'<span class=o>'+p.ovr+'</span><i>'+p.name.split(' ').slice(-1)[0]+(p.inj>0?' <span class=l>INJ</span>':'')+'</i>':'<i>—</i>')+'</div>';
+ const top=(pos,n)=>R.filter(p=>p.pos===pos).sort(dcmp).slice(0,n),ol=slotsOrd(R,'OL',false),dl=slotsOrd(R,'DL',false),lb=slotsOrd(R,'LB',false),sf=slotsOrd(R,'S',false);
  const wr=top('WR',3),te=top('TE',1),qb=top('QB',1),rb=top('RB',1),cb=top('CB',2),k=top('K',1),pp=top('P',1);
  const off='<div class=fm><div class=r>'+mk('WR',wr[0])+mk('LT',ol[0])+mk('LG',ol[2])+mk('C',ol[4])+mk('RG',ol[3])+mk('RT',ol[1])+mk('TE',te[0])+mk('WR',wr[1])+'</div><div class=r>'+mk('WR',wr[2])+'</div><div class=r>'+mk('QB',qb[0])+mk('HB',rb[0])+'</div></div>';
  const def='<div class=fm><div class=r>'+mk('LE',dl[0])+mk('DT',dl[2])+mk('DT',dl[3])+mk('RE',dl[1])+'</div><div class=r>'+mk('SAM',lb[0])+mk('MIKE',lb[2])+mk('WILL',lb[1])+'</div><div class=r>'+mk('CB',cb[0])+mk('FS',sf[0])+mk('SS',sf[1])+mk('CB',cb[1])+'</div></div>';
- return'<div class=card><h2>Starting Offense <span class=tag>'+t.po+'</span></h2>'+off+'</div><div class=card><h2>Starting Defense <span class=tag>'+t.pd+'</span></h2>'+def+'</div><div class=card><h2>Special Teams</h2><div class=fm><div class=r>'+mk('K',k[0])+mk('P',pp[0])+'</div></div><p class=m>Starters are your best healthy-or-injured players at each spot. Change schemes under Coach → Scheme &amp; Playbook; manage the roster under Team → View Roster.</p></div>'}
+ return depthEd(t)+'<div class=card><h2>Starting Offense <span class=tag>'+t.po+'</span></h2>'+off+'</div><div class=card><h2>Starting Defense <span class=tag>'+t.pd+'</span></h2>'+def+'</div><div class=card><h2>Special Teams</h2><div class=fm><div class=r>'+mk('K',k[0])+mk('P',pp[0])+'</div></div><p class=m>Click any player here to open the depth chart for that position above. Change schemes under Coach → Scheme &amp; Playbook; manage the roster under Team → View Roster.</p></div>'}
 function hist(){return'<div class=card><h2>Dynasty History</h2>'+(S.hist.length?tbl(['Year','Team','Record','Rank','CFP','Champion','Heisman','Class'],S.hist.map(h=>'<tr><td>'+h.year+'</td><td>'+h.team+'</td><td>'+h.w+'-'+h.l+'</td><td>#'+h.rk+'</td><td>'+(h.tit?'🏆 Champs':h.cfp?'Made CFP':h.cc?'Conf champ':'')+'</td><td>'+h.champ+'</td><td>'+h.heisman+'</td><td>#'+h.cls+'</td></tr>')):'<p class=m>Play a season to see history.</p>')+'</div>'}
 function set(){return'<div class=card><h2>Settings</h2><div class=row><button class=s onclick="saveNow();toast(\'Saved\')">Save now</button><button class=s onclick="expo()">Export save</button><button class=s onclick="$(\'imp\').click()">Import save</button><input id=imp type=file style="display:none" onchange="impo(this.files[0])"><button class=s onclick="ask(\'new\',newDyn)">'+(CF==='new'?'Click again to DELETE this dynasty':'New dynasty')+'</button>'+(CF==='new'?'<button class=s onclick="CF=null;render()">Cancel</button>':'')+'</div><p class=m>Autosaves to this browser (localStorage). Export a backup file to keep it safe.</p></div>'}
 function expo(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='dynasty-save.json';a.click()}
