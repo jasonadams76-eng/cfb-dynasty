@@ -236,8 +236,10 @@ const OFF={
 'Power Run':{k:1.9,pass:.35,w:{qa:.08,qs:.04,rb:.10,rpw:.14,rs:.06,wh:.04,te:.06,tb:.08,pb:.04,rk:.30,fbb:.06},tempo:.98,var:.85,d:'Smash-mouth. Grinds clock, low variance. Needs a bruising RB, blocking TEs and road-grader linemen.'},
 'Triple Option':{k:1.6,pass:.2,w:{qs:.26,rs:.10,rpw:.08,rb:.08,fbu:.26,fbb:.04,rk:.22,tb:.06},neg:{qa:.12,wh:.08},tempo:.94,var:1.1,d:'Rare option running attack. Slow pace. Only worth running with a fast running QB who is a poor passer, weak receivers, and a strong running fullback who can carry the load. A good passing roster is wasted, and costs you here.'}};
 /* league-wide calibration so each scheme is the best fit for a realistic share of rosters (Spread/Pro Style common, Triple Option rare) */
-const DEFB={'4-3 Multiple':2.15,'3-4 Attack':2.15,'Nickel 4-2-5':-1.25,'Tampa 2':0.85,'46 Pressure':1.85,'3-3-5 Stack':2.15},DEFPOP={'4-3 Multiple':1.6,'3-4 Attack':-0.1,'Nickel 4-2-5':0.8,'Tampa 2':0.0,'46 Pressure':-2.4,'3-3-5 Stack':0.1};
+const DEFB={'4-3 Multiple':2.15,'3-4 Attack':2.15,'Nickel 4-2-5':-1.25,'Tampa 2':0.85,'46 Pressure':1.85,'3-3-5 Stack':2.15},DEFPOP={'4-3 Multiple':1.38,'3-4 Attack':-0.32,'Nickel 4-2-5':0.99,'Tampa 2':0.24,'46 Pressure':-0.98,'3-3-5 Stack':0.38};
 const OFFB={'Spread':1.4,'Air Raid':-.1,'West Coast':.6,'Pro Style':1.55,'Power Run':-.3,'Triple Option':9.8};
+/* AI scheme-choice popularity tilt (real ratings favoured Air Raid/Spread too heavily); does not change how effective a scheme is */
+const OFFPOP={'Air Raid':-1.85,'Spread':-.97,'West Coast':-.78,'Pro Style':.37,'Power Run':2.38,'Triple Option':.85};
 const DEF={
 '4-3 Multiple':{k:1.8,pw:{dp:.30,lc:.15,cm:.15,cz:.15,sc:.25},rw:{dr:.35,lr:.38,sr:.17,cz:.10},agg:1,lean:0,d:'Balanced base defense.'},
 '3-4 Attack':{k:2.9,pw:{dp:.20,lc:.18,lr:.12,cm:.12,cz:.12,sc:.26},rw:{dr:.28,lr:.50,sr:.12,cz:.10},agg:1.15,lean:-.3,d:'Linebacker-driven blitz scheme. Needs athletic, physical LBs. Better vs run.'},
@@ -502,7 +504,7 @@ function pickArch(pos){const A=ARCH[GP(pos)];if(!A)return'';const f=AFF[pos]||{}
 /* the player's full rating sheet, derived from OVR (so it moves as he progresses) */
 /* a quarterback is never worse than 60 at any throwing rating */
 const QBT=['thp','sac','mac','dac','tup','tor','pac'];
-function rt0(p){let c=RC.get(p);if(p.r){if(c&&c.a===p.r)return c.r;if(p.pos==='QB'&&QBT.some(k=>p.r[ALLK.indexOf(k)]<60)){const a=p.r.slice();QBT.forEach(k=>{const i=ALLK.indexOf(k);if(a[i]<60)a[i]=60});p.r=a}const r={};ALLK.forEach((k,i)=>r[k]=p.r[i]);RC.set(p,{a:p.r,o:p.ovr,r,c:null});return r}
+function rt0(p){let c=RC.get(p);if(p.r){if(c&&c.a===p.r)return c.r;if(p.pos==='QB'&&!p.rl&&QBT.some(k=>p.r[ALLK.indexOf(k)]<60)){const a=p.r.slice();QBT.forEach(k=>{const i=ALLK.indexOf(k);if(a[i]<60)a[i]=60});p.r=a}const r={};ALLK.forEach((k,i)=>r[k]=p.r[i]);RC.set(p,{a:p.r,o:p.ovr,r,c:null});return r}
  if(c&&c.o===p.ovr&&!c.a)return c.r;const st=style(p),sp=SPEC[GP(p.pos)]||{},r={};
  for(const k of ALLK){const e=sp[k==='cod'?'agi':k];let v;if(typeof e==='number')v=p.ovr+e;else if(e)v=e[0]+e[1]*(p.ovr-70);else if(k==='awr')v=p.ovr-6;else{const d=DFR[k];v=d[0]+d[1]*(p.ovr-70)}
   r[k]=clamp(Math.round(v+(st.sh[k==='cod'?'agi':k]||0)+st.nz[k]),8,99)}
@@ -565,7 +567,7 @@ function mat(p){if(p.r)return;const r=Object.assign({},rt(p));let a=p.alt;if(a==
  if(a){const X=a.p,o=clamp(p.ovr+a.s,40,96),w=OWN[X];for(const k in w){if(w[k]<.035)continue;const t=Math.round(baseRt(k,X,o)+gauss()*3);if(t>r[k])r[k]=Math.min(99,t)}}
  p.r=ALLK.map(k=>r[k]);RC.delete(p);if(!(p.hwp!=null&&p.hwp!==p.pos)&&OWN[p.pos])p.ovr=ovrFromR(p)+(p.tbo||0)}
 /* a player's overall is computed from his individual ratings */
-function ovrFromR(p){const C=ocal()[p.pos];return clamp(Math.round(C.a*fOvr(rt0(p),p.pos)+C.b),20,99)}
+function ovrFromR(p){const C=ocal()[p.pos];return clamp(Math.round(C.a*fOvr(rt0(p),p.pos)+C.b)+(p.cb||0),20,99)}
 /* body-type penalty: only height/weight beyond 2 standard deviations of a position's normal build costs overall points (weight counts more) */
 function bodyPen(p,X){ensureHW(p);const r=HWR[X];if(!r)return 0;const eh=Math.max(0,Math.abs(p.ht-r[0])/r[1]-2),ew=Math.max(0,Math.abs(p.wt-r[2])/r[3]-2);return Math.min(25,1.5*eh+3.5*ew)}
 function ovrAt(p,X){mat(p);if(X===p.pos)return p.ovr;const C=ocal(),r=rt(p);return clamp(Math.round(p.ovr+C[X].a*fOvr(r,X)+C[X].b-(C[p.pos].a*fOvr(r,p.pos)+C[p.pos].b)-(bodyPen(p,X)-bodyPen(p,p.pos))+xtB(p,X)),20,99)}
@@ -690,7 +692,7 @@ function defEff(t,pb,oppPass,u){const sch=pb||t.pd;if(!u||u.sch!==sch)u=units(t,
 const stPts=u=>(u.k-70)*.055+(u.p-70)*.03;
 const tOvr=t=>{const u=units(t);return(offEff(t,t.po,u)+defEff(t,t.pd,.5,u))/2+stPts(u)/.72};
 function stickyPB(t){const[bo,bd]=bestPB(t);if(!t.po||!t.pd){t.po=bo;t.pd=bd;return}const u=units(t);if(offEff(t,bo,u)-offEff(t,t.po,u)>2.5)t.po=bo;if(defEff(t,bd,.5,u)-defEff(t,t.pd,.5,u)>2.5)t.pd=bd}
-function bestPB(t){const u=units(t);let bo=null,bd=null,so=-1,sd=-1;for(const k in OFF){const e=offEff(t,k,u)+F()*1.2;if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u)+(DEFPOP[k]||0)+F()*1.2;if(e>sd){sd=e;bd=k}}return[bo,bd]}
+function bestPB(t){const u=units(t);let bo=null,bd=null,so=-1,sd=-1;for(const k in OFF){const e=offEff(t,k,u)+(OFFPOP[k]||0)+F()*1.2;if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u)+(DEFPOP[k]||0)+F()*1.2;if(e>sd){sd=e;bd=k}}return[bo,bd]}
 function buildLeague(){S={nid:1,year:2026,stage:'setup',teams:[]};let id=0;TD.forEach(([c,l])=>l.forEach(([n,p,r])=>{const t={id:id++,name:n,conf:c,prestige:p,region:r,fac:clamp(p-2,0,4),g:gFor(n,p)};t.fac0=t.fac;t.g0conf=t.g.conference;genRoster(t);[t.po,t.pd]=bestPB(t);S.teams.push(t)}));S.sched=null;applyRosterData();S.teams.forEach(seedDr)}
 /* ===== real hometowns and campuses: recruits come from real places; distance drives Proximity to Home and visit cost ===== */
 const STREG={SE:'AL FL GA SC NC TN KY MS LA',SW:'TX OK AR NM',MW:'OH MI IN IL WI MN IA MO KS NE SD ND',NE:'PA NJ NY MD DC DE VA WV CT MA',W:'CA OR WA AZ UT CO NV ID HI MT WY'};
@@ -1958,7 +1960,7 @@ function importText(txt,tid){const miss=new Set(),by={};let n=0;const forced=tid
  return{n,miss:[...miss]}}
 function applyRosterData(){const D=typeof ROSTER_DATA!=='undefined'?ROSTER_DATA:null;if(!D)return 0;let n=0;
  for(const k in D){const t=findTeam(k),rows=D[k];if(!t||rows.length<11)continue;
-  t.roster=rows.slice(0,85).map(r=>({id:S.nid++,name:r[0],pos:r[1],yr:r[2],ovr:r[3],dev:guessDev(r[3]),stars:r[3]>=88?5:r[3]>=80?4:r[3]>=70?3:2,home:r[4]||t.region,db:pick(MOT),inj:0,xp:0,st:{},nc:0}));
+  t.roster=rows.slice(0,85).map(r=>{const p={id:S.nid++,name:r[0],pos:r[1],yr:r[2],ovr:r[3],dev:r[8]!=null?r[8]:guessDev(r[3]),stars:r[3]>=88?5:r[3]>=80?4:r[3]>=70?3:2,home:r[4]||t.region,db:pick(MOT),inj:0,xp:0,st:{},nc:0};if(r[11]&&r[11].length===ALLK.length){p.rl=1;p.ht=r[5];p.wt=r[6];if(r[7])p.town=r[7];p.arch=r[9];p.jn=r[10];p.r=r[11].slice();p.cb=0;p.cb=r[3]-ovrFromR(p)}return p});
   t.roster.forEach(p=>{if(!p.arch&&SLOTS[GP(p.pos)]&&POS.includes(p.pos))p.arch=style(p).n});convTeam(t);fillRoster(t);[t.po,t.pd]=bestPB(t);t.real=true;n++}return n}
 function impMsg(r){toast(r.n+' team(s) imported'+(r.miss.length?'; unmatched team names: '+r.miss.slice(0,6).join(', '):''))}
 function impRun(){impMsg(importText(SU.txt,SU.imt));setup()}
