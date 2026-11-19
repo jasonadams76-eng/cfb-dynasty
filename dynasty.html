@@ -191,6 +191,8 @@ const nm=()=>pick(FN)+' '+pick(LN);
 /* ===== data ===== */
 /* coach-set depth chart: p.dd = depth rank within a position (1 = first string); unranked players follow by overall */
 const dcmp=(x,y)=>(x.dd||999)-(y.dd||999)||y.ovr-x.ovr;
+/* a DL or LB can be listed at another position of his group on the depth chart (p.dpos); he is rated there with the Position Change formulas */
+const epos=p=>p.dpos||p.pos,eo=p=>p.dpos&&p.dpos!==p.pos&&typeof ovrAt==='function'?ovrAt(p,p.dpos):p.ovr;
 const POS=['QB','RB','FB','WR','TE','OT','OG','C','LE','RE','DT','SAM','WILL','MIKE','CB','FS','SS','K','P'];
 const NEED={QB:4,RB:6,FB:2,WR:10,TE:5,OT:5,OG:5,C:3,LE:4,RE:4,DT:6,SAM:3,WILL:3,MIKE:3,CB:8,FS:3,SS:3,K:2,P:2},START={QB:1,RB:1,FB:1,WR:3,TE:1,OT:2,OG:2,C:1,LE:1,RE:1,DT:2,SAM:1,WILL:1,MIKE:1,CB:2,FS:1,SS:1,K:1,P:1};
 /* roster targets for recruiting / roster fill: offense by scheme family, defense one standard list (K and P: 1 each) */
@@ -205,7 +207,7 @@ SAM:{'Lurker':1.5,'Thumper':1,'Signal Caller':.6},WILL:{'Lurker':1.5,'Signal Cal
 FS:{'Coverage Specialist':2,'Hybrid':1,'Box Specialist':.3},SS:{'Box Specialist':2,'Hybrid':1,'Coverage Specialist':.4}};
 /* starters for a rating group, honoring slot counts (2 OT, 2 OG, 1 C ...); short slots are filled by the best remaining player in the group */
 function slotsOrd(list,g,ghostFill){const sl=SLOTS[g],used=new Set(),out=[];
- for(const [k,c] of sl){const a=list.filter(p=>p.pos===k&&!used.has(p)).sort(dcmp).slice(0,c);a.forEach(x=>used.add(x));for(let i=0;i<c;i++)out.push(a[i]||null)}
+ for(const [k,c] of sl){const a=list.filter(p=>epos(p)===k&&!used.has(p)).sort(dcmp).slice(0,c);a.forEach(x=>used.add(x));for(let i=0;i<c;i++)out.push(a[i]||null)}
  const rest=list.filter(p=>GP(p.pos)===g&&!used.has(p)).sort((x,y)=>y.ovr-x.ovr);
  for(let i=0;i<out.length;i++)if(!out[i])out[i]=rest.length?rest.shift():(ghostFill?ghost(sl[0][0]):null);
  return out}
@@ -582,7 +584,7 @@ const pfOvr=(r,X)=>{const w=PFG[PFM[X]];if(!w)return null;let s=w[54];for(let i=
 function ovrAt(p,X){mat(p);if(X===p.pos)return p.ovr;if(PFM[X]&&PFM[p.pos]){const r=rt0(p),f=pfOvr(r,X),fp=pfOvr(r,p.pos);return clamp(Math.round(f+clamp(p.ovr-fp,-4,4)*.5),20,99)}const C=ocal(),r=rt(p);return clamp(Math.round(p.ovr+C[X].a*fOvr(r,X)+C[X].b-(C[p.pos].a*fOvr(r,p.pos)+C[p.pos].b)-(bodyPen(p,X)-bodyPen(p,p.pos))+xtB(p,X)),20,99)}
 /* if the new position does not use his archetype, pick the one his ratings fit best */
 function repick(p,X){const A=ARCH[GP(X)];if(!A||A.some(e=>e[0]===p.arch))return;const r=rt(p);let best=A[0][0],bs=-1e9;for(const e of A){const sh=e[2];let num=0,den=0;for(const k in sh){num+=sh[k]*(r[k]-baseRt(k,X,p.ovr));den+=sh[k]*sh[k]}const a=(AFF[X]&&AFF[X][e[0]]!=null?AFF[X][e[0]]:1),sc=(den?num/Math.sqrt(den):0)+Math.log(a*e[1]+.01)*2;if(sc>bs){bs=sc;best=e[0]}}p.arch=best}
-function setPos(p,X){delete p.dd;if(p.hwp==null){ensureHW(p);p.hwp=p.pos}const o=ovrAt(p,X);p.pos=X;p.ovr=o;p.pcy=S.year;delete p.ath;RC.delete(p);SX.delete(p);repick(p,X);SX.delete(p)}
+function setPos(p,X){delete p.dd;delete p.dpos;if(p.hwp==null){ensureHW(p);p.hwp=p.pos}const o=ovrAt(p,X);p.pos=X;p.ovr=o;p.pcy=S.year;delete p.ath;RC.delete(p);SX.delete(p);repick(p,X);SX.delete(p)}
 /* offseason training: whatever he gains in overall goes only into the ratings his position's overall is made of */
 function bump(p,d){if(!d||!p.r)return;const w=OWN[p.pos],C=ocal()[p.pos],dF=d/C.a,ks=Object.keys(w),r=p.r.slice();let den=0;for(const k of ks){const i=ALLK.indexOf(k);if(d>0?r[i]<99:r[i]>25)den+=w[k]*w[k]}if(!den)return;
  for(const k of ks){const i=ALLK.indexOf(k);r[i]=clamp(Math.round(r[i]+dF*(.5+.5*w[k]/den)*(1+.3*gauss())),20,99)}p.r=r}
@@ -648,7 +650,7 @@ function dpkg(H,sch,name,gf,tm){const R=ROLES[sch],P=PKGS[sch][name]||PKGS[sch].
  const m=PKM[PKGS[sch][name]?name:'base'];
  return{dl:dl.filter(Boolean),lb:lb.filter(Boolean),cb:cbs,sf:sf.filter(Boolean),c,cov:m.cov,box:m.box}}
 function units(t,sch){sch=sch||t.pd||'4-3 Multiple';const by={};for(const p of t.roster){if(p.inj>0)continue;(by[p.pos]=by[p.pos]||[]).push(p)}for(const k in by)by[k].sort(dcmp);for(const g in SLOTS)by[g]=slotsPick(t.roster.filter(p=>p.inj<=0),g,false);
- const av=(pos,n)=>{const a=(by[pos]||[]).slice(0,n).map(p=>p.ovr);while(a.length<n)a.push(48);return a.reduce((s,x)=>s+x,0)/n};
+ const av=(pos,n)=>{const a=(by[pos]||[]).slice(0,n).map(p=>eo(p));while(a.length<n)a.push(48);return a.reduce((s,x)=>s+x,0)/n};
  const u={qb:av('QB',1),fb:av('FB',1),rb:0,wr:av('WR',3),te:0,ol:av('OL',5),dl:av('DL',4),lb:av('LB',3),cb:av('CB',2),s:av('S',2),k:0,p:0};
  const cm=(pos,n,keys)=>{const L=(by[pos]||[]).slice(0,n),o={};for(const k of keys){let s=0;for(let i=0;i<n;i++)s+=i<L.length?comp(L[i])[k]:48;o[k]=s/n+(CAL[k]||0)}return o};
  Object.assign(u,cm('QB',1,['qa','qs']),cm('RB',1,['rb','rs','rpw']),cm('FB',1,['fbb','fbu']),cm('WR',3,['wh','ws']),cm('TE',1,['te','tb']),cm('OL',5,['pb','rk']),cm('DL',4,['dp','dr']),cm('LB',3,['lr','lc']),cm('CB',2,['cm','cz']),cm('S',2,['sc','sr']),cm('K',1,['k']),cm('P',1,['p']));
@@ -950,7 +952,8 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
  /* each human coach brings his own game plan, practice setting, abilities and clutch bonuses */
  const CX=[a,b].map(t=>isH(t.id)?asUser(t.id,()=>{if(!S.coach)return null;const g0=GCX;GCX=gctx(a,b,neutral);try{return{prac:S.practice,plan:S.plan,gp:gpl(),own:coachAdj(true),opp:coachAdj(false)}}finally{GCX=g0}}):null);
  const halfAdj=()=>{for(const Xs of X)if(Xs.isU&&S.coach){const b=0;for(const k of['qa','qs','rb','rs','rpw','wh','ws','te','tb','pb','rk','dp','dr','lr','lc','cm','cz','sc','sr']){Xs.u[k]+=b;for(const nm in Xs.pk)if(Xs.pk[nm].c[k]!=null)Xs.pk[nm].c[k]+=b}}};
- const X=[mkSide(a,neutral?0:6,CX[0],CX[1]?CX[1].opp:null),mkSide(b,0,CX[1],CX[0]?CX[0].opp:null)];
+ RSC.clear();const X=[mkSide(a,neutral?0:6,CX[0],CX[1]?CX[1].opp:null),mkSide(b,0,CX[1],CX[0]?CX[0].opp:null)];
+ X.forEach(T=>{T.rf={d3:roleFrom(T.ok,T.t.rl,'d3'),pwr:roleFrom(T.ok,T.t.rl,'pwr'),slw:roleFrom(T.ok,T.t.rl,'slw')};T.fb0=T.fb});
  const PC=[{},{}];
  const setPkg=(d,nm)=>{const T=X[d],P=T.pk[nm]||T.pk.base;if(T.cur===P)return;T.cur=P;T.dl=P.dl;T.lb=P.lb;T.cb=P.cb;T.sf=P.sf;Object.assign(T.u,P.c);T.cv=P.cov;T.bx=P.box;for(const L of[P.dl,P.lb,P.cb,P.sf])for(const p of L)T.seen.add(p)};
  setPkg(0,'base');setPkg(1,'base');
@@ -960,13 +963,14 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   if(P.nickel&&F()<clamp(.3+(pe-.4)*2.1,0,.95))return'nickel';
   return'base'};
  const offPkg=(o,pp,down,dist)=>{const T=X[o],ok=T.ok,g=pos=>ghost(pos);
-  const wrs=ok.filter(p=>p.pos==='WR').sort(dcmp),sl=roleFrom(ok,T.t.rl,'slw').slice(0,2),out=wrs.filter(p=>!sl.includes(p));
+  const wrs=ok.filter(p=>p.pos==='WR').sort(dcmp),sl=T.rf.slw.slice(0,2),out=wrs.filter(p=>!sl.includes(p));
   T.wset=pp>=.72?4:pp>=.42?3:2;
   T.wr=[out[0]||g('WR'),out[1]||g('WR'),sl[0]||out[2]||g('WR'),sl[1]||out[3]||g('WR')];
   const rbs=ok.filter(p=>p.pos==='RB').sort(dcmp);let lead=rbs[0];
-  if(pp>=.62){const d3=roleFrom(ok,T.t.rl,'d3')[0];if(d3)lead=d3}
-  else if(pp<=.38||(dist<=2&&pp<.55)){const pw=roleFrom(ok,T.t.rl,'pwr')[0];if(pw)lead=pw}
-  T.rb=lead?[lead,...rbs.filter(x=>x!==lead)]:[];while(T.rb.length<3)T.rb.push(g('RB'));
+  if(pp>=.62){const d3=T.rf.d3[0];if(d3)lead=d3}
+  else if(pp<=.38||(dist<=2&&pp<.55)){const pw=T.rf.pwr[0];if(pw)lead=pw}
+  T.rb=lead?[lead,...rbs.filter(x=>x!==lead)]:[];/* a FB at power back: the backup FB lines up at FB */
+  T.fb=lead&&lead.pos==='FB'?(ok.filter(p=>p.pos==='FB'&&p!==lead).sort(dcmp)[0]||g('FB')):T.fb0;if(lead&&lead.pos==='FB'&&rbs.length)T.rb=[lead,...rbs];while(T.rb.length<3)T.rb.push(g('RB'));
   for(const p of [...T.wr.slice(0,T.wset>=4?4:3),T.rb[0]])if(p&&!p.ghost)T.seen.add(p)};
  const ST=[new Map(),new Map()],TS=[0,1].map(()=>({pl:0,yd:0,py:0,ry:0,fd:0,t3a:0,t3c:0,t4a:0,t4c:0,to:0,sk:0,top:0,pn:0,pny:0,pin:0,kr:0,kry:0,pr:0,pry:0,fgm:0,fga:0,td:0,pen:0,peny:0,pts:[0,0,0,0,0]})),sc=[0,0];
  let q=1,t=900;
@@ -1009,8 +1013,8 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   const isTE=(ti===3&&ws<4)||(ti===2&&ws<=2),dp=ti===4?[.8,.17,.03]:isTE?[.5,.4,.1]:O.OS.dp;
   const dwt=[dp[0]*Math.exp(.03*((sr.cth+sr.srr)/2-72))*(rush?1.6:1),dp[1],dp[2]*Math.exp(.045*((sr.spd+sr.drr)/2-72))*(rush?.5:1)*(ag===1?1.25:ag===-1?.8:1)*(pa?1.25:1)];
   const dep=wpick(dwt),df=(ti<4&&!isTE)?(D.cb[ti]||D.cb[D.cb.length-1]||(F()<.5?D.lb[0]:D.sf[0])):(D.cb.length>2&&F()<.3*(D.cb.length-2)?D.cb[D.cb.length-1]:isTE?(F()<.65?D.lb[0]:D.sf[0]):(D.lb[1]||D.lb[0])),rd=er(df),man=D.DS.man;
-  const slt=df.pos==='CB'&&D.cb.indexOf(df)>=2;
-  let C=ti<3?(slt?man*(rd.mcv*.5+rd.agi*.3+rd.spd*.2)+(1-man)*(rd.zcv*.5+rd.prc*.25+rd.agi*.25):man*(rd.mcv*.55+rd.prs*.15+rd.spd*.3)+(1-man)*(rd.zcv*.5+rd.prc*.25+rd.spd*.25)):rd.zcv*.45+rd.mcv*.25+rd.prc*.3;
+  const slt=D.cb.indexOf(df)>=2;
+  let C=!isTE&&ti<4?(slt?man*(rd.mcv*.5+rd.agi*.3+rd.spd*.2)+(1-man)*(rd.zcv*.5+rd.prc*.25+rd.agi*.25):man*(rd.mcv*.55+rd.prs*.15+rd.spd*.3)+(1-man)*(rd.zcv*.5+rd.prc*.25+rd.spd*.25)):rd.zcv*.45+rd.mcv*.25+rd.prc*.3;
   C+=(D.cv||0)+(dep===2?(v.sc-72)*.7*D.DS.shell:dep===1?(v.sc-72)*.12*D.DS.shell:-(D.DS.shell-.5)*10);
   const rr=dep===0?sr.srr:dep===1?sr.mrr:sr.drr,sep=rr*.5+sr.spd*.22+sr.agi*.08+sr.rel*.2;
   const qa=dep===0?rq.sac:dep===1?rq.mac:rq.dac*.65+rq.thp*.35;
@@ -1187,7 +1191,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
 /* ===== Player XP / Training Points (your roster only) ===== */
 const PXL=l=>80+20*(l-1),TPC=r=>r<70?1:r<80?2:r<88?3:r<94?4:5,TPLV=10;
 function pxp(p,amt){if(!amt||!S.coach)return;const g=POSG[p.pos];if(abil('mm.'+g)>=4)amt*=1.15;if(!p.plv)p.plv=1;p.pxp=(p.pxp||0)+amt;while(p.plv<20&&p.pxp>=PXL(p.plv)){p.pxp-=PXL(p.plv);p.plv++;p.ptp=(p.ptp||0)+TPLV}}
-function awardXP(g,win,opp,post){const ut=U(),side=g.box?g.box.ids[0]===S.uid?0:1:0,lines=g.box?g.box.pl[side]:[],starters=new Set();for(const pos of POS)ut.roster.filter(x=>x.pos===pos&&x.inj<=0).sort(dcmp).slice(0,START[pos]||1).forEach(x=>starters.add(x));
+function awardXP(g,win,opp,post){const ut=U(),side=g.box?g.box.ids[0]===S.uid?0:1:0,lines=g.box?g.box.pl[side]:[],starters=new Set();for(const pos of POS)ut.roster.filter(x=>epos(x)===pos&&x.inj<=0).sort(dcmp).slice(0,START[pos]||1).forEach(x=>starters.add(x));
  const by={};lines.forEach(l=>by[l.pos+'|'+l.n]=l.s);const rk=(S.rk&&S.rk[opp.id])||99;
  for(const p of ut.roster){if(p.inj>0||p.new)continue;const s=by[p.pos+'|'+p.name];let x=starters.has(p)?6:s?4:1;if(s){const def=isDefP(p),sc=def?perfD(s):perfO(s);x+=clamp(sc*.6,0,12)}if(win){x+=4;if(rk<=25)x+=3;if(post)x+=3}pxp(p,x)}}
 const GRPN={thp:'Arm Strength',sac:'Accuracy',mac:'Accuracy',dac:'Accuracy',pac:'Accuracy',tup:'Poise',tor:'Poise',bsk:'Poise',spd:'Quickness',acc:'Quickness',agi:'Quickness',cod:'Quickness',jmp:'Quickness',bcv:'Elusiveness',btk:'Elusiveness',jkm:'Elusiveness',spm:'Elusiveness',str:'Power',trk:'Power',sfa:'Power',car:'Ball Carrying',cth:'Hands',cit:'Hands',spc:'Hands',srr:'Route Running',mrr:'Route Running',drr:'Route Running',rel:'Route Running',rbk:'Run Blocking',rbp:'Run Blocking',rbf:'Run Blocking',imp:'Run Blocking',lbk:'Run Blocking',pbk:'Pass Blocking',pbp:'Pass Blocking',pbf:'Pass Blocking',pmv:'Pass Rush',fmv:'Pass Rush',bsh:'Pass Rush',tak:'Tackling',hpw:'Tackling',pur:'Tackling',mcv:'Coverage',zcv:'Coverage',prs:'Coverage',awr:'IQ',prc:'IQ',tgh:'Toughness',kpw:'Kicking',kac:'Kicking'},TPK=10;
@@ -1364,7 +1368,7 @@ function capRoster(){S.teams.forEach(t=>{if(t.roster.length<=85)return;const cut
   if(isH(t.id))noteU(t.id,'Roster limit 85: released '+cut.map(p=>p.name+' ('+p.pos+' '+p.ovr+')').join(', '))})}
 /* Offseason Training: every player develops (new signees do not), then the league talent anchor nudges next year's progression */
 function trainAll(){if(!S.gadj){S.gadj=Object.assign({},GPRI);S.eadj=-.2}eachH(()=>{S.train=[]});
- S.teams.forEach(tm=>forTeam(tm,()=>{let STS=new Set();if(tm.id===S.uid){for(const pos of POS){tm.roster.filter(x=>x.pos===pos&&!x.new).sort(dcmp).slice(0,START[pos]||1).forEach(x=>STS.add(x))}}tm.roster.forEach(p=>{ensureSk(p);if(p.r&&OWN[p.pos]&&!(p.hwp!=null&&p.hwp!==p.pos))p.ovr=ovrFromR(p)+(p.tbo||0);if(p.new)return;const o0=p.ovr;p.yr=Math.min(4,p.yr+1);ensureHW(p);{const r=HWR[p.hwp||p.pos]||HWR.WR;p.wt=Math.min(r[7],p.wt+Math.round(2+F()*5))}mat(p);
+ S.teams.forEach(tm=>forTeam(tm,()=>{let STS=new Set();if(tm.id===S.uid){for(const pos of POS){tm.roster.filter(x=>epos(x)===pos&&!x.new).sort(dcmp).slice(0,START[pos]||1).forEach(x=>STS.add(x))}}tm.roster.forEach(p=>{ensureSk(p);if(p.r&&OWN[p.pos]&&!(p.hwp!=null&&p.hwp!==p.pos))p.ovr=ovrFromR(p)+(p.tbo||0);if(p.new)return;const o0=p.ovr;p.yr=Math.min(4,p.yr+1);ensureHW(p);{const r=HWR[p.hwp||p.pos]||HWR.WR;p.wt=Math.min(r[7],p.wt+Math.round(2+F()*5))}mat(p);
   const base=[4.5,3.2,2.2,1][p.yr-2]||1.5,dm=(1+.25*p.dev)*(p.tag==='bust'?.8:1),xpb=tm.id===S.uid?(p.xp-9)*.06:0,fb=tm.fac*.3,tr=tm.id===S.uid&&S.staff.find(s=>s.r==='trainer')?(S.staff.find(s=>s.r==='trainer').t+1)*.3:0;
   {const sc=isDefP(p)?(tm.pd0||tm.pd):(tm.po0||tm.po);p.scx=p.scx&&p.scx.s===sc?{s:sc,n:p.scx.n+1}:{s:sc,n:2}}
   if(tm.id===S.uid){const pre=base*dm*TUNE.pg,tp=Math.max(0,Math.round(10*(pre+fb+xpb+tr+(S.gadj&&S.gadj[GP(p.pos)]||0)+trainB(p,STS)+(S.coach&&la('mot',p)>=3?.15*Math.max(0,pre):0))));p.ptp=(p.ptp||0)+tp;p.o0t=o0;p.mpk=0;if(S.coach&&abil('ceo.gainz')&&p.dev<3&&F()<.08)p.dev++;S.train.push({id:p.id,name:p.name,pos:p.pos,yr:p.yr,o0,o1:o0,tp,dev:p.dev});return}
@@ -1957,52 +1961,61 @@ function recordsPage(){const H=S.hist||[];if(!H.length)return'<div class=card><h
 function trophyPage(){const H=S.hist||[],T=H.filter(h=>h.tit),C=H.filter(h=>h.cc),P=H.filter(h=>h.cfp);const sec=(n,L,t)=>'<div class=card><h2>'+n+' ('+L.length+')</h2>'+(L.length?'<div class=row>'+L.map(h=>'<span class=tag style="font-size:14px;padding:6px 12px">'+t+' '+h.year+'</span>').join('')+'</div>':'<p class=m>None yet.</p>')+'</div>';
  return sec('National Championships',T,'🏆')+sec('Conference Championships',C,'🏅')+sec('College Football Playoff Appearances',P,'🏈')+'<div class=card><h2>Heisman Winners</h2>'+(H.length?tbl(['Year','Winner'],H.map(h=>'<tr><td>'+h.year+'</td><td>'+h.heisman+'</td></tr>')):'<p class=m>None yet.</p>')+'</div>'}
 function retirePage(){return'<div class=card><h2>Retire</h2><p>Retiring ends this dynasty and deletes the save from this browser. Export a backup first from League Settings if you may want it back.</p><div class=row><button class=s onclick="ask(\'new\',newDyn)">'+(CF==='new'?'Click again to RETIRE and delete this dynasty':'Retire')+'</button>'+(CF==='new'?'<button class=s onclick="CF=null;render()">Cancel</button>':'')+'</div></div>'}
-/* special depth-chart roles: eligible positions + a rating formula, ranked from the 54 ratings; coach overrides saved in t.rl */
+/* special depth-chart roles: eligible positions + a rating formula (blended with the player's overall at that position), coach overrides in t.rl */
+const DL3=['LE','RE','DT'];
 const DROLES={
- d3:{n:'3rd Down Back',pos:['RB'],st:1,f:r=>.3*r.cth+.2*r.pbk+.12*r.spd+.12*r.acc+.1*r.agi+.08*r.rel+.08*r.awr},
- pwr:{n:'Power Back',pos:['RB'],st:1,f:r=>.25*r.trk+.2*r.btk+.2*r.str+.15*r.car+.1*r.sfa+.1*r.bcv},
- slw:{n:'Slot WR',pos:['WR'],st:2,f:r=>.25*r.srr+.2*r.cth+.15*r.cit+.15*r.agi+.1*r.cod+.1*r.rel+.05*r.acc},
- slc:{n:'Slot CB',pos:['CB'],st:2,f:r=>.22*r.mcv+.2*r.zcv+.18*r.agi+.12*r.cod+.12*r.acc+.1*r.tak+.06*r.prc},
- lre:{n:'Left Rush Edge',pos:['LE','RE'],st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
- rre:{n:'Right Rush Edge',pos:['LE','RE'],st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
- rdt:{n:'Rush Defensive Tackles',pos:['DT'],st:2,f:r=>.25*r.pmv+.2*r.fmv+.2*r.bsh+.15*r.pur+.1*r.acc+.1*r.str},
+ d3:{n:'3rd Down Back',pos:['RB'],bp:'RB',st:1,f:r=>.3*r.cth+.2*r.pbk+.12*r.spd+.12*r.acc+.1*r.agi+.08*r.rel+.08*r.awr},
+ pwr:{n:'Power Back',pos:['RB','FB'],bp:'RB',st:1,f:r=>.25*r.trk+.2*r.btk+.2*r.str+.15*r.car+.1*r.sfa+.1*r.bcv},
+ slw:{n:'Slot WR',pos:['WR'],bp:'WR',st:2,f:r=>.25*r.srr+.2*r.cth+.15*r.cit+.15*r.agi+.1*r.cod+.1*r.rel+.05*r.acc},
+ slc:{n:'Slot CB',pos:['CB','FS','SS'],bp:'CB',st:2,f:r=>.22*r.mcv+.2*r.zcv+.18*r.agi+.12*r.cod+.12*r.acc+.1*r.tak+.06*r.prc},
+ lre:{n:'Left Rush Edge',pos:DL3,bp:'LE',st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
+ rre:{n:'Right Rush Edge',pos:DL3,bp:'RE',st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
+ rdt:{n:'Rush Defensive Tackles',pos:DL3,bp:'DT',st:2,f:r=>.25*r.pmv+.2*r.fmv+.2*r.bsh+.15*r.pur+.1*r.acc+.1*r.str},
  nlb:{n:'Nickel Linebacker',pos:['MIKE','WILL','SAM'],st:2,f:r=>.25*r.zcv+.2*r.mcv+.15*r.spd+.15*r.prc+.1*r.awr+.1*r.tak+.05*r.agi},
  kr:{n:'Kick Returner',pos:['RB','WR','CB','FS','SS'],st:1,f:r=>.3*r.kr+.2*r.spd+.15*r.acc+.15*r.agi+.1*r.bcv+.1*r.car},
  pr:{n:'Punt Returner',pos:['RB','WR','CB','FS','SS'],st:1,f:r=>.3*r.kr+.2*r.cth+.15*r.agi+.15*r.cod+.1*r.spd+.1*r.bcv}};
-const roleSc=(p,k)=>{mat(p);return DROLES[k].f(rt0(p))};
-function roleFrom(list,rl,k,ex){const R=DROLES[k],el=list.filter(p=>R.pos.includes(p.pos)&&!p.ghost),ov=(rl&&rl[k])||[];let a=el.slice().sort((x,y)=>roleSc(y,k)-roleSc(x,k));
- const pin=ov.map(id=>el.find(p=>p.id===id)).filter(Boolean);let r=pin.concat(a.filter(p=>!pin.includes(p)));if(ex)r=r.filter(p=>!ex.includes(p));return r}
-function roleList(t,k){if(k==='rre'){const l=roleFrom(t.roster,t.rl,'lre')[0],r=roleFrom(t.roster,t.rl,'rre');if(l&&!(t.rl&&t.rl.rre&&t.rl.rre.length))return r.filter(p=>p!==l).concat(l);return r}return roleFrom(t.roster,t.rl,k)}
+const RSC=new Map();
+const roleOvr=(p,k)=>{const b=DROLES[k].bp;return b&&b!==p.pos?ovrAt(p,b):p.ovr};
+const roleSc=(p,k)=>{let m=RSC.get(p);if(!m)RSC.set(p,m={});if(m[k]!=null)return m[k];mat(p);return m[k]=.5*DROLES[k].f(rt0(p))+.5*roleOvr(p,k)};
+function roleFrom(list,rl,k,ex){const R=DROLES[k];let el=list.filter(p=>R.pos.includes(p.pos)&&!p.ghost);
+ if(k==='slc'){const st=slotsOrd(list,'S',false);el=el.filter(p=>!st.includes(p))}/* the starting FS and SS stay at safety */
+ const ov=(rl&&rl[k])||[],a=el.slice().sort((x,y)=>roleSc(y,k)-roleSc(x,k)),pin=ov.map(id=>el.find(p=>p.id===id)).filter(Boolean);let r=pin.concat(a.filter(p=>!pin.includes(p)));if(ex)r=r.filter(p=>!ex.includes(p));return r}
+/* a player starts at only one rush spot: left edge first, then right edge, then the rush tackles */
+function rushEx(list,rl,k){if(k==='rre')return[roleFrom(list,rl,'lre')[0]].filter(Boolean);if(k==='rdt'){const l=roleFrom(list,rl,'lre')[0],r=roleFrom(list,rl,'rre',l?[l]:[])[0];return[l,r].filter(Boolean)}return[]}
+function roleListFrom(list,rl,k){const r=roleFrom(list,rl,k),ex=rushEx(list,rl,k);return ex.length?r.filter(p=>!ex.includes(p)).concat(r.filter(p=>ex.includes(p))):r}
+const roleList=(t,k)=>roleListFrom(t.roster,t.rl,k);
 const roleTop=(t,k,n)=>roleList(t,k).slice(0,n);
 /* the depth editor works on either a regular position or a role */
-function dctx(t){if(DPOS.startsWith('R:')){const k=DPOS.slice(2),R=DROLES[k];return{role:k,N:3,all:roleList(t,k),st:R.st,lab:R.n,set(ids){t.rl=t.rl||{};t.rl[k]=ids},reset(){if(t.rl)delete t.rl[k]}}}
- const pos=DPOS;return{pos,N:DEPN[pos]||3,all:t.roster.filter(p=>p.pos===pos).sort(dcmp),st:START[pos]||1,lab:DLAB[pos]||pos,set(ids){depthSet(t,pos,ids)},reset(){t.roster.filter(p=>p.pos===pos).forEach(p=>{delete p.dd})}}}
+function dctx(t){if(DPOS.startsWith('R:')){const k=DPOS.slice(2),R=DROLES[k];return{role:k,N:3,all:roleList(t,k),ids:null,st:R.st,lab:R.n,ov:p=>roleOvr(p,k),set(ids){t.rl=t.rl||{};t.rl[k]=ids},reset(){if(t.rl)delete t.rl[k]}}}
+ const pos=DPOS,g=GP(pos),flex=g==='DL'||g==='LB',N=DEPN[pos]||3;
+ const mine=t.roster.filter(p=>epos(p)===pos).sort(dcmp),others=flex?t.roster.filter(p=>GP(p.pos)===g&&epos(p)!==pos).sort((a,b)=>ovrAt(b,pos)-ovrAt(a,pos)):[];
+ return{pos,N,all:mine.concat(others),ids:mine.slice(0,N).map(p=>p.id),st:START[pos]||1,lab:DLAB[pos]||pos,ov:p=>ovrAt(p,pos),set(ids){depthSet(t,pos,ids)},reset(){t.roster.filter(p=>epos(p)===pos).forEach(p=>{delete p.dd;if(p.dpos)delete p.dpos})}}}
 let DPOS='QB',DSEL=null;
 const DEPN={WR:5,CB:5},DLAB={RB:'RB / HB',SAM:'SAM (OLB)',WILL:'WILL (OLB)',MIKE:'MIKE (MLB)',OT:'OT (tackle)',OG:'OG (guard)',C:'C (center)',LE:'LE (end)',RE:'RE (end)',DT:'DT (tackle)',FS:'FS (safety)',SS:'SS (safety)'};
 const ORD=['1st','2nd','3rd','4th','5th'],htStr=h=>h?Math.floor(h/12)+"'"+(h%12)+'"':'';
-function depthSet(t,pos,ids){const all=t.roster.filter(p=>p.pos===pos);all.forEach(p=>{delete p.dd});ids.forEach((id,i)=>{const p=all.find(x=>x.id===id);if(p)p.dd=i+1})}
+function depthSet(t,pos,ids){const g=GP(pos),pool=t.roster.filter(p=>GP(p.pos)===g);pool.forEach(p=>{if(epos(p)===pos&&!ids.includes(p.id)){delete p.dd;if(p.pos!==pos)delete p.dpos}});ids.forEach((id,i)=>{const p=pool.find(x=>x.id===id);if(p){p.dd=i+1;if(p.pos===pos)delete p.dpos;else p.dpos=pos}})}
 function depthPos(v){DPOS=v;DSEL=null;render()}
 function depthReset(){const t=U();dctx(t).reset();DSEL=null;save();render()}
 function depthResetAll(){const t=U();t.roster.forEach(p=>{delete p.dd});delete t.rl;DSEL=null;save();render()}
-function depthClick(k,v){const t=U(),cx=dctx(t),N=cx.N,all=cx.all,ids=all.slice(0,N).map(p=>p.id),key=k+':'+v;
- if(k==='s'&&+v>=ids.length)return;
+function depthClick(k,v){const t=U(),cx=dctx(t),N=cx.N,all=cx.all,ids=cx.ids||all.slice(0,N).map(p=>p.id),key=k+':'+v;
+ if(k==='s'&&+v>=ids.length&&!(DSEL&&DSEL[0]==='p'))return;
  if(!DSEL||DSEL===key){DSEL=DSEL===key?null:key;render();return}
  const [k0,v0]=DSEL.split(':');
  if(k0==='p'&&k==='p'){DSEL=key;render();return}
  let si,pid;if(k0==='s'&&k==='s'){const a=+v0,b=+v;[ids[a],ids[b]]=[ids[b],ids[a]]}
- else{si=k0==='s'?+v0:+v;pid=k0==='p'?+v0:+v;const j=ids.indexOf(pid);if(j>=0)[ids[si],ids[j]]=[ids[j],ids[si]];else ids[si]=pid}
+ else{si=k0==='s'?+v0:+v;pid=k0==='p'?+v0:+v;const j=ids.indexOf(pid);if(j>=0)[ids[si],ids[j]]=[ids[j],ids[si]];else if(si>=ids.length)ids.push(pid);else ids[si]=pid}
  cx.set(ids);DSEL=null;save();render()}
-function depthEd(t){const cx=dctx(t),pos=cx.pos||cx.lab,N=cx.N,all=cx.all,slots=all.slice(0,N),st=cx.st,sel=DSEL;
+function depthEd(t){RSC.clear();const cx=dctx(t),pos=cx.pos||cx.lab,N=cx.N,all=cx.all,slots=cx.ids?cx.ids.map(id=>all.find(p=>p.id===id)):all.slice(0,N),st=cx.st,sel=DSEL;
  const dep=p=>{const i=slots.indexOf(p);return i>=0?ORD[i]:''};
  const card=(p,i)=>{const on=sel==='s:'+i,cls='dsc'+(on?' on':'')+(p?'':' em')+(i<st?' st':'');
-  return'<button class="'+cls+'"'+(p?' onclick="depthClick(\'s\','+i+')"':' disabled')+'><span class=dsh>'+ORD[i]+' string'+(i<st?' <em>starter</em>':'')+'</span>'+(p?'<span class=dso>'+p.ovr+'</span><span class=dsn>'+p.name+'</span><span class=dsm>'+(cx.role?p.pos:(YR[p.yr-1]||''))+(p.arch?' · '+p.arch:'')+(p.inj>0?' · <b class=l>INJ</b>':'')+'</span>':'<span class=dsm>— empty —</span>')+'</button>'};
+  return'<button class="'+cls+'"'+(p||sel&&sel[0]==='p'?' onclick="depthClick(\'s\','+i+')"':' disabled')+'><span class=dsh>'+ORD[i]+' string'+(i<st?' <em>starter</em>':'')+'</span>'+(p?'<span class=dso>'+cx.ov(p)+'</span><span class=dsn>'+p.name+'</span><span class=dsm>'+(cx.role?p.pos:(YR[p.yr-1]||''))+(p.arch?' · '+p.arch:'')+(p.inj>0?' · <b class=l>INJ</b>':'')+'</span>':'<span class=dsm>— empty —</span>')+'</button>'};
  let h='<div class=card><div class=row><h2 style="margin:0">Depth Chart</h2><span style="flex:1"></span><label style="margin:0">Position <select onchange="depthPos(this.value)">'+'<optgroup label="Positions">'+POS.map(k=>'<option value='+k+(k===DPOS?' selected':'')+'>'+(DLAB[k]||k)+'</option>').join('')+'</optgroup><optgroup label="Special roles">'+Object.keys(DROLES).map(k=>'<option value=R:'+k+(DPOS==='R:'+k?' selected':'')+'>'+DROLES[k].n+'</option>').join('')+'</optgroup></select></label><button class=s onclick="depthReset()">Reset '+pos+' to best OVR</button><button class=s onclick="depthResetAll()">Reset all</button></div>';
  h+='<p class=m style="margin:8px 0 12px">Click a player in the top '+N+' and then another one to swap them, or click a player in the list below to put him in that spot. The '+st+' '+(st>1?'starters':'starter')+' play first; if a starter is hurt the next man in the chart steps in.</p>';
  h+='<div class=dsl>'+Array.from({length:N},(_,i)=>card(slots[i],i)).join('')+'</div></div>';
- h+='<div class=card><h2>'+(cx.role?'Eligible for '+cx.lab:'All '+cx.lab+'s')+' ('+all.length+')</h2>'+tbl(['Depth','Player',cx.role?'Pos':'Class','OVR',cx.role?'Role score':'Archetype','Size','Dev'],all.map(p=>{ensureHW(p);return'<tr class="clk'+(sel==='p:'+p.id?' me':'')+'" onclick="depthClick(\'p\','+p.id+')"><td>'+(dep(p)||'<span class=m>—</span>')+'</td><td>'+p.name+(p.inj>0?' <span class=l>INJ</span>':'')+'</td><td>'+(cx.role?p.pos:(YR[p.yr-1]||''))+'</td><td><b>'+p.ovr+'</b></td><td>'+(cx.role?Math.round(roleSc(p,cx.role)):(p.arch||''))+'</td><td>'+htStr(p.ht)+' '+(p.wt||'')+'</td><td>'+(DEVS[p.dev]||'')+'</td></tr>'}))+'</div>';
+ h+='<div class=card><h2>'+(cx.role?'Eligible for '+cx.lab:'All '+cx.lab+'s')+' ('+all.length+')</h2>'+tbl(['Depth','Player',cx.role?'Pos':'Class','OVR',cx.role?'Role score':'Archetype','Size','Dev'],all.map(p=>{ensureHW(p);return'<tr class="clk'+(sel==='p:'+p.id?' me':'')+'" onclick="depthClick(\'p\','+p.id+')"><td>'+(dep(p)||'<span class=m>—</span>')+'</td><td>'+p.name+(p.inj>0?' <span class=l>INJ</span>':'')+'</td><td>'+(cx.role||(cx.pos&&p.pos!==cx.pos)?p.pos:(YR[p.yr-1]||''))+'</td><td><b>'+cx.ov(p)+'</b>'+(cx.ov(p)!==p.ovr?' <span class=m>('+p.ovr+' at '+p.pos+')</span>':'')+'</td><td>'+(cx.role?Math.round(roleSc(p,cx.role)):(p.arch||''))+'</td><td>'+htStr(p.ht)+' '+(p.wt||'')+'</td><td>'+(DEVS[p.dev]||'')+'</td></tr>'}))+'</div>';
  return h}
-function depthPage(){const t=U(),R=t.roster,rch=k=>{const p=roleTop(t,k,1)[0];return'<div class=chip style="cursor:pointer" onclick="depthPos(\'R:'+k+'\')"><b>'+DROLES[k].n+'</b>'+(p?'<span class=o>'+p.ovr+'</span><i>'+p.name.split(' ').slice(-1)[0]+' ('+p.pos+')</i>':'<i>—</i>')+'</div>'},mk=(lab,p,ps)=>'<div class=chip style="cursor:pointer" onclick="depthPos(\''+(ps||({LT:'OT',RT:'OT',LG:'OG',RG:'OG',HB:'RB'}[lab])||lab)+'\')"><b>'+lab+'</b>'+(p?'<span class=o>'+p.ovr+'</span><i>'+p.name.split(' ').slice(-1)[0]+(p.inj>0?' <span class=l>INJ</span>':'')+'</i>':'<i>—</i>')+'</div>';
- const top=(pos,n)=>R.filter(p=>p.pos===pos).sort(dcmp).slice(0,n),ol=slotsOrd(R,'OL',false),dl=slotsOrd(R,'DL',false),lb=slotsOrd(R,'LB',false),sf=slotsOrd(R,'S',false);
+function depthPage(){const t=U(),R=t.roster,rch=k=>{const p=roleTop(t,k,1)[0];return'<div class=chip style="cursor:pointer" onclick="depthPos(\'R:'+k+'\')"><b>'+DROLES[k].n+'</b>'+(p?'<span class=o>'+roleOvr(p,k)+'</span><i>'+p.name.split(' ').slice(-1)[0]+' ('+p.pos+')</i>':'<i>—</i>')+'</div>'},mk=(lab,p,ps)=>'<div class=chip style="cursor:pointer" onclick="depthPos(\''+(ps||({LT:'OT',RT:'OT',LG:'OG',RG:'OG',HB:'RB'}[lab])||lab)+'\')"><b>'+lab+'</b>'+(p?'<span class=o>'+p.ovr+'</span><i>'+p.name.split(' ').slice(-1)[0]+(p.inj>0?' <span class=l>INJ</span>':'')+'</i>':'<i>—</i>')+'</div>';
+ const top=(pos,n)=>R.filter(p=>epos(p)===pos).sort(dcmp).slice(0,n),ol=slotsOrd(R,'OL',false),dl=slotsOrd(R,'DL',false),lb=slotsOrd(R,'LB',false),sf=slotsOrd(R,'S',false);
  const wr=top('WR',3),te=top('TE',1),qb=top('QB',1),rb=top('RB',1),cb=top('CB',2),k=top('K',1),pp=top('P',1);
  const off='<div class=fm><div class=r>'+mk('WR',wr[0])+mk('LT',ol[0])+mk('LG',ol[2])+mk('C',ol[4])+mk('RG',ol[3])+mk('RT',ol[1])+mk('TE',te[0])+mk('WR',wr[1])+'</div><div class=r>'+mk('WR',wr[2])+'</div><div class=r>'+mk('QB',qb[0])+mk('HB',rb[0])+'</div></div>';
  const def='<div class=fm><div class=r>'+mk('LE',dl[0])+mk('DT',dl[2])+mk('DT',dl[3])+mk('RE',dl[1])+'</div><div class=r>'+mk('SAM',lb[0])+mk('MIKE',lb[2])+mk('WILL',lb[1])+'</div><div class=r>'+mk('CB',cb[0])+mk('FS',sf[0])+mk('SS',sf[1])+mk('CB',cb[1])+'</div></div>';
