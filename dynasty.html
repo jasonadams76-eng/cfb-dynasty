@@ -608,9 +608,11 @@ function styleTag(p){const x=style(p);if(!x.n)return'';const c=comp(p);return x.
 const CAL={qa:2.8,qs:6.1,rb:1.4,rs:-2.5,rpw:3,wh:1.2,ws:-1.7,te:6.5,tb:5.2,pb:-1.8,rk:1,dp:.2,dr:-.2,lr:0,lc:2.6,cm:-2.3,cz:1.3,sc:1.2,sr:5,k:1,p:1.2,fbb:-7.6,fbu:3,lp:7.5};
 /* corners: outside vs slot grades */
 const cbOut=p=>{const r=er(p);return r.mcv*.25+r.zcv*.08+r.prs*.2+r.spd*.2+r.jmp*.07+r.str*.1+r.cth*.03+r.tak*.07},cbSlot=p=>{const r=er(p);return r.mcv*.18+r.zcv*.2+r.agi*.18+r.acc*.1+r.cod*.07+r.tak*.1+r.pur*.05+r.prc*.12-1};
-function cbLine(H,nc,gf){const top=H.filter(p=>p.pos==='CB').sort(dcmp).slice(0,nc);if(gf)while(top.length<nc)top.push(ghost('CB'));
- const ns=Math.max(0,nc-2),slot=top.slice().sort((a,b)=>(cbSlot(b)-cbOut(b)+(b.ghost?-99:0))-(cbSlot(a)-cbOut(a)+(a.ghost?-99:0))).slice(0,ns).sort((a,b)=>cbSlot(b)-cbSlot(a));
- const out=top.filter(p=>!slot.includes(p)).sort((a,b)=>cbOut(b)-cbOut(a));return[...out,...slot]}
+function cbLine(H,nc,gf,tm){const top=H.filter(p=>p.pos==='CB').sort(dcmp).slice(0,nc);if(gf)while(top.length<nc)top.push(ghost('CB'));
+ const ns=Math.max(0,nc-2);let slot;
+ if(tm&&ns){const sr=roleFrom(H,tm.rl,'slc').slice(0,ns);slot=sr.slice();const fill=top.filter(p=>!slot.includes(p)).sort((a,b)=>(cbSlot(b)-cbOut(b)+(b.ghost?-99:0))-(cbSlot(a)-cbOut(a)+(a.ghost?-99:0)));while(slot.length<ns&&fill.length)slot.push(fill.shift())}
+ else slot=top.slice().sort((a,b)=>(cbSlot(b)-cbOut(b)+(b.ghost?-99:0))-(cbSlot(a)-cbOut(a)+(a.ghost?-99:0))).slice(0,ns).sort((a,b)=>cbSlot(b)-cbSlot(a));
+ const out=top.filter(p=>!slot.includes(p)).slice().sort((a,b)=>cbOut(b)-cbOut(a)).slice(0,nc-slot.length);return[...out,...slot]}
 /* offensive line: scheme fit by archetype, and slot-weighted pass/run grades */
 const OLFIT={'Agile':{'Spread':3,'Air Raid':3,'West Coast':1,'Triple Option':1,'Pro Style':-1,'Power Run':-3},
 'Pass Protector':{'Air Raid':3.5,'West Coast':3,'Spread':1,'Pro Style':-1,'Power Run':-3.5,'Triple Option':-3.5},
@@ -630,13 +632,14 @@ const PKM={base:{cov:0,box:0},nickel:{cov:0,box:-4},dime:{cov:2,box:-8},heavy:{c
 function dpkg(H,sch,name,gf,tm){const R=ROLES[sch],P=PKGS[sch][name]||PKGS[sch].base,[nd,nl,nc,ns]=P;
  const DLf=slotsOrd(H,'DL',gf),LBf=slotsOrd(H,'LB',gf),SFf=slotsOrd(H,'S',gf);
  const g3=w=>nd>=4?w.slice(0,4):[w[0],w[1],w[2]+w[3]];
- const dl=nd>=4?DLf.slice(0,4):[DLf[0],DLf[1],DLf[2]];
+ let dl=nd>=4?DLf.slice(0,4):[DLf[0],DLf[1],DLf[2]];const rl=tm&&tm.rl;
+ if(name==='nickel'||name==='dime'){const L=roleFrom(H,rl,'lre')[0],Rr=roleFrom(H,rl,'rre',[L])[0],T=roleFrom(H,rl,'rdt',[L,Rr]);const nn=[L||dl[0],Rr||dl[1],T[0]||dl[2]];if(nd>=4)nn.push(T[1]||dl[3]);dl=nn}
  let lb,fw;const rest=H.filter(p=>GP(p.pos)==='LB'&&!LBf.includes(p)).sort((a,b)=>b.ovr-a.ovr);
  if(nl>=4){lb=[LBf[0],LBf[1],LBf[2],rest[0]||(gf?ghost('MIKE'):null)];fw=w=>[w[0]*.8,w[1]*.8,w[2]*.8,.2]}
  else if(nl===3){lb=LBf.slice(0,3);fw=w=>w}
- else if(nl===2){const a=LBf[0],b=LBf[1];lb=[(a&&(!b||a.ovr>=b.ovr))?a:b,LBf[2]];fw=w=>[w[0]+w[1],w[2]]}
- else{lb=[LBf[2]];fw=w=>[1]}
- const cbs=cbLine(H,nc,gf);
+ else if(nl===2){const nb=roleFrom(H,rl,'nlb');lb=[nb[0]||LBf[0],nb[1]||LBf[2]];fw=w=>[w[0]+w[1],w[2]]}
+ else{const nb=roleFrom(H,rl,'nlb');lb=[nb[0]||LBf[2]];fw=w=>[1]}
+ const cbs=cbLine(H,nc,gf,tm);
  const sf=ns>=2?SFf.slice(0,2):[SFf[1]],sw=w=>ns>=2?w:[1];
  const wv=(L,key,w)=>{let x=0;for(let i=0;i<w.length;i++)x+=w[i]*(L[i]?comp(L[i])[key]+(CAL[key]||0):48);return x};
  const bl=R.bl*(nl>=4?1.15:nl/3);
@@ -941,7 +944,7 @@ function mkSide(t,hf,C,OA){OA=OA||{};
  for(const k of['dp','dr','lr','lc','cm','cz','sc','sr'])u[k]+=bd;
  const cg=Object.assign({},C?C.own:{});for(const k in OA)cg[k]=(cg[k]||0)+OA[k];for(const k in cg)if(u[k]!=null)u[k]+=cg[k];
  const pk={};for(const nm in PKGS[t.pd]){const g=dpkg(ok,t.pd,nm,true,t),c={cm:u.cm,cz:u.cz};for(const k of['dp','dr','lr','lc','sc','sr']){const d=g.c[k]-UR[k];c[k]=UR[k]+(d>0?d*UP:d*DN)+bd+(cg[k]||0)}pk[nm]={dl:g.dl,lb:g.lb,cb:g.cb,sf:g.sf,c,cov:g.cov,box:g.box}}
- return{t,u,isU,O:OFF[t.po],D:DEF[t.pd],DS:isU?tweakDS(DSC[t.pd],C.gp):DSC[t.pd],plan:C?C.plan:'bal',gp:C?C.gp:null,OS:OSC[t.po],qb:by('QB',1)[0],fb:by('FB',1)[0],rb:by('RB',3),wr:by('WR',4),te:by('TE',2),ol:by('OL',5),dl:pk.base.dl,lb:pk.base.lb,cb:pk.base.cb,sf:pk.base.sf,pk,seen:new Set(),cur:null,cv:0,bx:0,k:by('K',1)[0],pn:by('P',1)[0]}}
+ return{ok,t,u,isU,kr:roleFrom(ok,t.rl,'kr')[0],pr:roleFrom(ok,t.rl,'pr')[0],O:OFF[t.po],D:DEF[t.pd],DS:isU?tweakDS(DSC[t.pd],C.gp):DSC[t.pd],plan:C?C.plan:'bal',gp:C?C.gp:null,OS:OSC[t.po],qb:by('QB',1)[0],fb:by('FB',1)[0],rb:by('RB',3),wr:by('WR',4),te:by('TE',2),ol:by('OL',5),dl:pk.base.dl,lb:pk.base.lb,cb:pk.base.cb,sf:pk.base.sf,pk,seen:new Set(),cur:null,cv:0,bx:0,k:by('K',1)[0],pn:by('P',1)[0]}}
 function abil_any_mot4(){return GN.some(([g])=>abil('mot.'+g)>=4)}
 function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncUT();GCX=gctx(a,b,neutral);
  /* each human coach brings his own game plan, practice setting, abilities and clutch bonuses */
@@ -956,6 +959,15 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   const dt=P.nickel?.78:.82;if(P.dime&&pe>dt&&F()<.4+(pe-dt)*2)return'dime';
   if(P.nickel&&F()<clamp(.3+(pe-.4)*2.1,0,.95))return'nickel';
   return'base'};
+ const offPkg=(o,pp,down,dist)=>{const T=X[o],ok=T.ok,g=pos=>ghost(pos);
+  const wrs=ok.filter(p=>p.pos==='WR').sort(dcmp),sl=roleFrom(ok,T.t.rl,'slw').slice(0,2),out=wrs.filter(p=>!sl.includes(p));
+  T.wset=pp>=.72?4:pp>=.42?3:2;
+  T.wr=[out[0]||g('WR'),out[1]||g('WR'),sl[0]||out[2]||g('WR'),sl[1]||out[3]||g('WR')];
+  const rbs=ok.filter(p=>p.pos==='RB').sort(dcmp);let lead=rbs[0];
+  if(pp>=.62){const d3=roleFrom(ok,T.t.rl,'d3')[0];if(d3)lead=d3}
+  else if(pp<=.38||(dist<=2&&pp<.55)){const pw=roleFrom(ok,T.t.rl,'pwr')[0];if(pw)lead=pw}
+  T.rb=lead?[lead,...rbs.filter(x=>x!==lead)]:[];while(T.rb.length<3)T.rb.push(g('RB'));
+  for(const p of [...T.wr.slice(0,T.wset>=4?4:3),T.rb[0]])if(p&&!p.ghost)T.seen.add(p)};
  const ST=[new Map(),new Map()],TS=[0,1].map(()=>({pl:0,yd:0,py:0,ry:0,fd:0,t3a:0,t3c:0,t4a:0,t4c:0,to:0,sk:0,top:0,pn:0,pny:0,pin:0,kr:0,kry:0,pr:0,pry:0,fgm:0,fga:0,td:0,pen:0,peny:0,pts:[0,0,0,0,0]})),sc=[0,0];
  let q=1,t=900;
  const sa=(i,p)=>{let m=ST[i].get(p.id);if(!m){m={p};ST[i].set(p.id,m)}return m};
@@ -974,7 +986,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
  const rushCredit=(o,c,yds,td)=>{add(o,c,'car');add(o,c,'ry',yds);mxs(o,c,'rl',yds);if(td)add(o,c,'rtd');if(yds<0)add(o,c,'rneg');if(yds>=15)add(o,c,'rbig');TS[o].ry+=yds};
  function koS(ks){const K=X[ks],r=1-ks,R=X[r],rk=er(K.k);
   if(F()<clamp(.52+(rk.kpw-70)*.008,.15,.85))return{y:35};
-  const cands=[R.rb[1],R.wr[2],R.wr[3],R.cb[2],R.sf[1]].filter(p=>p&&!p.ghost);let kr=R.rb[0];if(cands.length)kr=cands.reduce((m,p)=>er(p).kr>er(m).kr?p:m);
+  let kr=R.kr||R.rb[0];
   const rr=er(kr).kr,ret=clamp(Math.round(gauss()*7+22+(rr-70)*.22),8,48);add(r,kr,'kr');add(r,kr,'kry',ret);TS[r].kr++;TS[r].kry+=ret;
   if(F()<.003+.00025*Math.max(0,rr-70)){add(r,kr,'krtd');return{td:1}}
   let y2=clamp(ret+3,6,48);
@@ -992,11 +1004,11 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
     if(F()<.06){add(d,sk,'ff');return{t:'sack',yds:-loss,sec:26,to:'fum',fr:1,rush:1}}return{t:'sack',yds:-loss,sec:26,rush:1}}
    if(F()<clamp(.07+.0055*(cq.qs-55),.01,.4)){let yds=Math.round(gauss()*4.5+2.5+(cq.qs-60)*.12);if(F()<clamp(.03+.002*(cq.qs-60),.01,.12))yds+=Math.round(5+ex(14));yds=Math.min(yds,100-y);const td=y+yds>=100;
     rushCredit(o,qb,yds,td);const tk=pickTk(D,yds>12);add(d,tk,'tkl');if(yds<0){add(d,tk,'tfl')}return{t:'scr',yds,td,sec:20,rush:1}}}
-  const rec=[O.wr[0],O.wr[1],O.wr[2],O.te[0],(O.fb&&!O.fb.ghost&&F()<.07*O.OS.fb*(style(O.fb).n==='Utility'?1.6:.7))?O.fb:O.rb[0]];
+  const ws=O.wset||3,rec=[O.wr[0],O.wr[1],ws<=2?(O.te[1]&&!O.te[1].ghost?O.te[1]:O.wr[2]):O.wr[2],ws>=4?O.wr[3]:O.te[0],(O.fb&&!O.fb.ghost&&F()<.07*O.OS.fb*(style(O.fb).n==='Utility'?1.6:.7))?O.fb:O.rb[0]];
   const tw=O.OS.tg.map((w,i)=>w*Math.exp(.03*(rec[i].ovr-75))),ti=wpick(tw),tg=rec[ti],sr=wcap(tg);
-  const dp=ti===4?[.8,.17,.03]:ti===3?[.5,.4,.1]:O.OS.dp;
+  const isTE=(ti===3&&ws<4)||(ti===2&&ws<=2),dp=ti===4?[.8,.17,.03]:isTE?[.5,.4,.1]:O.OS.dp;
   const dwt=[dp[0]*Math.exp(.03*((sr.cth+sr.srr)/2-72))*(rush?1.6:1),dp[1],dp[2]*Math.exp(.045*((sr.spd+sr.drr)/2-72))*(rush?.5:1)*(ag===1?1.25:ag===-1?.8:1)*(pa?1.25:1)];
-  const dep=wpick(dwt),df=ti<3?(D.cb[ti]||(F()<.5?D.lb[0]:D.sf[0])):(D.cb.length>2&&F()<.3*(D.cb.length-2)?D.cb[D.cb.length-1]:ti===3?(F()<.65?D.lb[0]:D.sf[0]):(D.lb[1]||D.lb[0])),rd=er(df),man=D.DS.man;
+  const dep=wpick(dwt),df=(ti<4&&!isTE)?(D.cb[ti]||D.cb[D.cb.length-1]||(F()<.5?D.lb[0]:D.sf[0])):(D.cb.length>2&&F()<.3*(D.cb.length-2)?D.cb[D.cb.length-1]:isTE?(F()<.65?D.lb[0]:D.sf[0]):(D.lb[1]||D.lb[0])),rd=er(df),man=D.DS.man;
   const slt=df.pos==='CB'&&D.cb.indexOf(df)>=2;
   let C=ti<3?(slt?man*(rd.mcv*.5+rd.agi*.3+rd.spd*.2)+(1-man)*(rd.zcv*.5+rd.prc*.25+rd.agi*.25):man*(rd.mcv*.55+rd.prs*.15+rd.spd*.3)+(1-man)*(rd.zcv*.5+rd.prc*.25+rd.spd*.25)):rd.zcv*.45+rd.mcv*.25+rd.prc*.3;
   C+=(D.cv||0)+(dep===2?(v.sc-72)*.7*D.DS.shell:dep===1?(v.sc-72)*.12*D.DS.shell:-(D.DS.shell-.5)*10);
@@ -1109,7 +1121,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
    if(kind==='punt'){const rp=er(O.pn),len=clamp(Math.round(gauss()*6.5+40+(rp.kpw-70)*.38),18,75),land=y+len;TS[o].pn++;TS[o].pny+=len;add(o,O.pn,'pn');add(o,O.pn,'pny',len);
     let ny;if(land>=100)ny=20;
     else if(land>=80&&F()<.55*(0.6+rp.kac/150)){TS[o].pin++;add(o,O.pn,'pin');ny=100-land}
-    else{const R_=D,cands=[R_.rb[1],R_.wr[2],R_.wr[3],R_.cb[2],R_.sf[1]].filter(p=>p&&!p.ghost);let pr=R_.rb[0];if(cands.length)pr=cands.reduce((m,p)=>er(p).kr>er(m).kr?p:m);
+    else{const R_=D;let pr=R_.pr||R_.rb[0];
      const ret=F()<.38?0:clamp(Math.round(ex(8)*(1+(er(pr).kr-70)*.015)),0,45);if(ret>0||true){add(d,pr,'prn');add(d,pr,'pry',ret);TS[d].pr++;TS[d].pry+=ret}ny=clamp(100-land+ret,1,99)}
     {const rr=F();
      if(rr<STM*.03){stP(o,F()<.6?'Holding':'Illegal formation',10,'Punt');ny=Math.min(99,ny+10)}
@@ -1123,6 +1135,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
    if(!ot&&q===3&&lead>14)pp-=.05;
    if(late||endHalf){if(lead<0)pp+=clamp(-lead/36,0,.25)*(t<600?1.4:1);else if(lead>0&&late)pp-=clamp(lead/30,0,.24)*(t<720?1.5:1)}
    pp=clamp(pp,.1,.9);
+   offPkg(o,pp,down,dist);
    {const nm=pickPkg(1-o,pp,down,dist,y);setPkg(1-o,nm);PC[1-o][nm]=(PC[1-o][nm]||0)+1}
    const ps=preSnap(o,lead,down,dist);if(ps){applyPen(ps);continue}
    const isPass=F()<pp,ts0=snapTS();jr=[];
@@ -1947,18 +1960,19 @@ function retirePage(){return'<div class=card><h2>Retire</h2><p>Retiring ends thi
 /* special depth-chart roles: eligible positions + a rating formula, ranked from the 54 ratings; coach overrides saved in t.rl */
 const DROLES={
  d3:{n:'3rd Down Back',pos:['RB'],st:1,f:r=>.3*r.cth+.2*r.pbk+.12*r.spd+.12*r.acc+.1*r.agi+.08*r.rel+.08*r.awr},
- pwr:{n:'Power Back',pos:['RB','FB'],st:1,f:r=>.25*r.trk+.2*r.btk+.2*r.str+.15*r.car+.1*r.sfa+.1*r.bcv},
- slw:{n:'Slow WR',pos:['WR'],st:1,f:r=>.25*r.cit+.2*r.mrr+.2*r.cth+.15*r.jmp+.1*r.str+.1*r.spc},
- slc:{n:'Slot CB',pos:['CB','FS'],st:1,f:r=>.22*r.mcv+.2*r.zcv+.18*r.agi+.12*r.cod+.12*r.acc+.1*r.tak+.06*r.prc},
+ pwr:{n:'Power Back',pos:['RB'],st:1,f:r=>.25*r.trk+.2*r.btk+.2*r.str+.15*r.car+.1*r.sfa+.1*r.bcv},
+ slw:{n:'Slot WR',pos:['WR'],st:2,f:r=>.25*r.srr+.2*r.cth+.15*r.cit+.15*r.agi+.1*r.cod+.1*r.rel+.05*r.acc},
+ slc:{n:'Slot CB',pos:['CB'],st:2,f:r=>.22*r.mcv+.2*r.zcv+.18*r.agi+.12*r.cod+.12*r.acc+.1*r.tak+.06*r.prc},
  lre:{n:'Left Rush Edge',pos:['LE','RE'],st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
  rre:{n:'Right Rush Edge',pos:['LE','RE'],st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
  rdt:{n:'Rush Defensive Tackles',pos:['DT'],st:2,f:r=>.25*r.pmv+.2*r.fmv+.2*r.bsh+.15*r.pur+.1*r.acc+.1*r.str},
- nlb:{n:'Nickel Linebacker',pos:['MIKE','WILL','SAM'],st:1,f:r=>.25*r.zcv+.2*r.mcv+.15*r.spd+.15*r.prc+.1*r.awr+.1*r.tak+.05*r.agi},
+ nlb:{n:'Nickel Linebacker',pos:['MIKE','WILL','SAM'],st:2,f:r=>.25*r.zcv+.2*r.mcv+.15*r.spd+.15*r.prc+.1*r.awr+.1*r.tak+.05*r.agi},
  kr:{n:'Kick Returner',pos:['RB','WR','CB','FS','SS'],st:1,f:r=>.3*r.kr+.2*r.spd+.15*r.acc+.15*r.agi+.1*r.bcv+.1*r.car},
  pr:{n:'Punt Returner',pos:['RB','WR','CB','FS','SS'],st:1,f:r=>.3*r.kr+.2*r.cth+.15*r.agi+.15*r.cod+.1*r.spd+.1*r.bcv}};
 const roleSc=(p,k)=>{mat(p);return DROLES[k].f(rt0(p))};
-function roleList(t,k){const R=DROLES[k],el=t.roster.filter(p=>R.pos.includes(p.pos)),ov=(t.rl&&t.rl[k])||[];let a=el.slice().sort((x,y)=>roleSc(y,k)-roleSc(x,k));if(k==='rre'){const l=roleList(t,'lre')[0];if(l&&!ov.length)a=a.filter(p=>p!==l).concat(l)}
- const pin=ov.map(id=>el.find(p=>p.id===id)).filter(Boolean);return pin.concat(a.filter(p=>!pin.includes(p)))}
+function roleFrom(list,rl,k,ex){const R=DROLES[k],el=list.filter(p=>R.pos.includes(p.pos)&&!p.ghost),ov=(rl&&rl[k])||[];let a=el.slice().sort((x,y)=>roleSc(y,k)-roleSc(x,k));
+ const pin=ov.map(id=>el.find(p=>p.id===id)).filter(Boolean);let r=pin.concat(a.filter(p=>!pin.includes(p)));if(ex)r=r.filter(p=>!ex.includes(p));return r}
+function roleList(t,k){if(k==='rre'){const l=roleFrom(t.roster,t.rl,'lre')[0],r=roleFrom(t.roster,t.rl,'rre');if(l&&!(t.rl&&t.rl.rre&&t.rl.rre.length))return r.filter(p=>p!==l).concat(l);return r}return roleFrom(t.roster,t.rl,k)}
 const roleTop=(t,k,n)=>roleList(t,k).slice(0,n);
 /* the depth editor works on either a regular position or a role */
 function dctx(t){if(DPOS.startsWith('R:')){const k=DPOS.slice(2),R=DROLES[k];return{role:k,N:3,all:roleList(t,k),st:R.st,lab:R.n,set(ids){t.rl=t.rl||{};t.rl[k]=ids},reset(){if(t.rl)delete t.rl[k]}}}
