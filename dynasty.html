@@ -192,6 +192,7 @@ const nm=()=>pick(FN)+' '+pick(LN);
 /* coach-set depth chart: p.dd = depth rank within a position (1 = first string); unranked players follow by overall */
 const dcmp=(x,y)=>(x.dd||999)-(y.dd||999)||y.ovr-x.ovr;
 /* a DL or LB can be listed at another position of his group on the depth chart (p.dpos); he is rated there with the Position Change formulas */
+const FLEXG={OT:'OL',OG:'OL',C:'OL',LE:'DL',RE:'DL',DT:'DL',SAM:'LB',WILL:'LB',MIKE:'LB',CB:'DB',FS:'DB',SS:'DB',TE:'TF',FB:'TF'},FG=pos=>FLEXG[pos]||pos;
 const epos=p=>p.dpos||p.pos,eo=p=>p.dpos&&p.dpos!==p.pos&&typeof ovrAt==='function'?ovrAt(p,p.dpos):p.ovr;
 const POS=['QB','RB','FB','WR','TE','OT','OG','C','LE','RE','DT','SAM','WILL','MIKE','CB','FS','SS','K','P'];
 const NEED={QB:4,RB:6,FB:2,WR:10,TE:5,OT:5,OG:5,C:3,LE:4,RE:4,DT:6,SAM:3,WILL:3,MIKE:3,CB:8,FS:3,SS:3,K:2,P:2},START={QB:1,RB:1,FB:1,WR:3,TE:1,OT:2,OG:2,C:1,LE:1,RE:1,DT:2,SAM:1,WILL:1,MIKE:1,CB:2,FS:1,SS:1,K:1,P:1};
@@ -604,13 +605,13 @@ K:r=>({k:r.kpw*.5+r.kac*.5}),P:r=>({p:r.kpw*.5+r.kac*.5})};
 const EC=new WeakMap(),cpv=v=>v<66?66+(v-66)*.4:v;
 /* sim-side ratings: diminishing returns above 80 so superstars don't produce absurd stat lines */
 function er(p){const r=rt(p);let c=EC.get(p);if(c&&c.r===r)return c.e;const e={};for(const k of ALLK)e[k]=cpv(r[k]);EC.set(p,{r,e});return e}
-function comp(p){rt(p);const c=RC.get(p);return c.c||(c.c=CFN[GP(p.pos)]?CFN[GP(p.pos)](er(p)):{})}
+function comp(p){rt(p);const c=RC.get(p),g=GP(epos(p));if(c.c&&c.cg===g)return c.c;c.cg=g;return c.c=CFN[g]?CFN[g](er(p)):{}}
 const CDISP={QB:[['qa','Pass'],['qs','Run']],RB:[['rs','Spd'],['rpw','Pwr']],FB:[['fbb','Blk'],['fbu','Util']],WR:[['wh','Hands'],['ws','Spd']],TE:[['te','Rec'],['tb','Blk']],OL:[['pb','PassBlk'],['rk','RunBlk']],DL:[['dp','Rush'],['dr','Run']],LB:[['lr','Run'],['lc','Cov']],CB:[['cm','Man'],['cz','Zone']],S:[['sc','Cov'],['sr','Run']]};
 function styleTag(p){const x=style(p);if(!x.n)return'';const c=comp(p);return x.n+' <span class=m>('+(CDISP[GP(p.pos)]||[]).map(([k,n])=>n+' '+Math.round(c[k])).join(', ')+')</span>'}
 const CAL={qa:2.8,qs:6.1,rb:1.4,rs:-2.5,rpw:3,wh:1.2,ws:-1.7,te:6.5,tb:5.2,pb:-1.8,rk:1,dp:.2,dr:-.2,lr:0,lc:2.6,cm:-2.3,cz:1.3,sc:1.2,sr:5,k:1,p:1.2,fbb:-7.6,fbu:3,lp:7.5};
 /* corners: outside vs slot grades */
 const cbOut=p=>{const r=er(p);return r.mcv*.25+r.zcv*.08+r.prs*.2+r.spd*.2+r.jmp*.07+r.str*.1+r.cth*.03+r.tak*.07},cbSlot=p=>{const r=er(p);return r.mcv*.18+r.zcv*.2+r.agi*.18+r.acc*.1+r.cod*.07+r.tak*.1+r.pur*.05+r.prc*.12-1};
-function cbLine(H,nc,gf,tm){const top=H.filter(p=>p.pos==='CB').sort(dcmp).slice(0,nc);if(gf)while(top.length<nc)top.push(ghost('CB'));
+function cbLine(H,nc,gf,tm){const top=H.filter(p=>epos(p)==='CB').sort(dcmp).slice(0,nc);if(gf)while(top.length<nc)top.push(ghost('CB'));
  const ns=Math.max(0,nc-2);let slot;
  if(tm&&ns){const sr=roleFrom(H,tm.rl,'slc').slice(0,ns);slot=sr.slice();const fill=top.filter(p=>!slot.includes(p)).sort((a,b)=>(cbSlot(b)-cbOut(b)+(b.ghost?-99:0))-(cbSlot(a)-cbOut(a)+(a.ghost?-99:0)));while(slot.length<ns&&fill.length)slot.push(fill.shift())}
  else slot=top.slice().sort((a,b)=>(cbSlot(b)-cbOut(b)+(b.ghost?-99:0))-(cbSlot(a)-cbOut(a)+(a.ghost?-99:0))).slice(0,ns).sort((a,b)=>cbSlot(b)-cbSlot(a));
@@ -649,7 +650,7 @@ function dpkg(H,sch,name,gf,tm){const R=ROLES[sch],P=PKGS[sch][name]||PKGS[sch].
  if(tm){const mb=L=>{const a=L.filter(Boolean);return a.length?a.reduce((x,p)=>x+sxB(p,tm),0)/a.length:0},bd=mb(dl),bl2=mb(lb),bs=mb(sf);c.dp+=bd;c.dr+=bd;c.lr+=bl2;c.lc+=bl2;c.sc+=bs;c.sr+=bs}
  const m=PKM[PKGS[sch][name]?name:'base'];
  return{dl:dl.filter(Boolean),lb:lb.filter(Boolean),cb:cbs,sf:sf.filter(Boolean),c,cov:m.cov,box:m.box}}
-function units(t,sch){sch=sch||t.pd||'4-3 Multiple';const by={};for(const p of t.roster){if(p.inj>0)continue;(by[p.pos]=by[p.pos]||[]).push(p)}for(const k in by)by[k].sort(dcmp);for(const g in SLOTS)by[g]=slotsPick(t.roster.filter(p=>p.inj<=0),g,false);
+function units(t,sch){sch=sch||t.pd||'4-3 Multiple';const by={};for(const p of t.roster){if(p.inj>0)continue;(by[epos(p)]=by[epos(p)]||[]).push(p)}for(const k in by)by[k].sort(dcmp);for(const g in SLOTS)by[g]=slotsPick(t.roster.filter(p=>p.inj<=0),g,false);
  const av=(pos,n)=>{const a=(by[pos]||[]).slice(0,n).map(p=>eo(p));while(a.length<n)a.push(48);return a.reduce((s,x)=>s+x,0)/n};
  const u={qb:av('QB',1),fb:av('FB',1),rb:0,wr:av('WR',3),te:0,ol:av('OL',5),dl:av('DL',4),lb:av('LB',3),cb:av('CB',2),s:av('S',2),k:0,p:0};
  const cm=(pos,n,keys)=>{const L=(by[pos]||[]).slice(0,n),o={};for(const k of keys){let s=0;for(let i=0;i<n;i++)s+=i<L.length?comp(L[i])[k]:48;o[k]=s/n+(CAL[k]||0)}return o};
@@ -938,7 +939,7 @@ function uRef(){if(UREF&&UREFY===S.year&&UREF.n===S.teams.length)return UREF.m;c
 const QC=new WeakMap();function qcap(p){const r=rt(p);let c=QC.get(p);if(c&&c.r===r)return c.e;const e=Object.assign({},er(p));for(const k of['sac','mac','dac','thp','pac','tup','tor','bsk'])if(e[k]>80)e[k]=80+(e[k]-80)*QCF;QC.set(p,{r,e});return e}
 const WC=new WeakMap();function wcap(p){const r=rt(p);let c=WC.get(p);if(c&&c.r===r)return c.e;const e=Object.assign({},er(p));for(const k of['cth','cit','spc','srr','mrr','drr','rel'])if(e[k]>82)e[k]=82+(e[k]-82)*.55;WC.set(p,{r,e});return e}
 function mkSide(t,hf,C,OA){OA=OA||{};
- const ok=t.roster.filter(p=>p.inj<=0),by=(pos,n)=>{if(SLOTS[pos])return slotsPick(ok,pos,true);const a=ok.filter(p=>p.pos===pos).sort(dcmp).slice(0,n);while(a.length<n)a.push(ghost(pos));return a};
+ const ok=t.roster.filter(p=>p.inj<=0),by=(pos,n)=>{if(SLOTS[pos])return slotsPick(ok,pos,true);const a=ok.filter(p=>epos(p)===pos).sort(dcmp).slice(0,n);while(a.length<n)a.push(ghost(pos));return a};
  const isU=!!C,u=Object.assign({},units(t));
  const UR=uRef();for(const k in UR){const d=u[k]-UR[k];u[k]=UR[k]+(d>0?d*UP:d*DN)}
  const bo=(isU?cb('off')+({full:.6,bal:0,lim:-.4}[C.prac]||0):0)+hf+gauss()*FORM,bd=(isU?cb('def'):0)+hf+gauss()*FORM;
@@ -970,7 +971,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   if(pp>=.62){const d3=T.rf.d3[0];if(d3)lead=d3}
   else if(pp<=.38||(dist<=2&&pp<.55)){const pw=T.rf.pwr[0];if(pw)lead=pw}
   T.rb=lead?[lead,...rbs.filter(x=>x!==lead)]:[];/* a FB at power back: the backup FB lines up at FB */
-  T.fb=lead&&lead.pos==='FB'?(ok.filter(p=>p.pos==='FB'&&p!==lead).sort(dcmp)[0]||g('FB')):T.fb0;if(lead&&lead.pos==='FB'&&rbs.length)T.rb=[lead,...rbs];while(T.rb.length<3)T.rb.push(g('RB'));
+  T.fb=lead&&lead.pos==='FB'?(ok.filter(p=>epos(p)==='FB'&&p!==lead).sort(dcmp)[0]||g('FB')):T.fb0;if(lead&&lead.pos==='FB'&&rbs.length)T.rb=[lead,...rbs];while(T.rb.length<3)T.rb.push(g('RB'));
   for(const p of [...T.wr.slice(0,T.wset>=4?4:3),T.rb[0]])if(p&&!p.ghost)T.seen.add(p)};
  const ST=[new Map(),new Map()],TS=[0,1].map(()=>({pl:0,yd:0,py:0,ry:0,fd:0,t3a:0,t3c:0,t4a:0,t4c:0,to:0,sk:0,top:0,pn:0,pny:0,pin:0,kr:0,kry:0,pr:0,pry:0,fgm:0,fga:0,td:0,pen:0,peny:0,pts:[0,0,0,0,0]})),sc=[0,0];
  let q=1,t=900;
@@ -1987,13 +1988,13 @@ const roleList=(t,k)=>roleListFrom(t.roster,t.rl,k);
 const roleTop=(t,k,n)=>roleList(t,k).slice(0,n);
 /* the depth editor works on either a regular position or a role */
 function dctx(t){if(DPOS.startsWith('R:')){const k=DPOS.slice(2),R=DROLES[k];return{role:k,N:3,all:roleList(t,k),ids:null,st:R.st,lab:R.n,ov:p=>roleOvr(p,k),set(ids){t.rl=t.rl||{};t.rl[k]=ids},reset(){if(t.rl)delete t.rl[k]}}}
- const pos=DPOS,g=GP(pos),flex=g==='DL'||g==='LB',N=DEPN[pos]||3;
- const mine=t.roster.filter(p=>epos(p)===pos).sort(dcmp),others=flex?t.roster.filter(p=>GP(p.pos)===g&&epos(p)!==pos).sort((a,b)=>ovrAt(b,pos)-ovrAt(a,pos)):[];
+ const pos=DPOS,g=FG(pos),flex=!!FLEXG[pos],N=DEPN[pos]||3;
+ const mine=t.roster.filter(p=>epos(p)===pos).sort(dcmp),others=flex?t.roster.filter(p=>FG(p.pos)===g&&epos(p)!==pos).sort((a,b)=>ovrAt(b,pos)-ovrAt(a,pos)):[];
  return{pos,N,all:mine.concat(others),ids:mine.slice(0,N).map(p=>p.id),st:START[pos]||1,lab:DLAB[pos]||pos,ov:p=>ovrAt(p,pos),set(ids){depthSet(t,pos,ids)},reset(){t.roster.filter(p=>epos(p)===pos).forEach(p=>{delete p.dd;if(p.dpos)delete p.dpos})}}}
 let DPOS='QB',DSEL=null;
 const DEPN={WR:5,CB:5},DLAB={RB:'RB / HB',SAM:'SAM (OLB)',WILL:'WILL (OLB)',MIKE:'MIKE (MLB)',OT:'OT (tackle)',OG:'OG (guard)',C:'C (center)',LE:'LE (end)',RE:'RE (end)',DT:'DT (tackle)',FS:'FS (safety)',SS:'SS (safety)'};
 const ORD=['1st','2nd','3rd','4th','5th'],htStr=h=>h?Math.floor(h/12)+"'"+(h%12)+'"':'';
-function depthSet(t,pos,ids){const g=GP(pos),pool=t.roster.filter(p=>GP(p.pos)===g);pool.forEach(p=>{if(epos(p)===pos&&!ids.includes(p.id)){delete p.dd;if(p.pos!==pos)delete p.dpos}});ids.forEach((id,i)=>{const p=pool.find(x=>x.id===id);if(p){p.dd=i+1;if(p.pos===pos)delete p.dpos;else p.dpos=pos}})}
+function depthSet(t,pos,ids){const g=FG(pos),pool=t.roster.filter(p=>FG(p.pos)===g);pool.forEach(p=>{if(epos(p)===pos&&!ids.includes(p.id)){delete p.dd;if(p.pos!==pos)delete p.dpos}});ids.forEach((id,i)=>{const p=pool.find(x=>x.id===id);if(p){p.dd=i+1;if(p.pos===pos)delete p.dpos;else p.dpos=pos}})}
 function depthPos(v){DPOS=v;DSEL=null;render()}
 function depthReset(){const t=U();dctx(t).reset();DSEL=null;save();render()}
 function depthResetAll(){const t=U();t.roster.forEach(p=>{delete p.dd});delete t.rl;DSEL=null;save();render()}
