@@ -820,7 +820,7 @@ function mkProspect(){const r=F(),stars=r<.01?5:r<.09?4:r<.56?3:2,mean={5:79,4:7
  return p}
 function cpuNeed(p,t){const n=t.roster.filter(x=>x.pos===p.pos&&x.yr<4&&x.id!==p.id).length;return clamp((nd(t,p.pos)-n)*.3,-.4,.6)}
 const rateFor=(p,t)=>.55+t.prestige*.1+proxD(t,p)*.35+F()*.3+(isHR(t.id)?0:sgT(p,t)*.14+cpuNeed(p,t)*.06)+(fit(p,t)-.45)*.3;
-const schoolScore0=(p,t)=>t.prestige*.6+proxD(t,p)*2+F()*2+(p.stars>=4?t.prestige*.5:0)-Math.abs(2+t.prestige*.5-p.stars)*.8+(isHR(t.id)?0:sgT(p,t)*2.6+cpuNeed(p,t)*1.5);
+const schoolScore0=(p,t)=>t.prestige*.6+proxD(t,p)*2+F()*2+(p.stars>=4?t.prestige*.5:0)-Math.abs(2+t.prestige*.5-p.stars)*.8+sgT(p,t)*2.6+cpuNeed(p,t)*1.5;
 /* every recruit starts with a Top 10 of interested schools (built-in influence), everyone else has a trace; each school keeps a candidate list for its board */
 const schoolScore=(p,t)=>fit(p,t)*3+schoolScore0(p,t);
 function candScores(p){const sc=S.teams.filter(t=>t.id!==p.from).map(t=>({id:t.id,s:schoolScore0(p,t)})).sort((a,b)=>b.s-a.s).slice(0,90);sc.slice(0,45).forEach(x=>x.s+=fit(p,S.teams[x.id])*3);sc.sort((a,b)=>b.s-a.s);return sc}
