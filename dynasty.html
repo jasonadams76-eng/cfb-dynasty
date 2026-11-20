@@ -1804,7 +1804,7 @@ function lfilter(tr){const f=LF[tr?'tr':'hs'],ut=U(),nd=needMap(),q=f.q.trim().t
   if(f.reg&&p.home!==f.reg)return false;if(f.pt&&ptier(S.uid,p)<+f.pt)return false;
   if(tr){if(f.cls&&p.yr!==+f.cls)return false;if(f.from!==''&&p.from!==+f.from)return false;if(f.fconf&&S.teams[p.from]&&S.teams[p.from].conf!==f.fconf)return false}
   if(nmin!=null||nmax!=null){const e=expNil(p,ut);if(nmin!=null&&e<nmin)return false;if(nmax!=null&&e>nmax)return false}
-  if(f.top10==='yes'){const r=myR(p);if(!r||r>10)return false}if(f.top10==='lead'){if(myR(p)!==1)return false}
+  if(f.top10){const r=myR(p),lim=f.top10==='lead'?1:+f.top10;if(!r||r>lim)return false}
   return true});
  const key={rank:p=>-pScore(p),name:p=>p.name.toLowerCase(),pos:p=>POS.indexOf(p.pos),stars:p=>p.stars*1000+pScore(p),nil:p=>expNil(p,ut),int:p=>{const r=myR(p);return r?-(p.infl[S.uid]||0):1e9},stage:p=>STO.indexOf(p.stage),st:p=>tr?(S.teams[p.from]?S.teams[p.from].name:''):stOf(p),ht:p=>p.ht,wt:p=>p.wt,off:p=>(p.offs||[]).length+(p.offer?1:0),pipe:p=>ptier(S.uid,p),cls:p=>p.yr||0}[f.sort]||(p=>-p.stars);
  const d=f.dir;L.sort((a,b)=>{const x=key(a),y=key(b);return(x<y?-1:x>y?1:0)*d||(pScore(b)-pScore(a))});
@@ -1831,7 +1831,7 @@ function listView(tr){const f=LF[tr?'tr':'hs'];RF.type=tr?'tr':'hs';const ut=U()
  const flt='<div class=flt>'+'<label class=lf style="grid-column:span 2"><small>SEARCH NAME'+(tr?' OR SCHOOL':'')+'</small><input value="'+f.q.replace(/"/g,'')+'" placeholder="Type a name" onchange="lset(\'q\',this.value)"></label>'+
  lsel('POSITION','pos',posO)+lsel('ARCHETYPE','arch',[['','Any archetype']].concat(archs))+lsel('STATE','st',[['','Any state']].concat(STATES))+lsel('REGION','reg',[['','Any region']].concat(REG))+
  lsel('MIN STARS','smin',[['','Any'],1,2,3,4,5])+lsel('MAX STARS','smax',[['','Any'],1,2,3,4,5])+lsel('MIN HEIGHT','hmin',HTO)+lsel('MAX HEIGHT','hmax',HTO)+lnum('MIN WEIGHT','wmin','lbs')+lnum('MAX WEIGHT','wmax','lbs')+lnum('MIN NIL DEMAND','nmin','◆')+lnum('MAX NIL DEMAND','nmax','◆')+
- lsel('STAGE','stage',stO)+lsel('MY INFLUENCE','top10',[['','Any'],['yes','I am in his Top 10'],['lead','I lead']])+lsel('SCHOLARSHIP OFFERS','off',[['','Any'],['any','Offered by any school'],['none','Not offered by anyone'],['mine','Offered by me'],['notmine','Not offered by me']])+lsel('OFFERED BY','offby',teamO('Any school'),150)+lsel('LEADING SCHOOL','lead',teamO('Any school'),150)+
+ lsel('STAGE','stage',stO)+lsel('INTEREST','top10',[['','Any'],['10','Top 10'],['5','Top 5'],['3','Top 3'],['lead','Top School']])+lsel('SCHOLARSHIP OFFERS','off',[['','Any'],['any','Offered by any school'],['none','Not offered by anyone'],['mine','Offered by me'],['notmine','Not offered by me']])+lsel('OFFERED BY','offby',teamO('Any school'),150)+lsel('LEADING SCHOOL','lead',teamO('Any school'),150)+
  lsel('AVAILABILITY','avail',[['','Any'],['open','Still open to me'],['locked','Locked out'],['tome','Committed to me'],['toother','Committed elsewhere']])+lsel('ON MY BOARD','board',ynO('On my board','Not on my board'))+lsel('FILLS A NEED','need',ynO('Fills a team need','Not a need'))+lsel('FITS MY SCHEME','fit',[['','Any'],['yes','Fits my schemes']])+
  lsel('SCOUTED','scout',ynO('Scouted','Not scouted'))+lsel('MIN PIPELINE TIER','pt',[['','Any'],2,3,4,5])+lsel('FAVORITE INTEREST','fav',[['','Any (known only)']].concat(MOT.map(k=>[k,MOTN[k]])),150)+lsel('DEALBREAKER (KNOWN)','db',[['','Any'],['meet','I meet it'],['fail','I do not meet it']])+
  lsel('DEV / GEM (SCOUTED)','gem',[['','Any'],['gem','Gems'],['bust','Busts']])+
