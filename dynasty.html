@@ -380,7 +380,7 @@ const gp=p=>POSG[p.pos]||'qb',la=(id,p)=>abil(id+'.'+gp(p));
 const perk=id=>{const T=CTI[id];return!!S.coach&&!!T&&((T.base&&S.coach.back===T.name)||treeLv(id)>0)};
 const cxp=n=>{if(S.coach)S.coach.xp+=n};
 const stp=(k,n)=>{S.coach.st=S.coach.st||{};S.coach.st[k]=(S.coach.st[k]||0)+(n==null?1:n)};
-const staffC=t=>Math.round(STAFFC[t]*(1-[0,.1,.2,.3][abil('pb.fam')||0]));
+const staffC=t=>r5(STAFFC[t]*(1-[0,.1,.2,.3][abil('pb.fam')||0]));
 const scoutC=p=>ACT.scout.h,scP=p=>p.sc!=null?p.sc:(p.scouted?100:0),scInc=p=>la('rec',p)>=1?50:25;
 const CALLK=OFFK.concat(DEFK);
 function regB(p){const h=U().region,hm=p.home,rl=abil('pb.rel');let m=0;if(hm===h)m+=.05*abil('pb.roots')+(rl>=1?.04:0);else if((RADJ[h]||[]).includes(hm)){if(rl>=2)m+=.04;if(rl>=3)m+=.04}else if(rl>=3)m+=.04;return m}
@@ -1258,7 +1258,7 @@ function genAD(t){const p=t.prestige;const dem=p>=5?pick(['Impatient','Impatient
  const rv=rival(t);g.push(rv>=0&&S.sched[t.id].some(x=>x&&x.o===rv)?{k:'rival',txt:'Beat your rival ('+S.teams[rv].name+')',dp:60,firm:p>=4}:{k:'ppg',txt:'Average 28+ points per game',dp:60});
  g.push(pick([{k:'conf',txt:'Win the conference title',dp:110},{k:'class',txt:'Sign a Top-'+(p>=4?10:p>=3?25:50)+' recruiting class',n:p>=4?10:p>=3?25:50,dp:80},{k:'ppg',txt:'Average 30+ points per game',dp:70},{k:'fac',txt:'Maintain facility tier',dp:0,firm:1}]));
  return{dem,goals:g}}
-const baseDP=t=>Math.round((1200+t.prestige*380+t.g.brand*150+t.g.tradition*120)*(1+.04*abil('rain.budget')));
+const baseDP=t=>r5((1200+t.prestige*380+t.g.brand*150+t.g.tradition*120)*(1+.04*abil('rain.budget')));
 function startSeason(first){if(!first){S.year++}S.teams.forEach(t=>{t.w=t.l=t.cw=t.cl=t.pf=t.pa=0;t.champ=false;t.roster.forEach(p=>{p.st={};p.xp=0;p.inj=0});if(!isH(t.id))stickyPB(t)});
  genSchedule();S.stage='pre';S.week=1;S.rw=0;S.pw=0;S.hu=0;S.cfp=null;S.bowls=null;S.res=[];S.potw=null;S.potwH=[];updateRanks();if(first||!S.pros.length||!S.keepPros)genClass();S.keepPros=false;
  eachH(()=>{S.ad=genAD(U());if(first){S.dpTotal=baseDP(U());U().roster.forEach(p=>{p.nc=r5(expRoster(p,U())*(.85+F()*.3))})}S.hu=0;S.recap=null;S.board=S.board||[]})}
@@ -1325,7 +1325,7 @@ function endSeason(){const c=S.cfp;
  S.dpool=[];S.teams.forEach(tm=>{const seniors=tm.roster.filter(p=>p.yr===4);seniors.filter(p=>p.ovr>=70).forEach(p=>S.dpool.push({id:p.id,n:p.name,pos:p.pos,ovr:p.ovr,tid:tm.id}));tm.draftees=seniors.filter(p=>p.ovr>=80).length;seniors.filter(p=>p.ovr>=80).forEach(p=>addDraft(tm,p));tm.roster=tm.roster.filter(p=>p.yr<4)});
  updGrades();
  eachH(()=>{const t=U(),tit=S.champ===t.id,rc=S.recap;
-  S.dpTotal=Math.round(baseDP(t)*1+rc.pay+rc.dp+(S.staff.find(s=>s.r==='fund')?[60,120,200,300][S.staff.find(s=>s.r==='fund').t]:0));
+  S.dpTotal=r5(baseDP(t)*1+rc.pay+rc.dp+(S.staff.find(s=>s.r==='fund')?[60,120,200,300][S.staff.find(s=>s.r==='fund').t]:0));
   S.facStart=t.fac;if(S.sec<20&&!tit){S.recap.fired=true;S.fired=true;note('You were fired by '+t.name+'.')}
   S.jobs=S.teams.filter(x=>!isH(x.id)).sort(()=>F()-.5).slice(0,5).map(x=>x.id)});
  S.teams.forEach(tm=>{tm.po0=tm.po;tm.pd0=tm.pd});S.stage='recap'}
@@ -1393,8 +1393,8 @@ function finishOff(){lateSign();S.teams.forEach(t=>t.roster.filter(p=>p.ath).for
  if(t.fac<S.facTarget){if(perk('pb'))cxp(2*(S.facTarget-t.fac));t.fac=S.facTarget}});
  startSeason(false);eachH(()=>{S.recapPrev=S.recap})}
 /* ===== actions ===== */
-function dpUsed(){const t=U();return t.roster.reduce((s,p)=>s+(p.yr<4||S.stage!=='recap'||true?p.nc||0:0),0)+S.staff.reduce((s,x)=>s+staffC(x.t)*(S.staff.find(y=>y.r==='ga')?1-.05*(S.staff.find(y=>y.r==='ga').t+1):1),0)+FACM[t.fac]+(S.facUpg||0)+S.pros.reduce((s,p)=>s+(p.offer&&p.stage!=='signed'&&p.stage!=='gone'?p.offer.nil:0),0)}
-const dpAvail=()=>Math.round(S.dpTotal-dpUsed());
+function dpUsed(){const t=U();return t.roster.reduce((s,p)=>s+(p.yr<4||S.stage!=='recap'||true?p.nc||0:0),0)+S.staff.reduce((s,x)=>s+r5(staffC(x.t)*(S.staff.find(y=>y.r==='ga')?1-.05*(S.staff.find(y=>y.r==='ga').t+1):1)),0)+FACM[t.fac]+(S.facUpg||0)+S.pros.reduce((s,p)=>s+(p.offer&&p.stage!=='signed'&&p.stage!=='gone'?p.offer.nil:0),0)}
+const dpAvail=()=>Math.round((S.dpTotal-dpUsed())/5)*5;
 function act(id,type,m){const p=P(id),A=ACT[type];let c=A.h;if(type==='scout')c=scoutC(p);
  if(p.locked)return toast('Locked out — not in their top schools');if(!S.board.includes(p.id)){if(S.board.length>=50)return toast('Recruiting board full (50). Remove someone first.');S.board.push(p.id)}if(hoursLeft()<c)return toast('Not enough hours');
  if(!['scout','offer'].includes(type)&&(p.hu||0)+c>capPer(p))return toast('Weekly per-prospect cap reached');
@@ -2074,7 +2074,7 @@ function impRun(){impMsg(importText(SU.txt,SU.imt));setup()}
 function impFiles(fl){const arr=[...fl];let done=0,tot={n:0,miss:new Set()};arr.forEach(f=>{const rd=new FileReader();rd.onload=()=>{const r=importText(rd.result,SU.imt);tot.n+=r.n;r.miss.forEach(x=>tot.miss.add(x));if(++done===arr.length){impMsg({n:tot.n,miss:[...tot.miss]});setup()}};rd.readAsText(f)})}
 function setup(){const ts=S.teams.filter(t=>!SU.cf||t.conf===SU.cf).sort((a,b)=>b.prestige-a.prestige||tOvr(b)-tOvr(a));
  $('app').innerHTML='<div class="hm wide"><div class=hero><div class=hball>🏈</div><h1>CFB <b>Dynasty</b></h1><div class=hsub>New dynasty · Choose your coach and school</div><div class=hline></div></div><div class="hc hot"><div class=hhd><div class=hic>🎓</div><div><div class=hk>Step 1</div><h2>Create your coach</h2></div></div><div class=row><label>Coach name <input value="'+SU.name+'" onchange="SU.name=this.value"></label><label>Backstory <select onchange="SU.back=this.value">'+Object.keys(BACK).map(b=>'<option'+(SU.back===b?' selected':'')+'>'+b+'</option>').join('')+'</select></label></div><p class=m>Recruiter, Tactician and Motivator trees are open from the start (Recruiter: recruiting · Tactician: schemes &amp; game plan · Motivator: development &amp; retention); your backstory archetype is 3 Coach Points cheaper per tier. Advanced archetypes unlock through career achievements.</p></div>'+
- '<div class=hc><div class=hhd><div class=hic>🏟️</div><div><div class=hk>Step 2</div><h2>Pick your school ('+S.teams.length+' FBS teams)</h2></div></div><div class=row><select onchange="SU.cf=this.value;setup()"><option value="">All conferences</option>'+CONFS.map(c=>'<option'+(SU.cf===c?' selected':'')+'>'+c+'</option>').join('')+'</select><button class="bt pri" '+(SU.team==null?'disabled':'')+' onclick="startNew()">'+(SU.team!=null?'Start Dynasty as '+S.teams[SU.team].name:'Choose a school to start')+'</button><button class=bt onclick="ask(\'reroll\',()=>{buildLeague();render()})">'+(CF==='reroll'?'Click again to re-roll':'Re-roll league')+'</button></div>'+tbl(['School','Conf','Prestige','OVR','Roster','Best offense','Best defense','Budget (DP)',''],ts.map(t=>{const u=units(t);let bo='',so=0,bd='',sd=0;for(const k in OFF){const e=offEff(t,k,u);if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u);if(e>sd){sd=e;bd=k}}return'<tr class="clk '+(SU.team===t.id?'me':'')+'" onclick="SU.team='+t.id+';setup()"><td>'+t.name+'</td><td>'+t.conf+'</td><td>'+'★'.repeat(t.prestige)+'</td><td>'+tOvr(t).toFixed(1)+'</td><td>'+(t.real?'real':'generated')+'</td><td>'+bo+'</td><td>'+bd+'</td><td>'+baseDP(t)+'</td><td>'+(SU.team===t.id?'✔':'')+'</td></tr>'}))+'</div></div>'}
+ '<div class=hc><div class=hhd><div class=hic>🏟️</div><div><div class=hk>Step 2</div><h2>Pick your school ('+S.teams.length+' FBS teams)</h2></div></div><div class=row><select onchange="SU.cf=this.value;setup()"><option value="">All conferences</option>'+CONFS.map(c=>'<option'+(SU.cf===c?' selected':'')+'>'+c+'</option>').join('')+'</select><button class="bt pri" '+(SU.team==null?'disabled':'')+' onclick="startNew()">'+(SU.team!=null?'Start Dynasty as '+S.teams[SU.team].name:'Choose a school to start')+'</button><button class=bt onclick="ask(\'reroll\',()=>{buildLeague();render()})">'+(CF==='reroll'?'Click again to re-roll':'Re-roll league')+'</button></div>'+tbl(['School','Conf','Prestige','OVR','OFF','DEF','Roster','Best offense','Best defense','Budget (DP)',''],ts.map(t=>{const u=units(t);let bo='',so=0,bd='',sd=0;for(const k in OFF){const e=offEff(t,k,u);if(e>so){so=e;bo=k}}for(const k in DEF){const e=defEff(t,k,.5,u);if(e>sd){sd=e;bd=k}}return'<tr class="clk '+(SU.team===t.id?'me':'')+'" onclick="SU.team='+t.id+';setup()"><td>'+t.name+'</td><td>'+t.conf+'</td><td>'+'★'.repeat(t.prestige)+'</td><td><b>'+Math.round((so+sd)/2+stPts(u)/.72+spPts(u))+'</b></td><td>'+Math.round(so)+'</td><td>'+Math.round(sd)+'</td><td>'+(t.real?'real':'generated')+'</td><td>'+bo+'</td><td>'+bd+'</td><td>'+baseDP(t)+'</td><td>'+(SU.team===t.id?'✔':'')+'</td></tr>'}))+'</div></div>'}
 function matAll(){if(!S||!S.teams||S.mv===2)return;S.teams.forEach(t=>t.roster.forEach(p=>{if(OWN[p.pos])mat(p)}));S.mv=2}
 function startNew(){if(SU.team==null)return;matAll();S.uid=SU.team;S.coach={name:SU.name,back:SU.back,xp:0,cp:100,ab:{},unl:[],sp:{},st:{},v2:1,wins:0,losses:0,titles:0,prestige:.4};Object.assign(S,{htv:2,hist:[],log:[],board:[],staff:[],practice:'bal',plan:'bal',facUpg:0,facTarget:U().fac,sec:70,fired:false,pros:[],keepPros:false});S.facStart=U().fac;S.hum=[S.uid];S.users={};S.pa=S.uid;
  S.stage='pre';startSeason(true);save();TAB='actions';SUB.actions='stage';render()}
