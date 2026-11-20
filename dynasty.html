@@ -1036,7 +1036,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   C+=(D.cv||0)+(dep===2?(v.sc-72)*.7*D.DS.shell:dep===1?(v.sc-72)*.12*D.DS.shell:-(D.DS.shell-.5)*10);
   const rr=dep===0?sr.srr:dep===1?sr.mrr:sr.drr,sep=rr*.5+sr.spd*.22+sr.agi*.08+sr.rel*.2;
   const qa=dep===0?rq.sac:dep===1?rq.mac:rq.dac*.65+rq.thp*.35;
-  let z=(O.OS.pz||0)+(D.DS.dz||0)+[.8,.05,-.8][dep]+GI*(.042*(qa-75)+.016*((sr.cth*.55+sr.cit*.25+sr.spc*.2)-75))+.034*GS*(sep-C)+(rush?-.5+.012*(rq.tup-65)+.006*(rq.tor-65):0)+(pa?.12+.012*(rq.pac-65):0);
+  let z=(O.OS.pz||0)+(D.DS.dz||0)+[1.02,.22,-.68][dep]+GI*(.042*(qa-75)+.016*((sr.cth*.55+sr.cit*.25+sr.spc*.2)-75))+.034*GS*(sep-C)+(rush?-.5+.012*(rq.tup-65)+.006*(rq.tor-65):0)+(pa?.12+.012*(rq.pac-65):0);
   const zr=z,zc=1.7;z=zr>zc?zc+(zr-zc)*.75:zr;
   add(o,qb,'pa');add(o,tg,'tgt');
   const air=ti===4?R(-3,4):dep===0?R(1,8):dep===1?R(7,16):clamp(17+Math.round(ex(8)),17,48);
@@ -1066,7 +1066,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   if(!isKeep&&fbx&&F()<(dist<=1?.12:dist<=2?.07:.012)*O.OS.fb*(style(fbx).n==='Utility'?1.5:.8))c=fbx;
   const cr=er(c),cc=c.pos==='FB'?CFN.RB(cr):comp(c),out=!isKeep&&F()<.34;
   const rb=u.rk*.88+u.tb*.12,rdf=v.dr*.42+v.lr*.38+v.sr*.15+v.cz*.05+(D.DS.box-1)*10+(D.bx||0);
-  let mu=(O.OS.rm||0)+(D.DS.dm||0)+3.3+.1*GS*(rb-rdf)+O.OS.opt*(cq.qs-60)*.04*GI;
+  let mu=(O.OS.rm||0)+(D.DS.dm||0)+3.45+.1*GS*(rb-rdf)+O.OS.opt*(cq.qs-60)*.04*GI;
   if(!isKeep)mu+=GI*.03*O.OS.fb*(u.fbb-70);
   if(isKeep)mu+=GI*.05*(cc.qs-70);else mu+=GI*(.045*(cc.rb-76)+(out?.045*(cc.rs-72):.03*(cc.rpw-72)));
   if(dist<=2&&!isKeep)mu+=.05*(cc.rpw-72);
@@ -1167,7 +1167,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
    if(pn&&pn.acc){for(let k=jn.length-1;k>=0;k--){const[m,key,old,had]=jn[k];if(had)m[key]=old;else delete m[key]}restTS(ts0);applyPen(pn);continue}
    if(pn)logPen(pn,false);
    TS[o].pl++;if(down===3)TS[o].t3a++;if(down===4)TS[o].t4a++;
-   let sec=r.sec/(O.O.tempo*(O.isU&&ag===1?1.04:ag===-1?.96:1));if(hurry)sec*=.55;else if(!ot&&q===4&&lead>0&&t<720&&r.t!=='inc')sec*=1.3;
+   let sec=r.sec*1.09/(O.O.tempo*(O.isU&&ag===1?1.04:ag===-1?.96:1));if(hurry)sec*=.55;else if(!ot&&q===4&&lead>0&&t<720&&r.t!=='inc')sec*=1.3;
    TS[o].yd+=r.yds;
    if(r.t==='sack')TS[o].py+=r.yds;
    if(r.t==='int'){tick(sec,o);let ny;if(r.spot>=100)ny=20;else ny=clamp(100-r.spot+r.ret,1,99);
