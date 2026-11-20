@@ -831,8 +831,9 @@ function favGate(p){const k=p.mot&&p.mot[0];if(!k)return null;const wk=S.year+'|
  return tid=>1-clamp((c.best-g(tid)-.2-(tid===S.uid&&la('str',p)>=3?.15:0))*.85,0,.55)}
 const r5=v=>Math.max(0,Math.round((+v||0)/5)*5);
 const anOf=tid=>{if(!isH(tid))return 1;const a=staffOf(tid).find(x=>x.r==='analyst');return 1-.03*(a?a.t+1:0)};
-const expNil=(p,t)=>{const base={5:110,4:55,3:22,2:9}[p.stars]*(1.45-.12*t.prestige)*(p.db==='brand'?1.15:1)*(p.type==='tr'?1.5:1);const an=anOf(t.id);return Math.max(r5(base*an*(t.nk||1)),0)};
-const expRoster=(p,t)=>{const o=p.ovr;let b=o>=90?90:o>=85?55:o>=80?30:o>=75?14:o>=70?6:2;b*=(p.yr>=3?1.1:1)*(1.3-.07*t.prestige)*(p.db==='brand'?1.15:1);const an=anOf(t.id);return r5(b*an*(t.nk||1))};
+const NILMAX=150;/* no player asks more than this */
+const expNil=(p,t)=>{const base={5:110,4:55,3:22,2:9}[p.stars]*(1.45-.12*t.prestige)*(p.db==='brand'?1.15:1)*(p.type==='tr'?1.5:1);const an=anOf(t.id);return clamp(r5(base*an*(t.nk||1)),0,NILMAX)};
+const expRoster=(p,t)=>{const o=p.ovr;let b=o>=90?90:o>=85?55:o>=80?30:o>=75?14:o>=70?6:2;b*=(p.yr>=3?1.1:1)*(1.3-.07*t.prestige)*(p.db==='brand'?1.15:1);const an=anOf(t.id);return Math.min(r5(b*an*(t.nk||1)),NILMAX)};
 /* ===== player happiness: favorite categories, expectations and NIL decide who stays ===== */
 const NBG=[4.5,3.2,2.2,0],projO=x=>x.ovr+(x.cls||x.new?0:(NBG[x.yr-1]||0));
 function ensureInt(p){if(!p.mot){mkInterest(p,false);delete p.kn}return p}
@@ -841,7 +842,7 @@ const NK={tol:.10,a:1.5,b:3,dt:.07,m:1.2,base:.01};
 function gradeR(t,k,p,ctx){if(k==='playtime'){const key=t.id+'|'+p.pos,L=ctx[key]||(ctx[key]=t.roster.filter(x=>x.pos===p.pos&&x.yr<4)),mp=projO(p),st=START[p.pos];let n=0,yb=0;for(const x of L){if(x===p)continue;if(projO(x)>mp){n++;if(x.yr<p.yr)yb++}}let g=n<st?1:clamp(1-(n-st+1)*.25,.04,1);if(n>=st)g=clamp(g*(1-.1*Math.min(3,yb)),.04,1);return g}return grade(t,k,p)}
 function satisf(p,t,nil,ctx){ensureInt(p);ctx=ctx||{};const e=xpec(p),cats=[];let U=0;
  for(let i=0;i<3;i++){const k=p.mot[i],g=gradeR(t,k,p,ctx),gp=p.gp&&p.gp[i]!=null?p.gp[i]:g,drop=Math.max(0,gp-g),ep=k==='playtime'?0:(p.ep!=null?p.ep:e),gap=Math.max(0,e-Math.max(g+NK.tol,ep)),w=i?.5:1,u=w*(NK.a*gap+(g<e?NK.b*Math.max(0,drop-NK.dt):0));U+=u;cats.push({k,g,e,gp,drop,u})}
- const want=expRoster(p,t),need=r5(want*(1+NK.m*U));if(nil===undefined)nil=p.nc||0;
+ const want=expRoster(p,t),need=Math.min(r5(want*(1+NK.m*U)),NILMAX);if(nil===undefined)nil=p.nc||0;
  const me=t.id===S.uid,ni=nil*(me?1+.03*abil('rain.stay'):1),r=need?ni/need:1;let P=NK.base+.97*Math.pow(clamp(1-r,0,1),1.3);if(me)P*=1-(la('mm',p)>=3?.10:0);
  return{U,need,P:clamp(P,0,.98),cats,e,want}}
 const cpuNil=(p,t)=>r5(expRoster(p,t)*clamp(.86+.05*t.prestige+(F()-.5)*.2,.72,1.3));
