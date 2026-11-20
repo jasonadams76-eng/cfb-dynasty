@@ -870,7 +870,7 @@ function buildPool(list){const per={};S.teams.forEach(t=>per[t.id]=[]);
  for(const t of S.teams){const L=per[t.id].sort((a,b)=>b[0]-a[0]).slice(0,400).map(x=>x[1]);t.rcl=L.concat((t.rcl||[]).filter(id=>!L.includes(id)));if(t.rcl.length>300)t.rcl.length=300;if(!t.board)t.board=[]}}
 const CLASSN=3600;
 function genClass(){SGM.clear();S.pros=[];S.teams.forEach(t=>{t.board=[];t.rcl=[]});for(let i=0;i<CLASSN;i++)S.pros.push(mkProspect());buildPool(S.pros)}
-const maxHours=()=>{const r=S.staff.find(s=>s.r==='recruiter');return Math.round(250+U().prestige*60+(r?[20,40,70,100][r.t]:0))};
+const maxHours=()=>{const r=S.staff.find(s=>s.r==='recruiter');return Math.round(400+U().prestige*130+(r?[30,60,105,150][r.t]:0))};
 const hoursLeft=()=>maxHours()-S.hu,capPer=p=>50+(p&&la('el',p)>=4?10:0);
 const vT=p=>(30+p.stars*8)*p.pace,hT=p=>vT(p)+25;
 function effInfl(p,tid,g0){let v=p.infl[tid]||0;if(p.stage!=='hard'){const gm=g0===undefined?favGate(p):g0;if(gm){let m=gm(tid);const nl=nilOf(p,tid);if(nl!=null&&m<1){const r=nl/Math.max(1,expNil(p,S.teams[tid]));m+=(1-m)*clamp((r-1)/1.2,0,1)}v*=m}}if(['open','top8','top5','top3'].includes(p.stage)){const off=hasOff(p,tid);if(!off)return Math.min(v,thr(p).vt*.9)}return v}
