@@ -1036,7 +1036,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   C+=(D.cv||0)+(dep===2?(v.sc-72)*.7*D.DS.shell:dep===1?(v.sc-72)*.12*D.DS.shell:-(D.DS.shell-.5)*10);
   const rr=dep===0?sr.srr:dep===1?sr.mrr:sr.drr,sep=rr*.5+sr.spd*.22+sr.agi*.08+sr.rel*.2;
   const qa=dep===0?rq.sac:dep===1?rq.mac:rq.dac*.65+rq.thp*.35;
-  let z=(O.OS.pz||0)+(D.DS.dz||0)+[1.45,.62,-.28][dep]+GI*(.042*(qa-75)+.016*((sr.cth*.55+sr.cit*.25+sr.spc*.2)-75))+.034*GS*(sep-C)+(rush?-.5+.012*(rq.tup-65)+.006*(rq.tor-65):0)+(pa?.12+.012*(rq.pac-65):0);
+  let z=(O.OS.pz||0)+(D.DS.dz||0)+[.8,.05,-.8][dep]+GI*(.042*(qa-75)+.016*((sr.cth*.55+sr.cit*.25+sr.spc*.2)-75))+.034*GS*(sep-C)+(rush?-.5+.012*(rq.tup-65)+.006*(rq.tor-65):0)+(pa?.12+.012*(rq.pac-65):0);
   const zr=z,zc=1.7;z=zr>zc?zc+(zr-zc)*.75:zr;
   add(o,qb,'pa');add(o,tg,'tgt');
   const air=ti===4?R(-3,4):dep===0?R(1,8):dep===1?R(7,16):clamp(17+Math.round(ex(8)),17,48);
@@ -1047,7 +1047,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
     const ret=Math.min(45,Math.round(ex(9))),pick6=F()<.035;if(pick6)add(d,ip,'dtd');return{t:'int',yds:0,sec:10,to:'int',spot,ret,rtd:pick6,ov:sep-C,df,tg,rush,dep}}
    if(F()<.42)add(d,df,'pd');return{t:'inc',yds:0,sec:6+R(0,2),ov:sep-C,df,tg,rush,dep}}
   const yR=sr.spd*.35+sr.agi*.1+sr.cod*.05+sr.bcv*.15+sr.jkm*.1+sr.btk*.15+sr.acc*.1,tkR=(rd.tak+rd.pur)/2;
-  let yac=Math.round(ex(.83*[4.2,3.2,1.8][dep]*(ti===4?1.25:1)*Math.exp(.028*(yR-72))*Math.exp(-.012*(tkR-72))));
+  let yac=Math.round(ex(.55*[4.2,3.2,1.8][dep]*(ti===4?1.25:1)*Math.exp(.028*(yR-72))*Math.exp(-.012*(tkR-72))));
   if(F()<clamp(.014+.0016*(sr.spd-75)+.0006*(yR-72),.004,.12)*(dep===2?.5:1))yac+=Math.round(5+ex(20));
   const yds=Math.min(air+yac,100-y),td=y+yds>=100;
   add(o,qb,'pc');add(o,qb,'py',yds);mxs(o,qb,'pl',yds);add(o,tg,'rec');add(o,tg,'cy',yds);mxs(o,tg,'cl',yds);if(yds>=20)add(o,tg,'cbig');TS[o].py+=yds;
@@ -1066,7 +1066,7 @@ function simGame(a,b,neutral,mode){const wantBox=mode==='box';CLUTCH=false;syncU
   if(!isKeep&&fbx&&F()<(dist<=1?.12:dist<=2?.07:.012)*O.OS.fb*(style(fbx).n==='Utility'?1.5:.8))c=fbx;
   const cr=er(c),cc=c.pos==='FB'?CFN.RB(cr):comp(c),out=!isKeep&&F()<.34;
   const rb=u.rk*.88+u.tb*.12,rdf=v.dr*.42+v.lr*.38+v.sr*.15+v.cz*.05+(D.DS.box-1)*10+(D.bx||0);
-  let mu=(O.OS.rm||0)+(D.DS.dm||0)+3.68+.1*GS*(rb-rdf)+O.OS.opt*(cq.qs-60)*.04*GI;
+  let mu=(O.OS.rm||0)+(D.DS.dm||0)+3.3+.1*GS*(rb-rdf)+O.OS.opt*(cq.qs-60)*.04*GI;
   if(!isKeep)mu+=GI*.03*O.OS.fb*(u.fbb-70);
   if(isKeep)mu+=GI*.05*(cc.qs-70);else mu+=GI*(.045*(cc.rb-76)+(out?.045*(cc.rs-72):.03*(cc.rpw-72)));
   if(dist<=2&&!isKeep)mu+=.05*(cc.rpw-72);
