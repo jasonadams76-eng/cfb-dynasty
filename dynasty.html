@@ -357,17 +357,7 @@ const CT=[
  {k:'int',name:'High Integrity',tiers:[['Gift Of Gab','Gain 3 additional persuade attempts per season','You get 6 Persuade attempts for Players Leaving instead of 3'],['Roster Retainer','Persuades have a higher success rate','Persuade success chance +15%'],['Full Refund','Successful persuades refund the attempt','A successful Persuade does not use up an attempt']]},
  {k:'prog',name:'Faster Progression',tiers:[['Smart Goals','Earn additional XP from all completed goals','+15 Coach XP for every AD goal you complete'],['Portal Preview','Able to see other school\'s AT Risk players in My School','Transfer-portal players you scout show their development trait'],['Friends & Family Discount','Archetypes are cheaper if owned by another coach','Every ability tier costs 1 CP less']]},
  {k:'rel',name:'Relationship Builder',tiers:[['Invest','Upgrade your school\'s best two pipelines by one tier','+4% influence on recruits from your own region'],['Making Inroads','Upgrade your school\'s five best pipelines by one tier','+4% influence on recruits from regions next to yours'],['Share The Wealth','Upgrade your school\'s five worst pipelines by one tier','+4% influence on recruits from every other region']]},
- {k:'roots',name:'Strong Roots',tiers:[['Giving Back','Boost to your primary pipeline','+5% influence on recruits from your own region'],['Household Name','Boost to starting interest for recruits from your primary pipeline','+5% more influence on recruits from your own region'],['Hometown Discount','Recruits from your primary pipeline gain extra influence boosts','+5% more influence on recruits from your own region']]}]},
-{id:'rain',name:'Rainmaker',cost:[15,15,15,15],perk:'No archetype perk (Rainmaker is a premium archetype on the site; open here)',fams:[
- {k:'deal',name:'Deal Maker',tiers:4,desc:'Increased recruiting influence from NIL offers',eff:'+10% influence from NIL offers per tier'},
- {k:'budget',name:'Budget Booster',tiers:4,desc:'Increased Dynasty Points from My School grades',eff:'+4% annual Dynasty Points per tier'},
- {k:'stay',name:'Stay Power',tiers:4,desc:'Increased NIL offer influence to reduce the risk of a player leaving',eff:'NIL retention effect +3% per tier'},
- {k:'incent',name:'Contract Incentives',tiers:4,desc:'Increased Dynasty Points from AD expectations',eff:'+10% Dynasty Points from AD goals per tier'}]},
-{id:'vis',name:'Visionary',cost:[15,15,15,15],perk:'No archetype perk (open here)',fams:[
- {k:'pro',name:'Pro Pipeline',tiers:4,desc:'Increase players NFL draft stock',eff:'Your draft prospects are rated a bit higher by NFL teams (a few picks per tier)'},
- {k:'prac',name:'Practice Makes Perfect',tiers:4,desc:'Increased player progression from practice',eff:'+10% practice XP per tier'},
- {k:'hot',name:'Hot Start',tiers:4,desc:'Increased chance of players starting hot from practice',eff:'+0.25 to all your units in games per tier'},
- {k:'bonus',name:'Signing Bonus',tiers:4,desc:'Increased coach points when signing a new coach contract',eff:'+3 Coach Points per season per tier'}]}];
+ {k:'roots',name:'Strong Roots',tiers:[['Giving Back','Boost to your primary pipeline','+5% influence on recruits from your own region'],['Household Name','Boost to starting interest for recruits from your primary pipeline','+5% more influence on recruits from your own region'],['Hometown Discount','Recruits from your primary pipeline gain extra influence boosts','+5% more influence on recruits from your own region']]}]}];
 /* normalize: expand group trees into keyed families, and numeric-tier families into 4 tiers */
 CT.forEach(T=>{T.fam=[];if(T.grp)GN.forEach(([g,gn,sn])=>{if(g==='kp'&&T.nokp)return;const tiers=T.tacg?TACG[g].map(x=>[x[0],x[1],'+2 to each rating listed above for your '+sn]):T.tiers.map(x=>[x[0].replace('{G}',sn),x[1].replace(/\{g\}/g,sn),x[2].replace(/\{g\}/g,sn)]);T.fam.push({k:g,name:gn,tiers,kp:g==='kp'})});(T.fams||[]).forEach(f=>{if(typeof f.tiers==='number')f.tiers=Array.from({length:f.tiers},(_,i)=>[f.name+' '+(i+1),f.desc,f.eff]);T.fam.push(f)})});
 const CTI={};CT.forEach(T=>CTI[T.id]=T);
@@ -398,7 +388,7 @@ function coachAdj(me){const o={};if(!GCX)return o;const add=(ks,v)=>{if(!v)retur
  if(me){for(const[g]of GN){const L=id=>abil(id+'.'+g);}
   const q=k=>abil('sg.'+k);add(OFFK,.3*q('fto')+.2*q('do')+(q('do')>=1&&!X.home&&!X.neutral?.2:0));add(['qa','qs','wh','ws','te','tb'],.6*q('pgo'));add(['rb','rs','rpw','rk'],.6*q('gpo'));
   add(DEFK,.3*q('ftd')+.2*q('dd')+(q('dd')>=1&&X.home?.2:0));add(['cm','cz','sc','sr'],.6*q('pgd'));add(['dr','lr'],.6*q('gpd'));
-  add(CALLK,(X.big&&abil('ceo.gas')?.7:0)+.25*abil('vis.hot')+(!X.home&&!X.neutral&&tn_>=2?.4:0)+(X.riv&&tn_>=3?.4:0))}
+  add(CALLK,(X.big&&abil('ceo.gas')?.7:0)+(!X.home&&!X.neutral&&tn_>=2?.4:0)+(X.riv&&tn_>=3?.4:0))}
  else add(CALLK,(X.home&&tn_>=1?-.4:0)+(X.riv&&tn_>=3?-.4:0));return o}
 function trk(opp,win,kind){if(!S.coach||!win)return;if(S.rk&&S.rk[opp]<=25)stp('t25');if(kind===0&&opp===rival(U()))stp('rv');if(kind===1)stp('bw');if(kind===2){stp('pw');if(perk('ceo'))cxp(250)}}
 function xtB(p,X){if(!S.coach||!abil('tac.x'))return 0;if(!U().roster.includes(p))return 0;const f=POSG[p.pos],t=POSG[X],l=abil('tac.x');return(f==='ol'&&t==='dl'&&l>=1)||(f==='dl'&&t==='ol'&&l>=2)||(p.pos==='WR'&&t==='db'&&l>=3)||(f==='db'&&X==='WR'&&l>=4)?5:0}
@@ -845,7 +835,7 @@ function gradeR(t,k,p,ctx){if(k==='playtime'){const key=t.id+'|'+p.pos,L=ctx[key
 function satisf(p,t,nil,ctx){ensureInt(p);ctx=ctx||{};const e=xpec(p),cats=[];let U=0;
  for(let i=0;i<3;i++){const k=p.mot[i],g=gradeR(t,k,p,ctx),gp=p.gp&&p.gp[i]!=null?p.gp[i]:g,drop=Math.max(0,gp-g),ep=k==='playtime'?0:(p.ep!=null?p.ep:e),gap=Math.max(0,e-Math.max(g+NK.tol,ep)),w=i?.5:1,u=w*(NK.a*gap+(g<e?NK.b*Math.max(0,drop-NK.dt):0));U+=u;cats.push({k,g,e,gp,drop,u})}
  const want=expRoster(p,t),need=Math.min(r5(want*(1+NK.m*U)),NILMAX*5);if(nil===undefined)nil=p.nc||0;
- const me=t.id===S.uid,ni=nil*(me?1+.03*abil('rain.stay'):1),r=need?ni/need:1;let P=NK.base+.97*Math.pow(clamp(1-r,0,1),1.3);if(me)P*=1-(la('mm',p)>=3?.10:0);
+ const me=t.id===S.uid,ni=nil,r=need?ni/need:1;let P=NK.base+.97*Math.pow(clamp(1-r,0,1),1.3);if(me)P*=1-(la('mm',p)>=3?.10:0);
  return{U,need,P:clamp(P,0,.98),cats,e,want}}
 const cpuNil=(p,t)=>r5(expRoster(p,t)*clamp(.86+.05*t.prestige+(F()-.5)*.2,.72,1.3));
 const leaveRisk=(p,t,nil,ctx)=>satisf(p,t,nil,ctx).P;
@@ -935,7 +925,7 @@ function recruitWeek(){S.rw++;
   for(const tid of (p.act||[])){if(isHR(tid))continue;if(p.top&&!p.top.includes(tid))continue;const off=(p.offs||[]).includes(tid);let g=(p.rate[tid]||.8)*(1.6+F()*2.4)*(off?.7:.65)*(p.type==='tr'?2.2:1);if(off){const ct=S.teams[tid],e=expNil(p,ct),nm=nilMult((p.cn&&p.cn[tid]!=null)?p.cn[tid]:e,e);g+=.55*(2.6*nm*(p.type==='tr'?1.6:1)+fit(p,ct))}if(p.stage==='verbal'&&p.vt===tid)g*=1.15;addInf(p,tid,g)}
  }
  eachH(()=>{const ut=U();for(const p of S.pros){if(p.stage==='signed'||p.stage==='gone')continue;const i0=p.infl[S.uid]||0;
-  if(p.offer&&p.stage!=='hard'&&!p.locked){const m=nilMult(p.offer.nil,expNil(p,ut));p.infl[S.uid]=(p.infl[S.uid]||0)+(2.6*m*(1+.1*abil('rain.deal'))*cI(p,'nil')*(p.type==='tr'?1.6:1)+fit(p,ut))*(p.stage==='verbal'&&p.vt===S.uid?1.15:1)}
+  if(p.offer&&p.stage!=='hard'&&!p.locked){const m=nilMult(p.offer.nil,expNil(p,ut));p.infl[S.uid]=(p.infl[S.uid]||0)+(2.6*m*cI(p,'nil')*(p.type==='tr'?1.6:1)+fit(p,ut))*(p.stage==='verbal'&&p.vt===S.uid?1.15:1)}
   const w=S.week-1,en=S.sched&&S.sched[S.uid]&&S.sched[S.uid][w-1];
   if(p.visit&&p.visit===w&&['reg','cc'].includes(S.stage)){const won=en&&en.r&&en.r.us>en.r.them;p.infl[S.uid]=(p.infl[S.uid]||0)+(12+(!en?4:won?10:-3))*vM(p);if(won&&perk('str'))cxp(30);p.visit=null}
   applyQ(p);if(S.coach&&la('rec',p)>=2){const gn=(p.infl[S.uid]||0)-i0;if(gn>0)p.infl[S.uid]+=.05*gn}}},true);
@@ -1259,7 +1249,7 @@ function weekHonors(w,before){const best={o:null,d:null,m:null};S.teams.forEach(
   const rec={n:p.name,pos:p.pos,team:t.name,tid:t.id,sc,line:seasonLine({st:dl,pos:p.pos})};if(!best[key]||sc>best[key].sc)best[key]=rec;if(t.id===S.uid&&(!best.m||sc>best.m.sc))best.m=rec}));
  if(best.m&&S.coach){const pp=U().roster.find(x=>x.name===best.m.n&&x.pos===best.m.pos);if(pp)pxp(pp,12)}const h={w:w-1,off:best.o,def:best.d,mine:best.m};S.potw=h;(S.potwH=S.potwH||[]).push(h)}
 function simWeek(w){const before=new Map();S.teams.forEach(t=>t.roster.forEach(p=>{if(p.st)before.set(p,Object.assign({},p.st))}));S.res=[];const wk=S.wk[w-1],ut=S.uid;for(const[h,a]of wk){const H=S.teams[h],A=S.teams[a],g=playGame(H,A,false,false);S.res.push([h,a,g.as,g.bs]);S.sched[h][w-1].r={us:g.as,them:g.bs};if(isH(h)||isH(a))gameHooks(h,a,g,'Wk '+(w-1),0);S.sched[a][w-1].r={us:g.bs,them:g.as}}
- const wkInj=t=>{const mult=isH(t.id)?{full:1.4,bal:1,lim:.6}[S.practice]*(1-.12*(S.staff.find(s=>s.r==='trainer')?S.staff.find(s=>s.r==='trainer').t+1:0)*.5):1;injuries(t,mult);const px=isH(t.id)?{full:1.3,bal:1,lim:.7}[S.practice]*(1+.1*abil('vis.prac')):1;t.roster.forEach(p=>{if(p.inj<=0)p.xp+=px})};
+ const wkInj=t=>{const mult=isH(t.id)?{full:1.4,bal:1,lim:.6}[S.practice]*(1-.12*(S.staff.find(s=>s.r==='trainer')?S.staff.find(s=>s.r==='trainer').t+1:0)*.5):1;injuries(t,mult);const px=isH(t.id)?{full:1.3,bal:1,lim:.7}[S.practice]:1;t.roster.forEach(p=>{if(p.inj<=0)p.xp+=px})};
  S.teams.forEach(t=>{if(isH(t.id))asUser(t.id,()=>wkInj(t));else wkInj(t)});weekHonors(w,before)}
 /* ===== rankings ===== */
 function rankScore(t){const g=t.w+t.l,o=S.ov[t.id];if(!g)return .5*(o-70)+t.prestige*1.5;const os=S.sched[t.id].filter(x=>x&&x.r).map(x=>S.ov[x.o]),sos=os.length?os.reduce((a,b)=>a+b,0)/os.length:70;return 35*(t.w/g)+.7*(t.pf-t.pa)/g+.5*(o-70)+.6*(sos-70)+t.prestige*.8+(t.champ?3:0)}
@@ -1271,7 +1261,7 @@ function genAD(t){const p=pint(t);const dem=p>=5?pick(['Impatient','Impatient','
  g.push(pick([{k:'conf',txt:'Win the conference title',dp:110},{k:'class',txt:'Sign a Top-'+(p>=4?10:p>=3?25:50)+' recruiting class',n:p>=4?10:p>=3?25:50,dp:80},{k:'ppg',txt:'Average 30+ points per game',dp:70},{k:'fac',txt:'Maintain facility tier',dp:0,firm:1}]));
  return{dem,goals:g}}
 const dpBase=t=>t.dpt!=null?t.dpt+((t.g.brand-t.gb0)*150+(t.g.tradition-t.gt0)*120)*(t.nk||1):1200+t.prestige*380+t.g.brand*150+t.g.tradition*120;
-const baseDP=t=>r5(dpBase(t)*(1+.04*abil('rain.budget')));
+const baseDP=t=>r5(dpBase(t));
 function startSeason(first){if(!first){S.year++}S.teams.forEach(t=>{t.w=t.l=t.cw=t.cl=t.pf=t.pa=0;t.champ=false;t.roster.forEach(p=>{p.st={};p.xp=0;p.inj=0});if(!isH(t.id))stickyPB(t)});
  genSchedule();S.stage='pre';S.week=1;S.rw=0;S.pw=0;S.hu=0;S.cfp=null;S.bowls=null;S.res=[];S.potw=null;S.potwH=[];updateRanks();if(first||!S.pros.length||!S.keepPros)genClass();S.keepPros=false;
  eachH(()=>{S.ad=genAD(U());if(first){S.dpTotal=baseDP(U());U().roster.forEach(p=>{p.nc=r5(expRoster(p,U())*(.85+F()*.3))})}S.hu=0;S.recap=null;S.board=S.board||[]})}
@@ -1322,10 +1312,10 @@ function endSeason(){const c=S.cfp;
  let best=null;S.teams.forEach(tm=>tm.roster.forEach(p=>{if(p.hsy===S.year||!p.st||!p.st.g)return;const o={};for(const k in p.st)if(p.st[k])o[k]=Math.round(p.st[k]*10)/10;(p.hs=p.hs||[]).push({y:S.year,t:tm.name,p:p.pos,s:o});p.hsy=S.year}));
  S.teams.forEach(tm=>tm.roster.forEach(p=>{const s=p.st;if(!s.g)return;const sc=p.pos==='QB'?(s.py||0)/22+(s.ptd||0)*4+(s.ry||0)/12:p.pos==='RB'?(s.ry||0)/9+(s.rtd||0)*6+(s.cy||0)/20:(s.cy||0)/10+(s.ctd||0)*6;const tot=sc+tm.w*3;if(!best||tot>best.sc)best={sc:tot,name:p.name,pos:p.pos,team:tm.name,id:p.id,s:{...s}}}));S.heisman=best;
  eachH(()=>{const t=U();const goals=evalGoals(),dm={Patient:.6,Balanced:1,Impatient:1.5}[S.ad.dem];let d=0,dp=0;
-  goals.forEach(x=>{if(x.ok){d+=x.firm?3:10;dp+=Math.round(x.dp*(1+.1*abil('rain.incent')));if(abil('pb.prog')>=1)cxp(15)}else d-=(x.firm?12:3)*dm});
+  goals.forEach(x=>{if(x.ok){d+=x.firm?3:10;dp+=Math.round(x.dp);if(abil('pb.prog')>=1)cxp(15)}else d-=(x.firm?12:3)*dm});
   const winsB=Math.max(0,t.w-6)*1.5,cfpIn=c.seeds.includes(t.id),tit=S.champ===t.id;d+=winsB-(t.w<=4?8*dm:0);
   let pay=(t.champ?100:0)+(cfpIn?150:0)+(tit?300:0);
-  S.sec=clamp(S.sec+d,0,100);S.coach.wins+=t.w;S.coach.losses+=t.l;S.coach.xp+=(perk('tac')?5*t.w:0)+t.w*10+(t.champ?25:0)+(cfpIn?50:0)+(tit?100:0);S.coach.cp+=2*t.w+(t.champ?10:0)+(cfpIn?15:0)+(tit?30:0)+3*abil('vis.bonus')+[0,0,5,10,15,25][pint(t)];
+  S.sec=clamp(S.sec+d,0,100);S.coach.wins+=t.w;S.coach.losses+=t.l;S.coach.xp+=(perk('tac')?5*t.w:0)+t.w*10+(t.champ?25:0)+(cfpIn?50:0)+(tit?100:0);S.coach.cp+=2*t.w+(t.champ?10:0)+(cfpIn?15:0)+(tit?30:0)+[0,0,5,10,15,25][pint(t)];
   if(tit)S.coach.titles++;S.coach.prestige=clamp(S.coach.prestige*.6+(t.w/(t.w+t.l))*.4+(tit?.15:0),0,1);
   if(S.coach){U().roster.forEach(p=>{const q=p.st||{};let m=0;if((q.ry||0)>=1000)m+=20;if((q.py||0)>=3000)m+=20;if((q.cy||0)>=1000)m+=20;if((q.sck||0)>=10)m+=15;if((q.tkl||0)>=100)m+=15;if((q.dint||0)>=5)m+=15;if(best&&best.id===p.id&&best.team===U().name)m+=60;pxp(p,m)})}
   S.recap={goals,d,dp,pay,fired:false}});
@@ -1364,7 +1354,7 @@ function toLeave(){flushQ();S.xfer=[];eachH(()=>{S.leave={grads:S.grads||[],draf
    const s=satisf(p,tm,me?(p.nc||0):cpuNil(p,tm),ctx);
    if(F()<s.P){const why=leaveWhy(s);S.xfer.push({p,from:tm.id,why,P:s.P});if(me){S.leave.xfer.push(snap(why));note(p.name+' ('+p.pos+' '+p.ovr+') is entering the portal: '+why)}return}
    p.gp=s.cats.map(c=>Math.round((c.g+.4*c.drop)*100)/100);p.ep=Math.round(((p.ep!=null?p.ep:s.e)+s.e)/2*100)/100;keep.push(p)});tm.roster=keep}));
- decayDr();S.draft=(S.dpool||[]).map(x=>({...x,sc:x.ovr+gauss()*2.5+(isH(x.tid)?.3*asUser(x.tid,()=>abil('vis.pro')):0)})).sort((a,b)=>b.sc-a.sc).slice(0,224).map((x,i)=>({id:x.id,n:x.n,pos:x.pos,ovr:x.ovr,tid:x.tid,early:x.early,pick:i+1,rd:Math.floor(i/32)+1}));S.dpool=[];eachH(()=>{S.leave.att=3+(abil('pb.int')>=1?3:0);{const mine=S.draft.filter(x=>x.tid===S.uid);S.dg={};mine.forEach(x=>{const g=POSG[x.pos];S.dg[g]=(S.dg[g]||0)+1});if(S.coach){stp('dr',mine.length);stp('d1',mine.filter(x=>x.pick<=32).length);if(perk('td'))cxp(60*mine.length)}}});S.stage='leave'}
+ decayDr();S.draft=(S.dpool||[]).map(x=>({...x,sc:x.ovr+gauss()*2.5})).sort((a,b)=>b.sc-a.sc).slice(0,224).map((x,i)=>({id:x.id,n:x.n,pos:x.pos,ovr:x.ovr,tid:x.tid,early:x.early,pick:i+1,rd:Math.floor(i/32)+1}));S.dpool=[];eachH(()=>{S.leave.att=3+(abil('pb.int')>=1?3:0);{const mine=S.draft.filter(x=>x.tid===S.uid);S.dg={};mine.forEach(x=>{const g=POSG[x.pos];S.dg[g]=(S.dg[g]||0)+1});if(S.coach){stp('dr',mine.length);stp('d1',mine.filter(x=>x.pick<=32).length);if(perk('td'))cxp(60*mine.length)}}});S.stage='leave'}
 function toPortal(){flushQ();S.pros=S.pros.filter(p=>p.stage!=='signed'&&p.stage!=='gone');
  const NEWP=[];(S.xfer||[]).concat((S.carry||[]).map(c=>({...c,carry:1}))).forEach(({p,from,carry})=>{const stars=p.ovr>=86?5:p.ovr>=80?4:p.ovr>=72?3:2;
   const pr={id:S.nid++,type:'tr',name:p.name,pos:p.pos,arch:p.arch,yr:p.yr,stars,ovr:p.ovr,est:p.ovr,mean:p.ovr,dev:p.dev,home:p.home,hi:hiOf(p),mot:(p.mot||[]).slice(),zero:(p.zero||[]).slice(),db:p.db,infl:{},cand:[],rate:{},stage:'open',pace:1,sc:scP(p)>=100?100:(p.sc||0),scouted:scP(p)>=100,from,kn:{},carry:carry?1:0,r:p.r,alt:p.alt,hs:p.hs,hsy:p.hsy,ht:ensureHW(p).ht,wt:p.wt};NEWP.push(pr);S.pros.push(pr)});
@@ -1459,6 +1449,7 @@ function save(){clearTimeout(SVT);SVT=setTimeout(saveNow,250);if(typeof MP!=='un
 function saveNow(){if(!S)return;let js;try{js=JSON.stringify(S,rd)}catch(e){return}if(IDB.db&&IDB.put(js)){try{localStorage.removeItem('cfb27dyn')}catch(e){}return}try{localStorage.setItem('cfb27dyn',js)}catch(e){if(!saveNow.w){saveNow.w=1;toast('Browser storage is full. Use Settings, Export save, to back up your dynasty.')}}}
 function load(){try{const s=PRE!=null?PRE:localStorage.getItem('cfb27dyn');if(s){S=JSON.parse(s);if(!S.hum)S.hum=[S.uid];if(S.pa==null)S.pa=S.uid;try{matAll()}catch(e){}try{migCoach()}catch(e){}try{if(!['reg','cc','cfp'].includes(S.stage)&&S.stage!=='setup'){const cm={};TD.forEach(([c,l])=>l.forEach(([n])=>cm[n]=c));let ch=0;S.teams.forEach(t=>{if(cm[t.name]&&t.conf!==cm[t.name]){t.conf=cm[t.name];ch++}});if(ch&&S.stage==='pre'&&S.sched)genSchedule()}}catch(e){}
  try{if(S.htv!==2){S.htv=2;(S.pros||[]).forEach(p=>{delete p.hi});S.teams.forEach(t=>t.roster.forEach(p=>{delete p.hi}));(S.carry||[]).forEach(p=>{delete p.hi});(S.dpool||[]).forEach(p=>{delete p.hi})}}catch(e){}
+ if(S.coach){/* Rainmaker and Visionary were removed: refund anything spent on them */const c=S.coach;if(c.sp)['rain','vis'].forEach(k=>delete c.sp[k]);Object.keys(c.ab||{}).forEach(k=>{if(/^(rain|vis)\./.test(k))delete c.ab[k]});if(Array.isArray(c.unl))c.unl=c.unl.filter(k=>!/^(rain|vis)/.test(k))}
  try{S.teams.forEach(t=>{convTeam(t);if(!Number.isFinite(t.cl))t.cl=0;if(!Array.isArray(t.rcl))t.rcl=[];migGr(t);if(t.g0conf==null)t.g0conf=GR[t.name]?GSC[GR[t.name].split(' ')[7]]:.5});(S.pros||[]).forEach(convPros);S.teams.forEach(t=>t.roster.forEach(p=>{if(p.nc)p.nc=r5(p.nc)}));(S.pros||[]).forEach(p=>{if(p.offer&&p.offer.nil)p.offer.nil=r5(p.offer.nil);if(p.cn)for(const k in p.cn)p.cn[k]=r5(p.cn[k])})}catch(e){}return true}}catch(e){}return false}
 /* ===== UI ===== */
 const rec=t=>t.w+'-'+t.l,pct=(v,m)=>Math.round(clamp(v/m,0,1)*100);
