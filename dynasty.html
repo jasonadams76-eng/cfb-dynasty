@@ -1780,7 +1780,7 @@ function needMap(){const ut=U(),cm=S.pros.filter(p=>p.offer&&['verbal','hard'].i
 function lfilter(tr){const f=LF[tr?'tr':'hs'],ut=U(),nd=needMap(),q=f.q.trim().toLowerCase();ensureStates();
  let L=S.pros.filter(p=>p.type===(tr?'tr':'hs')&&!['signed','gone'].includes(p.stage));
  const num=v=>v===''||v==null?null:+v,smin=num(f.smin),smax=num(f.smax),hmin=num(f.hmin),hmax=num(f.hmax),wmin=num(f.wmin),wmax=num(f.wmax),nmin=num(f.nmin),nmax=num(f.nmax),omin=num(f.omin);
- const rk=new Map(),myR=p=>{let r=rk.get(p.id);if(r===undefined){const a=ranked(p).findIndex(x=>x[0]===S.uid);r=(S.board.includes(p.id)||p.offer)&&a>=0?a+1:0;rk.set(p.id,r)}return r};
+ const rk=new Map(),myR=p=>{let r=rk.get(p.id);if(r===undefined){const a=ranked(p).findIndex(x=>x[0]===S.uid);r=a>=0?a+1:0;rk.set(p.id,r)}return r};
  L=L.filter(p=>{ensureHW(p);
   if(q&&!p.name.toLowerCase().includes(q)&&!(tr&&S.teams[p.from]&&S.teams[p.from].name.toLowerCase().includes(q)))return false;
   if(f.pos==='ATH'){if(!p.ath)return false}else if(f.pos==='OFF'){if(isDefP(p)||['K','P'].includes(p.pos))return false}else if(f.pos==='DEF'){if(!isDefP(p))return false}else if(f.pos&&p.pos!==f.pos)return false;
