@@ -317,9 +317,9 @@ const CT=[
  {k:'dd',name:'Discipline (Defense)',tiers:[['Unfriendly Confines','Slightly increased effects from crowd noise at home',''],['Too Loud???','Significant increase to effects of crowd noise at home',''],['No Free Yards','Defenders will commit slightly fewer penalties',''],['Clean Sheet Defense','Defensive players will commit significantly fewer penalties','']]}]},
 {id:'mot',name:'Motivator',base:1,grp:1,cost:[15,20,25,30],kp:[10,10,15,15],perk:'+1 Coach XP when a player improves 3+ overall in offseason training',tiers:[
  ['Extra Gear','Players receive +2 Toughness and Stamina and are 10% less likely to get hurt',''],
- ['Hot Hand','Players receive +2 to every rating that feeds their overall',''],
+ ['Hot Hand','Players receive +1 to every rating that feeds their overall',''],
  ['Put In Work','Players receive a 15% boost to their offseason training progress',''],
- ['Locked In','Players get another +2 to the ratings behind their overall in the 4th quarter of close games','']]},
+ ['Locked In','Players get another +1 to the ratings behind their overall in the 4th quarter of close games','']]},
 {id:'mm',name:'Master Motivator',grp:1,cost:[25,30,35,40],kp:[15,15,20,20],req:{a:[['dr',5,'Have five players drafted']],s:[['mot',200,'Motivator']]},perk:'No archetype perk',tiers:[
  ['Quick Recovery','Players recover faster from injury','Injuries to {g} heal 1 week faster'],
  ['Icy Veins','Players start games with composure boost','+2 Awareness (offense) or Play Recognition (defense) for {g}'],
@@ -522,7 +522,7 @@ function rt0(p){let c=RC.get(p);if(p.r){if(c&&c.a===p.r)return c.r;if(p.pos==='Q
 const TACK={qb:[['tor','cod'],['tup','bsk'],['spm','jkm','bcv'],['sac','mac']],rb:[['pbk','rbk'],['trk','btk'],['spm','jkm','bcv'],['cth','srr']],rec:[['rbp','rbf'],['jkm','spm'],['srr','mrr'],['cth','cit']],ol:[['pbk','imp'],['rbk','lbk'],['rbf','pbf'],['pbp','rbp']],dl:[['cod','pur'],['fmv','bsh'],['pmv','hpw'],['tak','prc']],lb:[['fmv','bsh'],['pur','prc'],['mcv','zcv'],['tak','hpw']],db:[['spm','jkm','bcv'],['cth','jmp'],['mcv','pur'],['zcv','prc']]};
 let UBV=0,UBM={},UBMV=-1,UTL=null;const UC=new WeakMap();
 let CLUTCH=false;
-function ubon(p){if(UBMV!==UBV){UBM={};UBMV=UBV}const tid=(p.ut||1)-1,key=tid+p.pos+(CLUTCH?'c':'');let m=UBM[key];if(m===undefined){m=null;const SC=S.coach,cc=coachOf(tid);S.coach=cc;try{if(S.coach){const g=POSG[p.pos],add=(k,v)=>{m=m||{};m[k]=(m[k]||0)+v},lt=TACK[g]?abil('tac.'+g):0;for(let i=0;i<lt;i++)TACK[g][i].forEach(k=>add(k,2));const lm=abil('mot.'+g);if(lm>=1){add('tgh',2);add('stm',2)}if(lm>=2)for(const k in (OWN[p.pos]||{}))add(k,2);if(CLUTCH&&lm>=4)for(const k in (OWN[p.pos]||{}))add(k,2);if(abil('mm.'+g)>=2&&g!=='kp')add(isDefP(p)?'prc':'awr',2)}}finally{S.coach=SC}UBM[key]=m}return m}
+function ubon(p){if(UBMV!==UBV){UBM={};UBMV=UBV}const tid=(p.ut||1)-1,key=tid+p.pos+(CLUTCH?'c':'');let m=UBM[key];if(m===undefined){m=null;const SC=S.coach,cc=coachOf(tid);S.coach=cc;try{if(S.coach){const g=POSG[p.pos],add=(k,v)=>{m=m||{};m[k]=(m[k]||0)+v},lt=TACK[g]?abil('tac.'+g):0;for(let i=0;i<lt;i++)TACK[g][i].forEach(k=>add(k,2));const lm=abil('mot.'+g);if(lm>=1){add('tgh',2);add('stm',2)}if(lm>=2)for(const k in (OWN[p.pos]||{}))add(k,1);if(CLUTCH&&lm>=4)for(const k in (OWN[p.pos]||{}))add(k,1);if(abil('mm.'+g)>=2&&g!=='kp')add(isDefP(p)?'prc':'awr',2)}}finally{S.coach=SC}UBM[key]=m}return m}
 function ubr(r0,m){const r=Object.assign({},r0);for(const k in m)if(r[k]!=null)r[k]=Math.min(99,r[k]+m[k]);return r}
 let UBA=-1;
 function applyTB(ro){const C=ocal();for(const p of ro){mat(p);const r0=rt0(p),m=ubon(p);let d=0;if(m){const r=ubr(r0,m);d=Math.round(C[p.pos].a*(fOvr(r,p.pos)-fOvr(r0,p.pos)))}const base=p.ovr-(p.tbo||0),n=clamp(base+d,20,99);p.tbo=n-base;p.ovr=n}}
