@@ -1398,7 +1398,7 @@ function finishOff(){lateSign();S.teams.forEach(t=>t.roster.filter(p=>p.ath).for
 /* ===== actions ===== */
 function dpUsed(){const t=U();return t.roster.reduce((s,p)=>s+(p.yr<4||S.stage!=='recap'||true?p.nc||0:0),0)+S.staff.reduce((s,x)=>s+r5(staffC(x.t)*(S.staff.find(y=>y.r==='ga')?1-.05*(S.staff.find(y=>y.r==='ga').t+1):1)),0)+FACM[t.fac]+(t.oc||0)+(S.facUpg||0)+S.pros.reduce((s,p)=>s+(p.offer&&p.stage!=='signed'&&p.stage!=='gone'?p.offer.nil:0),0)}
 const dpAvail=()=>Math.round((S.dpTotal-dpUsed())/5)*5;
-function act(id,type,m){const p=P(id),A=ACT[type];let c=A.h;if(type==='scout')c=scoutC(p);
+function act(id,type,m){if(S.stage==='pre'&&type!=='scout')return toast('Preseason: you can only add players to your board and scout them');const p=P(id),A=ACT[type];let c=A.h;if(type==='scout')c=scoutC(p);
  if(p.locked)return toast('Locked out — not in their top schools');if(!S.board.includes(p.id)){if(S.board.length>=50)return toast('Recruiting board full (50). Remove someone first.');S.board.push(p.id)}if(hoursLeft()<c)return toast('Not enough hours');
  if(!['scout','offer'].includes(type)&&(p.hu||0)+c>capPer(p))return toast('Weekly per-prospect cap reached');
  const g=cI(p,type)*(1-.07*(p.stars-3))*(.7+.8*fit(p,U()))*(p.stage==='verbal'&&p.vt===S.uid?1.15:1);const ut=U();
@@ -1420,7 +1420,7 @@ function autoRecruit(){const ut=U();const need=pos=>Math.max(0,nd(ut,pos)-ut.ros
  if(S.board.length<25){const c=S.pros.filter(p=>(S.stage==='portal'||p.type==='hs')&&!S.board.includes(p.id)&&!['signed','gone'].includes(p.stage)&&!p.locked).map(p=>({p,s:(p.stars*10+sgTilt(p,ut)*14+fit(p,ut)*20+need(p.pos)*4)})).sort((a,b)=>b.s-a.s);for(const x of c){if(S.board.length>=30)break;S.board.push(x.p.id)}}
  const tg=S.board.map(P).filter(p=>p&&!['signed','gone','hard'].includes(p.stage)&&!p.locked&&(S.stage==='portal'||p.type==='hs')).sort((a,b)=>b.stars-a.stars);
  for(const p of tg){if(hoursLeft()<5)break;if(!p.scouted&&hoursLeft()>=10)act2(p.id,'scout');if(S.stage!=='pre'&&!p.offer&&p.scouted&&dpAvail()>expNil(p,ut)+50&&S.pros.filter(x=>x.offer&&x.stage!=='gone'&&x.stage!=='signed').length<35)act2(p.id,'offer');
-  while(hoursLeft()>=25&&(p.hu||0)+25<=capPer(p)&&!p.locked)act2(p.id,(hoursLeft()>=50&&(p.hu||0)+50<=capPer(p))?'house':'ff')}
+  while(S.stage!=='pre'&&hoursLeft()>=25&&(p.hu||0)+25<=capPer(p)&&!p.locked)act2(p.id,(hoursLeft()>=50&&(p.hu||0)+50<=capPer(p))?'house':'ff')}
  save();render()}
 function act2(id,t){const old=render;render=()=>{};try{act(id,t)}finally{render=old}}
 function lockStaff(){}
