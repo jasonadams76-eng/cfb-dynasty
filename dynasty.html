@@ -2252,7 +2252,7 @@ function dctx(t){if(DPOS.startsWith('R:')){const k=DPOS.slice(2),R=DROLES[k];ret
  const mine=t.roster.filter(p=>epos(p)===pos).sort(dcmp),others=flex?t.roster.filter(p=>inFG(p,pos)&&epos(p)!==pos).sort((a,b)=>ovrAt(b,pos)-ovrAt(a,pos)):[];
  return{pos,N,all:mine.concat(others),ids:mine.slice(0,N).map(p=>p.id),st:START[pos]||1,lab:DLAB[pos]||pos,ov:p=>ovrAt(p,pos),set(ids){depthSet(t,pos,ids)},reset(){t.roster.filter(p=>epos(p)===pos).forEach(p=>{delete p.dd;if(p.dpos)delete p.dpos})}}}
 /* who can be slotted at a depth-chart position: his own group, plus halfbacks at fullback (and fullbacks back at halfback) */
-const inFG=(p,pos)=>pos==='RB'?p.pos==='RB'||p.pos==='FB':pos==='FB'?FG(p.pos)==='TF'||p.pos==='RB':FG(p.pos)===FG(pos);
+const inFG=(p,pos)=>pos==='RB'?p.pos==='RB'||p.pos==='FB':pos==='FB'?FG(p.pos)==='TF'||p.pos==='RB':(pos==='LE'||pos==='RE')?FG(p.pos)==='DL'||FG(p.pos)==='LB':FG(p.pos)===FG(pos);
 let DPOS='QB',DSEL=null;
 const DEPN={WR:5,CB:5},DLAB={RB:'RB / HB',SAM:'SAM (OLB)',WILL:'WILL (OLB)',MIKE:'MIKE (MLB)',LT:'LT (left tackle)',RT:'RT (right tackle)',LG:'LG (left guard)',RG:'RG (right guard)',C:'C (center)',LE:'LE (end)',RE:'RE (end)',DT:'DT (tackle)',FS:'FS (safety)',SS:'SS (safety)'};
 const ORD=['1st','2nd','3rd','4th','5th'],htStr=h=>h?Math.floor(h/12)+"'"+(h%12)+'"':'';
