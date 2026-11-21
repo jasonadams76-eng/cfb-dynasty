@@ -2192,13 +2192,15 @@ const roleList=(t,k)=>roleListFrom(t.roster,t.rl,k);
 const roleTop=(t,k,n)=>roleList(t,k).slice(0,n);
 /* the depth editor works on either a regular position or a role */
 function dctx(t){if(DPOS.startsWith('R:')){const k=DPOS.slice(2),R=DROLES[k];return{role:k,N:3,all:roleList(t,k),ids:null,st:R.st,lab:R.n,ov:p=>roleOvr(p,k),set(ids){t.rl=t.rl||{};t.rl[k]=ids},reset(){if(t.rl)delete t.rl[k]}}}
- const pos=DPOS,g=FG(pos),flex=!!FLEXG[pos],N=DEPN[pos]||3;
- const mine=t.roster.filter(p=>epos(p)===pos).sort(dcmp),others=flex?t.roster.filter(p=>FG(p.pos)===g&&epos(p)!==pos).sort((a,b)=>ovrAt(b,pos)-ovrAt(a,pos)):[];
+ const pos=DPOS,g=FG(pos),flex=!!FLEXG[pos]||pos==='RB',N=DEPN[pos]||3;
+ const mine=t.roster.filter(p=>epos(p)===pos).sort(dcmp),others=flex?t.roster.filter(p=>inFG(p,pos)&&epos(p)!==pos).sort((a,b)=>ovrAt(b,pos)-ovrAt(a,pos)):[];
  return{pos,N,all:mine.concat(others),ids:mine.slice(0,N).map(p=>p.id),st:START[pos]||1,lab:DLAB[pos]||pos,ov:p=>ovrAt(p,pos),set(ids){depthSet(t,pos,ids)},reset(){t.roster.filter(p=>epos(p)===pos).forEach(p=>{delete p.dd;if(p.dpos)delete p.dpos})}}}
+/* who can be slotted at a depth-chart position: his own group, plus halfbacks at fullback (and fullbacks back at halfback) */
+const inFG=(p,pos)=>pos==='RB'?p.pos==='RB'||p.pos==='FB':pos==='FB'?FG(p.pos)==='TF'||p.pos==='RB':FG(p.pos)===FG(pos);
 let DPOS='QB',DSEL=null;
 const DEPN={WR:5,CB:5},DLAB={RB:'RB / HB',SAM:'SAM (OLB)',WILL:'WILL (OLB)',MIKE:'MIKE (MLB)',LT:'LT (left tackle)',RT:'RT (right tackle)',LG:'LG (left guard)',RG:'RG (right guard)',C:'C (center)',LE:'LE (end)',RE:'RE (end)',DT:'DT (tackle)',FS:'FS (safety)',SS:'SS (safety)'};
 const ORD=['1st','2nd','3rd','4th','5th'],htStr=h=>h?Math.floor(h/12)+"'"+(h%12)+'"':'';
-function depthSet(t,pos,ids){const g=FG(pos),pool=t.roster.filter(p=>FG(p.pos)===g);pool.forEach(p=>{if(epos(p)===pos&&!ids.includes(p.id)){delete p.dd;if(p.pos!==pos)delete p.dpos}});ids.forEach((id,i)=>{const p=pool.find(x=>x.id===id);if(p){p.dd=i+1;if(p.pos===pos)delete p.dpos;else p.dpos=pos}})}
+function depthSet(t,pos,ids){const pool=t.roster.filter(p=>inFG(p,pos));pool.forEach(p=>{if(epos(p)===pos&&!ids.includes(p.id)){delete p.dd;if(p.pos!==pos)delete p.dpos}});ids.forEach((id,i)=>{const p=pool.find(x=>x.id===id);if(p){p.dd=i+1;if(p.pos===pos)delete p.dpos;else p.dpos=pos}})}
 function depthPos(v){DPOS=v;DSEL=null;render()}
 function depthReset(){const t=U();dctx(t).reset();DSEL=null;save();render()}
 function depthResetAll(){const t=U();t.roster.forEach(p=>{delete p.dd});delete t.rl;DSEL=null;save();render()}
