@@ -605,14 +605,17 @@ const SIB={LT:'RT',RT:'LT',LG:'RG',RG:'LG',LE:'RE',RE:'LE'};
 function ovrAt(p,X){mat(p);if(X===p.pos||SIB[X]===p.pos)return p.ovr;if(PFM[X]&&PFM[p.pos]){const r=rt0(p),d=poD(p,PFM[X]);if(d!=null)return clamp(Math.round(pfOvr(r,X)+d),20,99);const f=pfOvr(r,X),fp=pfOvr(r,p.pos);return clamp(Math.round(f+clamp(p.ovr-fp,-4,4)*.5),20,99)}const C=ocal(),r=rt(p);return clamp(Math.round(p.ovr+C[X].a*fOvr(r,X)+C[X].b-(C[p.pos].a*fOvr(r,p.pos)+C[p.pos].b)-(bodyPen(p,X)-bodyPen(p,p.pos))+xtB(p,X)),20,99)}
 /* if the new position does not use his archetype, pick the one his ratings fit best */
 /* coach-requested archetype re-evaluation (offseason only, once per player per year): scores every archetype at his position against his current ratings; the label changes only if another one fits clearly better than his current one */
-const OFFS_ST=['recap','nil','leave','portal','sign','train','cut'],archOK=()=>OFFS_ST.includes(S.stage),ARCHM=3;
+/* archetypes sit on a spectrum: a player can only slide to a neighbouring archetype in one offseason (QB: runner to passer, one step at a time) */
+const ARCHLAD={QB:['Pure Runner','Dual Threat','Backfield Creator','Pocket Passer']};
+const OFFS_ST=['recap','nil','leave','portal','sign','train','cut'],archOK=()=>OFFS_ST.includes(S.stage),ARCHM=3,ARCHL=.4;
 function archScores(p){const A=ARCH[GP(p.pos)];if(!A)return null;mat(p);const r=rt0(p),o={};for(const e of A){const sh=e[2];let num=0,den=0;for(const k in sh){num+=sh[k]*(r[k]-baseRt(k,p.pos,p.ovr));den+=sh[k]*sh[k]}o[e[0]]=den?num/Math.sqrt(den):0}return o}
 function reArch(p){if(!archOK())return{ok:0,msg:'Archetypes can only be re-evaluated in the offseason.'};if(['K','P'].includes(p.pos))return{ok:0,msg:p.name+' has no archetype to re-evaluate.'};if(p.rev===S.year)return{ok:0,msg:p.name+' was already re-evaluated this offseason.'};
  const now=archScores(p);if(!now)return{ok:0,msg:'No archetype to re-evaluate.'};p.rev=S.year;const was=p.as;p.as=now;
  if(!was)return{ok:1,changed:0,msg:p.name+' keeps his archetype ('+(p.arch||style(p).n)+'): no training since the last review.'};
  /* judge by how far each archetype's fit has moved since the last review, so untouched players never flip */
- const cur=p.arch||style(p).n,dc=(now[cur]||0)-(was[cur]||0);let best=null,bd=-1e9;for(const k in now){if(k===cur||was[k]==null)continue;const d=now[k]-was[k];if(d>bd){bd=d;best=k}}
- if(best&&bd-dc>=ARCHM){p.arch=best;SX.delete(p);RC.delete(p);return{ok:1,changed:1,msg:p.name+': '+cur+' → '+best}}
+ const cur=p.arch||style(p).n,dc=(now[cur]||0)-(was[cur]||0),lad=ARCHLAD[p.pos],li=lad?lad.indexOf(cur):-1;let best=null,bd=-1e9;for(const k in now){if(k===cur||was[k]==null)continue;const d=now[k]-was[k];if(d>bd){bd=d;best=k}}
+ if(best&&bd-dc>=(li>=0?ARCHL:ARCHM)){let to=best;if(li>=0){const tj=lad.indexOf(best);if(tj>=0)to=lad[li+(tj>li?1:-1)]}/* on a spectrum he moves one step toward the best fit, not all the way */
+  p.arch=to;SX.delete(p);RC.delete(p);return{ok:1,changed:1,msg:p.name+': '+cur+' → '+to+(to!==best?' (heading toward '+best+')':'')}}
  return{ok:1,changed:0,msg:p.name+' keeps his archetype ('+cur+').'}}
 function reArchOne(id){const p=U().roster.find(x=>x.id===id);if(!p)return;const r=reArch(p);toast(r.msg);if(r.ok){save();render()}}
 function reArchAll(){if(!archOK())return toast('Archetypes can only be re-evaluated in the offseason.');let n=0,c=0;const ch=[];for(const p of U().roster){const r=reArch(p);if(r.ok){n++;if(r.changed){c++;ch.push(r.msg)}}}RAMSG=c?ch:null;toast(n?'Re-evaluated '+n+' player'+(n===1?'':'s')+' · '+c+' archetype'+(c===1?'':'s')+' changed':'Everyone was already re-evaluated this offseason.');save();render()}
