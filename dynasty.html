@@ -529,11 +529,11 @@ const QBT=['thp','sac','mac','dac','tup','tor','pac'];
 function rt0(p){let c=RC.get(p);if(p.r){if(c&&c.a===p.r)return c.r;if(p.pos==='QB'&&!p.rl&&QBT.some(k=>p.r[ALLK.indexOf(k)]<60)){const a=p.r.slice();QBT.forEach(k=>{const i=ALLK.indexOf(k);if(a[i]<60)a[i]=60});p.r=a}const r={};ALLK.forEach((k,i)=>r[k]=p.r[i]);RC.set(p,{a:p.r,o:p.ovr,r,c:null});return r}
  if(c&&c.o===p.ovr&&!c.a)return c.r;const st=style(p),sp=SPEC[GP(p.pos)]||{},r={};
  for(const k of ALLK){const e=sp[k==='cod'?'agi':k];let v;if(typeof e==='number')v=p.ovr+e;else if(e)v=e[0]+e[1]*(p.ovr-70);else if(k==='awr')v=p.ovr-6;else{const d=DFR[k];v=d[0]+d[1]*(p.ovr-70)}
-  r[k]=clamp(Math.round(v+(st.sh[k==='cod'?'agi':k]||0)+st.nz[k]),8,99)}
- if(p.pos==='QB'&&OCAL&&!String(p.name).startsWith('~cal')){const C=OCAL.QB,w=OWN.QB,ws=Object.values(w).reduce((t,v)=>t+v*v,0);
-  /* archetype shifts must not make a QB worse than his overall: re-balance so the sheet matches his OVR, throwing included */
-  for(let it=0;it<3;it++){QBT.forEach(k=>{if(r[k]<60)r[k]=60});const d=p.ovr-(C.a*fOvr(r,'QB')+C.b);if(Math.abs(d)<.6)break;const dF=d/C.a;for(const k in w)r[k]=clamp(Math.round(r[k]+dF*w[k]/ws),20,99)}
-  QBT.forEach(k=>{if(r[k]<60)r[k]=60})}
+  r[k]=clamp(Math.round(v+Math.max(0,st.sh[k==='cod'?'agi':k]||0)+st.nz[k]),8,99)}/* an archetype only adds strengths, never penalties */
+ if(OCAL&&OWN[p.pos]&&OCAL[p.pos]&&!String(p.name).startsWith('~cal')){const C=OCAL[p.pos],w=OWN[p.pos],ws=Object.values(w).reduce((t,v)=>t+v*v,0),qb=p.pos==='QB';
+  /* strengths from his archetype raise some ratings, so re-balance the sheet to match his OVR; the archetype never lowers a rating */
+  for(let it=0;it<3;it++){if(qb)QBT.forEach(k=>{if(r[k]<60)r[k]=60});const d=p.ovr-(C.a*fOvr(r,p.pos)+C.b);if(Math.abs(d)<.6)break;const dF=d/C.a;for(const k in w)r[k]=clamp(Math.round(r[k]+dF*w[k]/ws),20,99)}
+  if(qb)QBT.forEach(k=>{if(r[k]<60)r[k]=60})}
  else if(p.pos==='QB')QBT.forEach(k=>{if(r[k]<60)r[k]=60});
  c={o:p.ovr,r,c:null};RC.set(p,c);return r}
 /* Tactician: each tier gives +2 to specific ratings of your players at that position group */
@@ -608,7 +608,7 @@ function ovrAt(p,X){mat(p);if(X===p.pos||SIB[X]===p.pos)return p.ovr;if(PFM[X]&&
 /* archetypes sit on a spectrum: a player can only slide to a neighbouring archetype in one offseason (QB: runner to passer, one step at a time) */
 const ARCHLAD={QB:['Pure Runner','Dual Threat','Backfield Creator','Pocket Passer']};
 const OFFS_ST=['recap','nil','leave','portal','sign','train','cut'],archOK=()=>OFFS_ST.includes(S.stage),ARCHM=3,ARCHL=.4;
-function archScores(p){const A=ARCH[GP(p.pos)];if(!A)return null;mat(p);const r=rt0(p),o={};for(const e of A){const sh=e[2];let num=0,den=0;for(const k in sh){num+=sh[k]*(r[k]-baseRt(k,p.pos,p.ovr));den+=sh[k]*sh[k]}o[e[0]]=den?num/Math.sqrt(den):0}return o}
+function archScores(p){const A=ARCH[GP(p.pos)];if(!A)return null;mat(p);const r=rt0(p),o={};for(const e of A){const sh=e[2];let num=0,den=0;for(const k in sh){if(sh[k]<=0)continue;num+=sh[k]*(r[k]-baseRt(k,p.pos,p.ovr));den+=sh[k]*sh[k]}o[e[0]]=den?num/Math.sqrt(den):0}return o}
 function reArch(p){if(!archOK())return{ok:0,msg:'Archetypes can only be re-evaluated in the offseason.'};if(['K','P'].includes(p.pos))return{ok:0,msg:p.name+' has no archetype to re-evaluate.'};if(p.rev===S.year)return{ok:0,msg:p.name+' was already re-evaluated this offseason.'};
  const now=archScores(p);if(!now)return{ok:0,msg:'No archetype to re-evaluate.'};p.rev=S.year;const was=p.as;p.as=now;
  if(!was)return{ok:1,changed:0,msg:p.name+' keeps his archetype ('+(p.arch||style(p).n)+'): no training since the last review.'};
@@ -620,7 +620,7 @@ function reArch(p){if(!archOK())return{ok:0,msg:'Archetypes can only be re-evalu
 function reArchOne(id){const p=U().roster.find(x=>x.id===id);if(!p)return;const r=reArch(p);toast(r.msg);if(r.ok){save();render()}}
 function reArchAll(){if(!archOK())return toast('Archetypes can only be re-evaluated in the offseason.');let n=0,c=0;const ch=[];for(const p of U().roster){const r=reArch(p);if(r.ok){n++;if(r.changed){c++;ch.push(r.msg)}}}RAMSG=c?ch:null;toast(n?'Re-evaluated '+n+' player'+(n===1?'':'s')+' · '+c+' archetype'+(c===1?'':'s')+' changed':'Everyone was already re-evaluated this offseason.');save();render()}
 let RAMSG=null;
-function repick(p,X){const A=ARCH[GP(X)];if(!A||A.some(e=>e[0]===p.arch))return;const r=rt(p);let best=A[0][0],bs=-1e9;for(const e of A){const sh=e[2];let num=0,den=0;for(const k in sh){num+=sh[k]*(r[k]-baseRt(k,X,p.ovr));den+=sh[k]*sh[k]}const a=(AFF[X]&&AFF[X][e[0]]!=null?AFF[X][e[0]]:1),sc=(den?num/Math.sqrt(den):0)+Math.log(a*e[1]+.01)*2;if(sc>bs){bs=sc;best=e[0]}}p.arch=best}
+function repick(p,X){const A=ARCH[GP(X)];if(!A||A.some(e=>e[0]===p.arch))return;const r=rt(p);let best=A[0][0],bs=-1e9;for(const e of A){const sh=e[2];let num=0,den=0;for(const k in sh){if(sh[k]<=0)continue;num+=sh[k]*(r[k]-baseRt(k,X,p.ovr));den+=sh[k]*sh[k]}const a=(AFF[X]&&AFF[X][e[0]]!=null?AFF[X][e[0]]:1),sc=(den?num/Math.sqrt(den):0)+Math.log(a*e[1]+.01)*2;if(sc>bs){bs=sc;best=e[0]}}p.arch=best}
 function setPos(p,X){delete p.dd;delete p.dpos;delete p.as;if(p.hwp==null){ensureHW(p);p.hwp=p.pos}const o=ovrAt(p,X);p.pos=X;p.ovr=o;p.pcy=S.year;delete p.ath;RC.delete(p);SX.delete(p);repick(p,X);const ra=poA(p,PFM[X]);if(ra&&ARCH[GP(X)]&&ARCH[GP(X)].some(e=>e[0]===ra))p.arch=ra;if(p.r){p.cb=0;p.cb=o-ovrFromR(p)}SX.delete(p)}
 /* offseason training: whatever he gains in overall goes only into the ratings his position's overall is made of */
 function bump(p,d){if(!d||!p.r)return;const w=OWN[p.pos],C=ocal()[p.pos],dF=d/C.a,ks=Object.keys(w),r=p.r.slice();let den=0;for(const k of ks){const i=ALLK.indexOf(k);if(d>0?r[i]<99:r[i]>25)den+=w[k]*w[k]}if(!den)return;
@@ -644,7 +644,7 @@ function er(p){const r=rt(p);let c=EC.get(p);if(c&&c.r===r)return c.e;const e={}
 function comp(p){rt(p);const c=RC.get(p),g=GP(epos(p));if(c.c&&c.cg===g)return c.c;c.cg=g;return c.c=CFN[g]?CFN[g](er(p)):{}}
 const CDISP={QB:[['qa','Pass'],['qs','Run']],RB:[['rs','Spd'],['rpw','Pwr']],FB:[['fbb','Blk'],['fbu','Util']],WR:[['wh','Hands'],['ws','Spd']],TE:[['te','Rec'],['tb','Blk']],OL:[['pb','PassBlk'],['rk','RunBlk']],DL:[['dp','Rush'],['dr','Run']],LB:[['lr','Run'],['lc','Cov']],CB:[['cm','Man'],['cz','Zone']],S:[['sc','Cov'],['sr','Run']]};
 function styleTag(p){const x=style(p);if(!x.n)return'';const c=comp(p);return x.n+' <span class=m>('+(CDISP[GP(p.pos)]||[]).map(([k,n])=>n+' '+Math.round(c[k])).join(', ')+')</span>'}
-const CAL={qa:2.8,qs:6.1,rb:1.4,rs:-2.5,rpw:3,wh:1.2,ws:-1.7,te:6.5,tb:5.2,pb:-1.8,rk:1,dp:.2,dr:-.2,lr:0,lc:2.6,cm:-2.3,cz:1.3,sc:1.2,sr:5,k:1,p:1.2,fbb:-7.6,fbu:3,lp:7.5};
+const CAL={qa:2.8,qs:6.1,rb:1.4,rs:-2.5,rpw:3,wh:1.2,ws:-1.7,te:6.5,tb:5.2,pb:-1.16,rk:1.64,dp:.2,dr:-.2,lr:0,lc:2.6,cm:-2.3,cz:1.3,sc:1.2,sr:5,k:1,p:1.2,fbb:-7.6,fbu:3,lp:7.5};
 /* corners: outside vs slot grades */
 const cbOut=p=>{const r=er(p);return r.mcv*.25+r.zcv*.08+r.prs*.2+r.spd*.2+r.jmp*.07+r.str*.1+r.cth*.03+r.tak*.07},cbSlot=p=>{const r=er(p);return r.mcv*.18+r.zcv*.2+r.agi*.18+r.acc*.1+r.cod*.07+r.tak*.1+r.pur*.05+r.prc*.12-1};
 function cbLine(H,nc,gf,tm){const top=H.filter(p=>epos(p)==='CB').sort(dcmp).slice(0,nc);if(gf)while(top.length<nc)top.push(ghost('CB'));
@@ -657,7 +657,7 @@ const OLFIT={'Agile':{'Spread':3,'Air Raid':3,'West Coast':1,'Triple Option':1,'
 'Pass Protector':{'Air Raid':3.5,'West Coast':3,'Spread':1,'Pro Style':-1,'Power Run':-3.5,'Triple Option':-3.5},
 'Raw Strength':{'Power Run':3.5,'Triple Option':2.5,'Pro Style':2,'Spread':-2,'West Coast':-2.5,'Air Raid':-3.5},'Well Rounded':{}};
 const OLW={pb:[.24,.24,.18,.18,.16],rk:[.16,.16,.22,.22,.24]},OLI={LT:[0],RT:[1],LG:[2],RG:[3],C:[4]};
-const olFit=(p,po)=>((OLFIT[style(p).n]||{})[po])||0;
+const olFit=(p,po)=>0;/* archetypes no longer change a lineman's blocking in the sim */
 function olComp(H,po){const L=slotsOrd(H,'OL',false),o={};for(const k of['pb','rk']){let x=0;for(let i=0;i<5;i++)x+=OLW[k][i]*(L[i]?comp(L[i])[k]+(CAL[k]||0)+olFit(L[i],po):48);o[k]=x}return o}
 const PKGS={
 '4-3 Multiple':{base:[4,3,2,2],nickel:[4,2,3,2],dime:[4,1,4,2],heavy:[4,4,2,1]},
