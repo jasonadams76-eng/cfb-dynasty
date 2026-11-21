@@ -2226,8 +2226,8 @@ const DROLES={
  pwr:{n:'Power Back',pos:['RB','FB'],bp:'RB',st:1,f:r=>.25*r.trk+.2*r.btk+.2*r.str+.15*r.car+.1*r.sfa+.1*r.bcv},
  slw:{n:'Slot WR',pos:['WR'],bp:'WR',st:2,f:r=>.25*r.srr+.2*r.cth+.15*r.cit+.15*r.agi+.1*r.cod+.1*r.rel+.05*r.acc},
  slc:{n:'Slot CB',pos:['CB','FS','SS'],bp:'CB',st:2,f:r=>.22*r.mcv+.2*r.zcv+.18*r.agi+.12*r.cod+.12*r.acc+.1*r.tak+.06*r.prc},
- lre:{n:'Left Rush Edge',pos:DL3,bp:'LE',st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
- rre:{n:'Right Rush Edge',pos:DL3,bp:'RE',st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
+ lre:{n:'Left Rush Edge',pos:[...DL3,'SAM','WILL','MIKE'],bp:'LE',st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
+ rre:{n:'Right Rush Edge',pos:[...DL3,'SAM','WILL','MIKE'],bp:'RE',st:1,f:r=>.25*r.pmv+.2*r.fmv+.15*r.bsh+.15*r.pur+.15*r.acc+.1*r.spd},
  rdt:{n:'Rush Defensive Tackles',pos:DL3,bp:'DT',st:2,f:r=>.25*r.pmv+.2*r.fmv+.2*r.bsh+.15*r.pur+.1*r.acc+.1*r.str},
  nlb:{n:'Nickel Linebacker',pos:['MIKE','WILL','SAM'],st:2,f:r=>.25*r.zcv+.2*r.mcv+.15*r.spd+.15*r.prc+.1*r.awr+.1*r.tak+.05*r.agi},
  kr:{n:'Kick Returner',pos:['RB','WR','CB','FS','SS'],st:1,f:r=>.3*r.kr+.2*r.spd+.15*r.acc+.15*r.agi+.1*r.bcv+.1*r.car},
@@ -2252,7 +2252,7 @@ function dctx(t){if(DPOS.startsWith('R:')){const k=DPOS.slice(2),R=DROLES[k];ret
  const mine=t.roster.filter(p=>epos(p)===pos).sort(dcmp),others=flex?t.roster.filter(p=>inFG(p,pos)&&epos(p)!==pos).sort((a,b)=>ovrAt(b,pos)-ovrAt(a,pos)):[];
  return{pos,N,all:mine.concat(others),ids:mine.slice(0,N).map(p=>p.id),st:START[pos]||1,lab:DLAB[pos]||pos,ov:p=>ovrAt(p,pos),set(ids){depthSet(t,pos,ids)},reset(){t.roster.filter(p=>epos(p)===pos).forEach(p=>{delete p.dd;if(p.dpos)delete p.dpos})}}}
 /* who can be slotted at a depth-chart position: his own group, plus halfbacks at fullback (and fullbacks back at halfback) */
-const inFG=(p,pos)=>pos==='RB'?p.pos==='RB'||p.pos==='FB':pos==='FB'?FG(p.pos)==='TF'||p.pos==='RB':(pos==='LE'||pos==='RE')?FG(p.pos)==='DL'||FG(p.pos)==='LB':FG(p.pos)===FG(pos);
+const inFG=(p,pos)=>pos==='RB'?p.pos==='RB'||p.pos==='FB':pos==='FB'?FG(p.pos)==='TF'||p.pos==='RB':FG(p.pos)===FG(pos);
 let DPOS='QB',DSEL=null;
 const DEPN={WR:5,CB:5},DLAB={RB:'RB / HB',SAM:'SAM (OLB)',WILL:'WILL (OLB)',MIKE:'MIKE (MLB)',LT:'LT (left tackle)',RT:'RT (right tackle)',LG:'LG (left guard)',RG:'RG (right guard)',C:'C (center)',LE:'LE (end)',RE:'RE (end)',DT:'DT (tackle)',FS:'FS (safety)',SS:'SS (safety)'};
 const ORD=['1st','2nd','3rd','4th','5th'],htStr=h=>h?Math.floor(h/12)+"'"+(h%12)+'"':'';
