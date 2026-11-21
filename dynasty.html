@@ -209,7 +209,7 @@ const epos=p=>p.dpos||p.pos,eo=p=>p.dpos&&p.dpos!==p.pos&&typeof ovrAt==='functi
 const POS=['QB','RB','FB','WR','TE','LT','RT','LG','RG','C','LE','RE','DT','SAM','WILL','MIKE','CB','FS','SS','K','P'];
 const NEED={QB:4,RB:6,FB:2,WR:10,TE:5,LT:3,RT:3,LG:3,RG:3,C:3,LE:4,RE:4,DT:6,SAM:3,WILL:3,MIKE:3,CB:8,FS:3,SS:3,K:2,P:2},START={QB:1,RB:1,FB:1,WR:3,TE:1,LT:1,RT:1,LG:1,RG:1,C:1,LE:1,RE:1,DT:2,SAM:1,WILL:1,MIKE:1,CB:2,FS:1,SS:1,K:1,P:1};
 /* roster targets for recruiting / roster fill: offense by scheme family, defense one standard list (K and P: 1 each) */
-const OFFN={pro:{QB:4,RB:5,FB:2,WR:8,TE:4,LT:3,RT:3,LG:3,RG:3,C:2},spr:{QB:4,RB:5,FB:1,WR:9,TE:3,LT:3,RT:3,LG:3,RG:3,C:2},air:{QB:4,RB:4,FB:0,WR:10,TE:3,LT:3,RT:3,LG:3,RG:3,C:2},opt:{QB:5,RB:6,FB:3,WR:6,TE:4,LT:3,RT:3,LG:3,RG:3,C:2}},DEFN={'4-3 Multiple':{LE:4,RE:4,DT:5,SAM:4,MIKE:4,WILL:4,CB:7,FS:3,SS:3},'Nickel 4-2-5':{LE:4,RE:4,DT:5,SAM:3,MIKE:4,WILL:3,CB:8,FS:4,SS:4},'Tampa 2':{LE:4,RE:4,DT:5,SAM:4,MIKE:4,WILL:4,CB:7,FS:4,SS:4},'46 Pressure':{LE:4,RE:4,DT:5,SAM:4,MIKE:4,WILL:4,CB:6,FS:3,SS:5},'3-4 Attack':{LE:4,RE:4,DT:5,SAM:4,MIKE:5,WILL:4,CB:7,FS:3,SS:3},'3-3-5 Stack':{LE:3,RE:3,DT:5,SAM:4,MIKE:4,WILL:4,CB:8,FS:4,SS:4}},OTIER={'Pro Style':'pro','West Coast':'pro','Power Run':'pro','Spread':'spr','Air Raid':'air','Triple Option':'opt'};
+const OFFN={pro:{QB:4,RB:5,FB:2,WR:8,TE:4,LT:3,RT:3,LG:3,RG:3,C:2},spr:{QB:4,RB:5,FB:1,WR:9,TE:3,LT:3,RT:3,LG:3,RG:3,C:2},air:{QB:4,RB:4,FB:0,WR:10,TE:3,LT:3,RT:3,LG:3,RG:3,C:2},opt:{QB:5,RB:6,FB:3,WR:6,TE:4,LT:3,RT:3,LG:3,RG:3,C:2}},DEFN={'4-3 Multiple':{LE:4,RE:4,DT:5,SAM:4,MIKE:4,WILL:4,CB:7,FS:3,SS:3},'4-2-5':{LE:4,RE:4,DT:5,SAM:3,MIKE:4,WILL:3,CB:8,FS:4,SS:4},'Tampa 2':{LE:4,RE:4,DT:5,SAM:4,MIKE:4,WILL:4,CB:7,FS:4,SS:4},'46 Pressure':{LE:4,RE:4,DT:5,SAM:4,MIKE:4,WILL:4,CB:6,FS:3,SS:5},'3-4 Attack':{LE:4,RE:4,DT:5,SAM:4,MIKE:5,WILL:4,CB:7,FS:3,SS:3},'3-3-5 Stack':{LE:3,RE:3,DT:5,SAM:4,MIKE:4,WILL:4,CB:8,FS:4,SS:4}},OTIER={'Pro Style':'pro','West Coast':'pro','Power Run':'pro','Spread':'spr','Air Raid':'air','Triple Option':'opt'};
 /* base offensive personnel by scheme (WR, TE, extra backs behind the QB: 1 = FB, 2 = FB + second HB); passing downs spread it out, short yardage packs it in */
 const OPERS=(po,pp)=>{switch(po){case'Air Raid':return pp>=.45?{wr:4,te:0,fb:0}:{wr:3,te:1,fb:0};case'West Coast':return pp>=.8?{wr:4,te:0,fb:0}:pp<.38?{wr:2,te:2,fb:0}:{wr:3,te:1,fb:0};case'Pro Style':return pp>=.72?{wr:3,te:1,fb:0}:{wr:2,te:1,fb:1};case'Power Run':return pp>=.62?{wr:2,te:1,fb:1}:{wr:1,te:2,fb:1};case'Triple Option':return pp>=.62?{wr:2,te:1,fb:1}:{wr:1,te:1,fb:2};default:return pp>=.72?{wr:4,te:0,fb:0}:{wr:3,te:1,fb:0}}};
 function nd(t,pos){const o=OFFN[OTIER[t&&t.po]||'pro'];if(o[pos]!=null)return o[pos];if(pos==='K'||pos==='P')return 1;const d=DEFN[t&&t.pd]||DEFN['4-3 Multiple'];return d[pos]!=null?d[pos]:(NEED[pos]||0)}
@@ -265,14 +265,14 @@ const OFF={
 'Power Run':{k:1.9,pass:.35,w:{qa:.08,qs:.04,rb:.10,rpw:.14,rs:.06,wh:.04,te:.06,tb:.08,pb:.04,rk:.30,fbb:.06},tempo:.98,var:.85,d:'Smash-mouth. Grinds clock, low variance. Needs a bruising RB, blocking TEs and road-grader linemen.'},
 'Triple Option':{k:1.6,pass:.2,w:{qs:.26,rs:.10,rpw:.08,rb:.08,fbu:.26,fbb:.04,rk:.22,tb:.06},neg:{qa:.12,wh:.08},tempo:.94,var:1.1,d:'Rare option running attack. Slow pace. Only worth running with a fast running QB who is a poor passer, weak receivers, and a strong running fullback who can carry the load. A good passing roster is wasted, and costs you here.'}};
 /* league-wide calibration so each scheme is the best fit for a realistic share of rosters (Spread/Pro Style common, Triple Option rare) */
-const DEFB={'4-3 Multiple':2.15,'3-4 Attack':2.15,'Nickel 4-2-5':-1.25,'Tampa 2':0.85,'46 Pressure':1.85,'3-3-5 Stack':2.15},DEFPOP={'4-3 Multiple':1.38,'3-4 Attack':-0.32,'Nickel 4-2-5':0.99,'Tampa 2':0.24,'46 Pressure':-0.98,'3-3-5 Stack':0.38};
+const DEFB={'4-3 Multiple':2.15,'3-4 Attack':2.15,'4-2-5':-1.25,'Tampa 2':0.85,'46 Pressure':1.85,'3-3-5 Stack':2.15},DEFPOP={'4-3 Multiple':1.38,'3-4 Attack':-0.32,'4-2-5':0.99,'Tampa 2':0.24,'46 Pressure':-0.98,'3-3-5 Stack':0.38};
 const OFFB={'Spread':1.4,'Air Raid':-.1,'West Coast':.6,'Pro Style':1.55,'Power Run':-.3,'Triple Option':9.8};
 /* AI scheme-choice popularity tilt (real ratings favoured Air Raid/Spread too heavily); does not change how effective a scheme is */
 const OFFPOP={'Air Raid':-1.85,'Spread':-.97,'West Coast':-.78,'Pro Style':.37,'Power Run':2.38,'Triple Option':.85};
 const DEF={
 '4-3 Multiple':{k:1.8,pw:{dp:.30,lc:.15,cm:.15,cz:.15,sc:.25},rw:{dr:.35,lr:.38,sr:.17,cz:.10},agg:1,lean:0,d:'Balanced base defense.'},
 '3-4 Attack':{k:2.9,pw:{dp:.20,lc:.18,lr:.12,cm:.12,cz:.12,sc:.26},rw:{dr:.28,lr:.50,sr:.12,cz:.10},agg:1.15,lean:-.3,d:'Linebacker-driven blitz scheme. Needs athletic, physical LBs. Better vs run.'},
-'Nickel 4-2-5':{k:2.6,pw:{dp:.28,lc:.08,cm:.22,cz:.18,sc:.24},rw:{dr:.38,lr:.30,sr:.18,cz:.14},agg:.95,lean:.5,d:'Extra DB. Built to stop the pass; needs good cover corners and a pass rush.'},
+'4-2-5':{k:2.6,pw:{dp:.28,lc:.08,cm:.22,cz:.18,sc:.24},rw:{dr:.38,lr:.30,sr:.18,cz:.14},agg:.95,lean:.5,d:'Extra DB. Built to stop the pass; needs good cover corners and a pass rush.'},
 'Tampa 2':{k:2.8,pw:{dp:.18,lc:.20,cz:.30,cm:.04,sc:.28},rw:{dr:.30,lr:.38,sr:.22,cz:.10},agg:.8,lean:.4,d:'Zone shell, bend-don\'t-break. Needs zone corners, cover LBs and safeties. Low variance.'},
 '46 Pressure':{k:3.0,pw:{dp:.38,lc:.06,lr:.08,cm:.30,sc:.18},rw:{dr:.42,lr:.40,sr:.14,cm:.04},agg:1.3,lean:-.5,d:'All-out pressure. Elite vs run with run-stuffers; needs edge rushers and man corners or it gets burned. Volatile vs pass.'}};
 DEF['3-3-5 Stack']={k:2.6,pw:{dp:.18,lc:.20,lr:.08,cm:.14,cz:.16,sc:.24},rw:{dr:.34,lr:.40,sr:.16,cz:.10},agg:1.05,lean:.25,d:'Three down linemen, three stacked linebackers, five DBs. Linemen eat blocks and stop the run; speedy LBs rush and cover. Disguised looks.'};
@@ -280,14 +280,14 @@ DEF['3-3-5 Stack']={k:2.6,pw:{dp:.18,lc:.20,lr:.08,cm:.14,cz:.16,sc:.24},rw:{dr:
 const ROLES={
 '4-3 Multiple':{dl:{dp:[.4,.4,.1,.1],dr:[.1,.1,.4,.4]},lb:{lr:[.3,.3,.4],lc:[.4,.4,.2],lp:[.3,.3,.4]},s:{sc:[.55,.45],sr:[.35,.65]},bl:.12},
 '3-4 Attack':{dl:{dp:[.1,.1,.4,.4],dr:[.4,.4,.1,.1]},lb:{lr:[.25,.25,.5],lc:[.25,.25,.5],lp:[.45,.45,.1]},s:{sc:[.5,.5],sr:[.4,.6]},bl:.35},
-'Nickel 4-2-5':{dl:{dp:[.4,.4,.1,.1],dr:[.15,.15,.35,.35]},lb:{lr:[.25,.25,.5],lc:[.35,.35,.3],lp:[.3,.3,.4]},s:{sc:[.5,.5],sr:[.4,.6]},bl:.08},
+'4-2-5':{dl:{dp:[.4,.4,.1,.1],dr:[.15,.15,.35,.35]},lb:{lr:[.25,.25,.5],lc:[.35,.35,.3],lp:[.3,.3,.4]},s:{sc:[.5,.5],sr:[.4,.6]},bl:.08},
 'Tampa 2':{dl:{dp:[.4,.4,.1,.1],dr:[.25,.25,.25,.25]},lb:{lr:[.3,.3,.4],lc:[.27,.28,.45],lp:[.3,.3,.4]},s:{sc:[.5,.5],sr:[.45,.55]},bl:.05},
 '46 Pressure':{dl:{dp:[.15,.15,.35,.35],dr:[.2,.2,.3,.3]},lb:{lr:[.33,.33,.34],lc:[.35,.35,.3],lp:[.3,.3,.4]},s:{sc:[.6,.4],sr:[.3,.7]},bl:.3},
 '3-3-5 Stack':{dl:{dp:[.1,.1,.4,.4],dr:[.4,.4,.1,.1]},lb:{lr:[.3,.3,.4],lc:[.35,.35,.3],lp:[.35,.35,.3]},s:{sc:[.5,.5],sr:[.4,.6]},bl:.3}};
 const ROLEL={
 '4-3 Multiple':{LE:'Pass Rusher',RE:'Pass Rusher',DT:'Run Stopper',SAM:'Strongside LB',WILL:'Weakside LB',MIKE:'Run Stopper',FS:'Deep Coverage',SS:'Run Support'},
 '3-4 Attack':{LE:'Run Stopper (5-tech)',RE:'Run Stopper (5-tech)',DT:'Nose / Gap Plugger',SAM:'Edge Rusher',WILL:'Edge Rusher',MIKE:'Run Stopper',FS:'Deep Coverage',SS:'Run Support'},
-'Nickel 4-2-5':{LE:'Speed Rusher',RE:'Speed Rusher',DT:'Interior Rusher',SAM:'Coverage LB',WILL:'Coverage LB',MIKE:'Run Stopper',FS:'Deep Coverage',SS:'Slot / Run Support'},
+'4-2-5':{LE:'Speed Rusher',RE:'Speed Rusher',DT:'Interior Rusher',SAM:'Coverage LB',WILL:'Coverage LB',MIKE:'Run Stopper',FS:'Deep Coverage',SS:'Slot / Run Support'},
 'Tampa 2':{LE:'Contain Rusher',RE:'Contain Rusher',DT:'Run Stopper',SAM:'Zone Dropper',WILL:'Zone Dropper',MIKE:'Deep-Middle Dropper',FS:'Deep Half Coverage',SS:'Deep Half Coverage'},
 '46 Pressure':{LE:'Pass Rusher',RE:'Pass Rusher',DT:'Interior Pressure',SAM:'Run Blitzer',WILL:'Run Blitzer',MIKE:'Run Stopper',FS:'Deep Coverage',SS:'Box Enforcer'},
 '3-3-5 Stack':{LE:'Run Stopper',RE:'Run Stopper',DT:'Nose / Run Stopper',SAM:'Hybrid Rusher',WILL:'Hybrid Rusher',MIKE:'Run Stopper',FS:'Deep Coverage',SS:'Run Support'}};
@@ -664,7 +664,7 @@ const PKGS={
 'Tampa 2':{base:[4,3,2,2],nickel:[4,2,3,2],dime:[4,1,4,2],heavy:[4,4,2,1]},
 '46 Pressure':{base:[4,3,2,2],nickel:[4,2,3,2],dime:[4,1,4,2],heavy:[4,4,2,1]},
 '3-4 Attack':{base:[3,4,2,2],nickel:[3,3,3,2],dime:[3,2,4,2],heavy:[4,4,2,1]},
-'Nickel 4-2-5':{base:[4,2,2,3],dime:[4,1,4,2],heavy:[4,3,2,2]},
+'4-2-5':{base:[4,2,2,3],dime:[4,1,4,2],heavy:[4,3,2,2]},
 '3-3-5 Stack':{base:[3,3,2,3],dime:[3,2,4,2],heavy:[3,4,2,2]}};
 const COV3=-2;
 const PKM={base:{cov:0,box:0},nickel:{cov:0,box:-4},dime:{cov:2,box:-8},heavy:{cov:-3,box:6}};
@@ -706,10 +706,10 @@ const ARFIT={'QB|Backfield Creator':['Spread','Air Raid'],'QB|Dual Threat':['Spr
 'WR|Contested Specialist':['Pro Style','West Coast'],'WR|Elusive Route Runner':['Air Raid','West Coast'],'WR|Gadget':['Spread','Triple Option'],'WR|Gritty Possession':['West Coast','Pro Style'],'WR|Physical Route Runner':['Pro Style','West Coast'],'WR|Route Artist':['Air Raid','West Coast'],'WR|Speedster':['Air Raid','Spread'],
 'TE|Gritty Possession':['Pro Style','Power Run'],'TE|Physical Route Runner':['West Coast','Pro Style'],'TE|Pure Possession':['West Coast','Spread'],'TE|Pure Blocker':['Power Run','Triple Option'],'TE|Vertical Threat':['Air Raid','Spread'],
 'OL|Agile':['Spread','Air Raid'],'OL|Pass Protector':['Air Raid','West Coast'],'OL|Raw Strength':['Power Run','Triple Option'],
-'DL|Edge Setter':['3-4 Attack','3-3-5 Stack'],'DL|Gap Specialist':['46 Pressure','4-3 Multiple'],'DL|Power Rusher':['4-3 Multiple','46 Pressure'],'DL|Pure Power':['3-4 Attack','3-3-5 Stack'],'DL|Speed Rusher':['4-3 Multiple','Nickel 4-2-5'],
-'LB|Lurker':['Tampa 2','Nickel 4-2-5'],'LB|Signal Caller':['4-3 Multiple','3-3-5 Stack'],'LB|Thumper':['46 Pressure','3-4 Attack'],
-'CB|Boundary':['4-3 Multiple','3-4 Attack'],'CB|Bump and Run':['46 Pressure','Nickel 4-2-5'],'CB|Field':['Nickel 4-2-5','4-3 Multiple'],'CB|Zone':['Tampa 2','3-4 Attack'],
-'S|Box Specialist':['46 Pressure','3-4 Attack'],'S|Coverage Specialist':['Tampa 2','Nickel 4-2-5'],'S|Hybrid':['4-3 Multiple','3-4 Attack']};
+'DL|Edge Setter':['3-4 Attack','3-3-5 Stack'],'DL|Gap Specialist':['46 Pressure','4-3 Multiple'],'DL|Power Rusher':['4-3 Multiple','46 Pressure'],'DL|Pure Power':['3-4 Attack','3-3-5 Stack'],'DL|Speed Rusher':['4-3 Multiple','4-2-5'],
+'LB|Lurker':['Tampa 2','4-2-5'],'LB|Signal Caller':['4-3 Multiple','3-3-5 Stack'],'LB|Thumper':['46 Pressure','3-4 Attack'],
+'CB|Boundary':['4-3 Multiple','3-4 Attack'],'CB|Bump and Run':['46 Pressure','4-2-5'],'CB|Field':['4-2-5','4-3 Multiple'],'CB|Zone':['Tampa 2','3-4 Attack'],
+'S|Box Specialist':['46 Pressure','3-4 Attack'],'S|Coverage Specialist':['Tampa 2','4-2-5'],'S|Hybrid':['4-3 Multiple','3-4 Attack']};
 const archFit=(pos,arch)=>ARFIT[GP(pos)+'|'+arch]||[];
 const fitsMine=(p,t)=>{const f=archFit(p.pos,style(p).n);return!!f.length&&(f.includes(t.po)||f.includes(t.pd))};
 const fitTxt=p=>{const f=archFit(p.pos,style(p).n);return f.length?'<span class=m>thrives in '+f.join(', ')+'</span>':(['K','P'].includes(p.pos)?'':'<span class=m>fits any scheme</span>')};
@@ -1049,7 +1049,7 @@ function toast(s){const t=$('toast');if(!t)return;t.textContent=s;t.style.displa
 /* ===== game sim ===== */
 const cb=side=>0;
 /* ===== play-by-play engine: every snap is resolved from player ratings ===== */
-const DSC={'3-3-5 Stack':{blitz:1.1,man:.35,box:.95,shell:.55},'4-3 Multiple':{blitz:1,man:.35,box:1,shell:.5},'3-4 Attack':{blitz:1.2,man:.4,box:1.1,shell:.4},'Nickel 4-2-5':{blitz:.95,man:.5,box:.85,shell:.6},'Tampa 2':{blitz:.75,man:.1,box:.9,shell:.85},'46 Pressure':{blitz:1.5,man:.75,box:1.3,shell:.15}};
+const DSC={'3-3-5 Stack':{blitz:1.1,man:.35,box:.95,shell:.55},'4-3 Multiple':{blitz:1,man:.35,box:1,shell:.5},'3-4 Attack':{blitz:1.2,man:.4,box:1.1,shell:.4},'4-2-5':{blitz:.95,man:.5,box:.85,shell:.6},'Tampa 2':{blitz:.75,man:.1,box:.9,shell:.85},'46 Pressure':{blitz:1.5,man:.75,box:1.3,shell:.15}};
 const OSC={
 'Spread':{pz:0.06,fb:0.3,rm:0.08,pa:.18,keep:.12,opt:.35,tg:[.27,.23,.17,.14,.19],dp:[.45,.35,.20]},
 'Air Raid':{pz:-0.2,fb:0.1,rm:-0.11,pa:.10,keep:.05,opt:.10,tg:[.31,.28,.21,.09,.11],dp:[.30,.35,.35]},
@@ -1567,9 +1567,11 @@ function save(){clearTimeout(SVT);SVT=setTimeout(saveNow,250);if(typeof MP!=='un
 function saveNow(){if(!S)return;let js;try{js=JSON.stringify(S,rd)}catch(e){return}if(IDB.db&&IDB.put(js)){try{localStorage.removeItem('cfb27dyn')}catch(e){}return}try{localStorage.setItem('cfb27dyn',js)}catch(e){if(!saveNow.w){saveNow.w=1;toast('Browser storage is full. Use Settings, Export save, to back up your dynasty.')}}}
 /* tackles and guards are split into left and right: spread a team's OT/OG players across both sides, best men first */
 function splitSides(t){for(const [o,a,b] of [['OT','LT','RT'],['OG','LG','RG']]){const L=t.roster.filter(p=>p.pos===o).sort((x,y)=>(x.dd||99)-(y.dd||99)||y.ovr-x.ovr);let sd=Math.random()<.5?0:1;L.forEach(p=>{p.pos=sd?b:a;sd^=1;delete p.dd;delete p.dpos;if(p.hwp===o)p.hwp=p.pos})}t.roster.forEach(p=>{if(p.dpos==='OT'||p.dpos==='OG'){delete p.dpos;delete p.dd}})}
+/* the 4-2-5 defense used to be called "Nickel 4-2-5": rename it wherever an older save stored the name */
+function migNick(){if(!S||S.nk)return;const O='Nickel 4-2-5',N='4-2-5';const walk=(o,d)=>{if(!o||typeof o!=='object'||d>9)return;if(Array.isArray(o)){for(let i=0;i<o.length;i++){if(o[i]===O)o[i]=N;else walk(o[i],d+1)}return}for(const k of Object.keys(o)){const v=o[k];if(k===O){o[N]=v;delete o[k]}if(v===O)o[k]=N;else if(v&&typeof v==='object')walk(v,d+1)}};walk(S,0);S.nk=1}
 function migSides(){if(!S||S.sv>=1)return;const m={OT:['LT','RT'],OG:['LG','RG']};(S.teams||[]).forEach(t=>t.roster&&splitSides(t));const walk=(o,d)=>{if(!o||typeof o!=='object'||d>8)return;if(Array.isArray(o)){for(const v of o)walk(v,d+1);return}for(const f of['pos','hwp','dpos']){if(typeof o[f]==='string'&&m[o[f]])o[f]=m[o[f]][Math.random()<.5?0:1]}for(const k in o){const v=o[k];if(v&&typeof v==='object'&&k!=='infl'&&k!=='rate')walk(v,d+1)}};walk(S,0);S.sv=1}
 function migHome(){const OLD=['SE','SW','MW','W','NE'];const w=(x,c)=>{const L=HT.map((h,i)=>h.o===c&&h.pr!=null?i:-1).filter(i=>i>=0);if(!L.length)return;x.hi=L[wpick(L.map(i=>HTW[i]))];x.home=HT[x.hi].r};const walk=(o,d)=>{if(!o||typeof o!=='object'||d>6)return;if(Array.isArray(o)){for(const v of o)walk(v,d+1);return}if(typeof o.home==='string'&&OLD.includes(o.home))w(o,o.home);for(const k in o){const v=o[k];if(v&&typeof v==='object'&&k!=='infl'&&k!=='rate')walk(v,d+1)}};walk(S,0)}
-function load(){try{const s=PRE!=null?PRE:localStorage.getItem('cfb27dyn');if(s){S=JSON.parse(s);if(!S.hum)S.hum=[S.uid];if(S.pa==null)S.pa=S.uid;try{matAll()}catch(e){}try{migCoach()}catch(e){}try{migHome()}catch(e){}try{migSides()}catch(e){}try{if(!['reg','cc','cfp'].includes(S.stage)&&S.stage!=='setup'){const cm={};TD.forEach(([c,l])=>l.forEach(([n])=>cm[n]=c));let ch=0;S.teams.forEach(t=>{if(cm[t.name]&&t.conf!==cm[t.name]){t.conf=cm[t.name];ch++}});if(ch&&S.stage==='pre'&&S.sched)genSchedule()}}catch(e){}
+function load(){try{const s=PRE!=null?PRE:localStorage.getItem('cfb27dyn');if(s){S=JSON.parse(s);if(!S.hum)S.hum=[S.uid];if(S.pa==null)S.pa=S.uid;try{matAll()}catch(e){}try{migCoach()}catch(e){}try{migHome()}catch(e){}try{migSides()}catch(e){}try{migNick()}catch(e){}try{if(!['reg','cc','cfp'].includes(S.stage)&&S.stage!=='setup'){const cm={};TD.forEach(([c,l])=>l.forEach(([n])=>cm[n]=c));let ch=0;S.teams.forEach(t=>{if(cm[t.name]&&t.conf!==cm[t.name]){t.conf=cm[t.name];ch++}});if(ch&&S.stage==='pre'&&S.sched)genSchedule()}}catch(e){}
  try{if(S.htv!==2){S.htv=2;(S.pros||[]).forEach(p=>{delete p.hi});S.teams.forEach(t=>t.roster.forEach(p=>{delete p.hi}));(S.carry||[]).forEach(p=>{delete p.hi});(S.dpool||[]).forEach(p=>{delete p.hi})}}catch(e){}
  if(S.coach){/* Rainmaker and Visionary were removed: refund anything spent on them */const c=S.coach;if(c.sp)['rain','vis'].forEach(k=>delete c.sp[k]);Object.keys(c.ab||{}).forEach(k=>{if(/^(rain|vis)\./.test(k))delete c.ab[k]});if(Array.isArray(c.unl))c.unl=c.unl.filter(k=>!/^(rain|vis)/.test(k))}
  try{S.teams.forEach(t=>{convTeam(t);if(!Number.isFinite(t.cl))t.cl=0;if(!Array.isArray(t.rcl))t.rcl=[];migGr(t);if(t.g0conf==null)t.g0conf=GR[t.name]?GSC[GR[t.name].split(' ')[7]]:.5});(S.pros||[]).forEach(convPros);S.teams.forEach(t=>t.roster.forEach(p=>{if(p.nc)p.nc=r5(p.nc)}));(S.pros||[]).forEach(p=>{if(p.offer&&p.offer.nil)p.offer.nil=r5(p.offer.nil);if(p.cn)for(const k in p.cn)p.cn[k]=r5(p.cn[k])})}catch(e){}return true}}catch(e){}return false}
