@@ -117,6 +117,61 @@ body{background:radial-gradient(1400px 800px at 78% 30%,color-mix(in srgb,var(--
 .hfoot{text-align:center;color:var(--m);font-size:12px;margin-top:26px;letter-spacing:.5px}
 @media(max-width:560px){.hjoin .grid{grid-template-columns:1fr}.hc{padding:18px 16px}.bt{flex:1 1 auto}}
 
+/* ===== new-dynasty screen ===== */
+.hm.wide{max-width:1120px}
+.su{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}.su>*{min-width:0}
+.su .pn{position:relative;background:linear-gradient(180deg,#171d27,#12171f);border:1px solid #ffffff12;border-radius:16px;padding:26px 28px 24px;box-shadow:0 18px 44px #0009}
+.su .ph{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #ffffff12}
+.su .no{font-family:var(--disp);font-size:44px;line-height:.9;font-weight:700;color:var(--a);letter-spacing:0}
+.su .ph h2{margin:0;font-size:24px;color:#fff}
+.su .ph .sub{margin-left:auto;color:var(--m);font-size:13px;max-width:420px;text-align:right}
+.su .fl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.su .fl.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.su .sf{display:flex;flex-direction:column;gap:6px;min-width:0}
+.su .sf>span{font-size:12px;color:var(--m);font-weight:600}
+.su .sf select,.su .sf input{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:11px 12px;border-radius:9px;background:#0c1016;border:1px solid #ffffff1f;color:var(--t);outline:none;transition:border-color .15s,box-shadow .15s}
+.su .sf select:focus,.su .sf input:focus{border-color:var(--a);box-shadow:0 0 0 3px #f5a52430}
+.su .sf.need select{border-color:#f5a52488;box-shadow:0 0 0 3px #f5a5241f}
+.su .hint{margin:14px 0 0;color:var(--m);font-size:13px;line-height:1.55;max-width:90ch}
+.su .hint b{color:var(--t)}
+.su .boards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:22px 0}
+.su .bd{border:1px solid #ffffff12;border-radius:12px;background:#0c1016;overflow:hidden;display:flex;flex-direction:column}
+.su .bd .bh{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #ffffff10}
+.su .bd .bh label{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.su .bd .bh label>span{font-size:12px;color:var(--m);font-weight:600}
+.su .bd .bh select{font:inherit;font-size:17px;font-weight:700;padding:6px 8px;border-radius:8px;background:#151b24;border:1px solid #ffffff1f;color:#fff;width:100%}
+.su .bd svg{display:block;width:100%;height:auto;max-height:250px;background:linear-gradient(180deg,#14301f,#0f2418)}
+.su .bd .bn{padding:12px 14px;color:var(--m);font-size:13px;line-height:1.5;min-height:58px;white-space:normal;overflow:visible;text-overflow:clip}
+.su .sel{display:flex;flex-wrap:wrap;align-items:center;gap:18px 30px;padding:16px 20px;margin-bottom:18px;border-radius:12px;background:linear-gradient(90deg,#f5a52422,#f5a52408 60%,transparent);border:1px solid #f5a52455}
+.su .sel.none{background:#ffffff08;border-color:#ffffff14;color:var(--m)}
+.su .sel .nm{font-family:var(--disp);font-size:30px;text-transform:uppercase;letter-spacing:.04em;color:#fff;line-height:1}
+.su .sel .cf{color:var(--m);font-size:13px;margin-top:4px}.su .sel .cf b{color:var(--a);font-weight:600;letter-spacing:2px}
+.su .sel .st{display:flex;gap:26px;margin-left:auto;flex-wrap:wrap}
+.su .sel .st div{display:flex;flex-direction:column;align-items:flex-start}
+.su .sel .st b{font-family:var(--disp);font-size:28px;line-height:1;color:#fff}
+.su .sel .st small{color:var(--m);font-size:11px;margin-top:3px}
+.su .go{font:inherit;font-weight:700;font-size:16px;padding:13px 26px;border-radius:10px;cursor:pointer;border:1px solid #ffd27a;background:linear-gradient(180deg,#ffbf47,#e8940e);color:#1a1100;box-shadow:0 6px 20px #f5a52440,inset 0 1px 0 #fff6;transition:transform .12s,box-shadow .12s}
+.su .go:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 26px #f5a52466,inset 0 1px 0 #fff8}
+.su .go:disabled{background:#ffffff10;color:var(--m);border-color:#ffffff1a;box-shadow:none}
+.su .cfs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.su .cfs button{font:inherit;font-size:13px;font-weight:600;padding:6px 13px;border-radius:999px;border:1px solid #ffffff1f;background:#ffffff08;color:var(--m);cursor:pointer}
+.su .cfs button:hover{color:var(--t);border-color:#ffffff44}
+.su .cfs button.on{background:var(--a);color:#1a1100;border-color:var(--a)}
+.su .tw{font-size:14px;max-height:560px;overflow:auto;border:1px solid #ffffff12;border-radius:12px}
+.su .tw table{border-collapse:separate;border-spacing:0}
+.su .tw th{position:sticky;top:0;z-index:2;background:#1a212b;color:var(--m);font-size:12px;padding:10px 9px;border-bottom:1px solid #ffffff1a}
+.su .tw td{padding:9px 9px;border-bottom:1px solid #ffffff0a}
+.su .tw tr.clk:hover td{background:#ffffff0a}
+.su .tw tr.me td{background:#f5a5241c;border-bottom-color:#f5a52444}
+.su .tw tr.me td:first-child{box-shadow:inset 3px 0 0 var(--a)}
+.su .tw td{font-size:13.5px}.su .tw th{font-size:11.5px;letter-spacing:0}.su .tw .sn{font-weight:700;color:#fff}
+.su .tw .stars{color:var(--a);letter-spacing:1px}
+.su .rb{display:flex;align-items:center;gap:6px}.su .rb b{min-width:24px}
+.su .rb i{display:block;width:32px;height:5px;border-radius:3px;background:#ffffff14;overflow:hidden}.su .rb i s{display:block;height:100%;border-radius:3px;text-decoration:none}
+.su .tier{display:inline-block;padding:1px 8px;border-radius:999px;background:#4c9aff22;color:#9cc7ff;font-size:12px;font-weight:700}
+.su .num{font-variant-numeric:tabular-nums}
+@media(max-width:900px){.su .fl,.su .fl.five{grid-template-columns:1fr 1fr}.su .boards{grid-template-columns:1fr}.su .ph .sub{display:none}.su .sel .st{margin-left:0}}
+@media(max-width:560px){.su .pn{padding:18px 14px}.su .fl,.su .fl.five{grid-template-columns:1fr}}
 /* ===== unified premium theme (applies to every screen) ===== */
 :root{--gold1:#ffbf47;--gold2:#e8940e;--line:#ffffff14;--panel:linear-gradient(180deg,#1b212bf2,#141920f2)}
 html{scrollbar-color:#3a4556 #0e1116;scrollbar-width:thin}
@@ -2272,12 +2327,54 @@ function applyRosterData(){const D=typeof ROSTER_DATA!=='undefined'?ROSTER_DATA:
 function impMsg(r){toast(r.n+' team(s) imported'+(r.miss.length?'; unmatched team names: '+r.miss.slice(0,6).join(', '):''))}
 function impRun(){impMsg(importText(SU.txt,SU.imt));setup()}
 function impFiles(fl){const arr=[...fl];let done=0,tot={n:0,miss:new Set()};arr.forEach(f=>{const rd=new FileReader();rd.onload=()=>{const r=importText(rd.result,SU.imt);tot.n+=r.n;r.miss.forEach(x=>tot.miss.add(x));if(++done===arr.length){impMsg({n:tot.n,miss:[...tot.miss]});setup()}};rd.readAsText(f)})}
-function setup(){const ts=S.teams.filter(t=>!SU.cf||t.conf===SU.cf).sort((a,b)=>b.prestige-a.prestige||tOvr(b)-tOvr(a));
- $('app').innerHTML='<div class="hm wide"><img class=sban src=banner.jpg alt="CFB Dynasty · New dynasty · Choose your coach and school" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'"><div class=hero style="display:none"><div class=hball>🏈</div><h1>CFB <b>Dynasty</b></h1><div class=hsub>New dynasty · Choose your coach and school</div><div class=hline></div></div><div class="hc hot"><div class=hhd><div class=hic>🎓</div><div><div class=hk>Step 1</div><h2>Create your coach: identity, region, schemes and style</h2></div></div><div class=row><label>Coach name <input value="'+SU.name+'" onchange="SU.name=this.value"></label><label>Backstory <select onchange="SU.back=this.value">'+Object.keys(BACK).map(b=>'<option'+(SU.back===b?' selected':'')+'>'+b+'</option>').join('')+'</select></label><label>Primary recruiting region <select onchange="SU.rg=this.value;setup()"><option value="">Choose a region…</option>'+PRN.map(r=>'<option'+(SU.rg===r?' selected':'')+'>'+r+'</option>').join('')+'</select></label></div><p class=m>Recruiter, Tactician and Motivator trees are open from the start (Recruiter: recruiting · Tactician: schemes &amp; game plan · Motivator: development &amp; retention); your backstory archetype is 3 Coach Points cheaper per tier. Advanced archetypes unlock through career achievements. Your <b>primary region</b> is where your name carries weight: it adds to your school\'s pipeline there every offseason while you are the head coach.</p>'+
- '<div class=row><label>Offense <select onchange="SU.po=this.value;setup()">'+Object.keys(OFF).map(k=>'<option'+(SU.po===k?' selected':'')+'>'+k+'</option>').join('')+'</select></label><label>Defense <select onchange="SU.pd=this.value;setup()">'+[...new Set(Object.keys(DEF))].map(k=>'<option'+(SU.pd===k?' selected':'')+'>'+k+'</option>').join('')+'</select></label></div><p class=m><b>'+SU.po+':</b> '+OFF[SU.po].d+' <b>'+SU.pd+':</b> '+DEF[SU.pd].d+' Whatever school you take will run your offense and defense.</p>'+
- '<div class=row><label>Defensive aggressiveness <select onchange="SU.agg=+this.value">'+[[-1,'Conservative (fewer blitzes)'],[0,'Balanced'],[1,'Aggressive (more blitzes)']].map(([v,n])=>'<option value='+v+(SU.agg==v?' selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Coverage lean <select onchange="SU.lean=+this.value">'+[[-1,'Zone'],[0,'Balanced'],[1,'Man']].map(([v,n])=>'<option value='+v+(SU.lean==v?' selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Run/pass tilt <select onchange="SU.pass=+this.value">'+[-15,-10,-5,0,5,10,15].map(v=>'<option value='+v+(SU.pass==v?' selected':'')+'>'+(v>0?'+'+v+'% passing':v<0?(-v)+'% more running':'Scheme default')+'</option>').join('')+'</select></label></div>'+
- '<div class=row><label>Game plan <select onchange="SU.plan=this.value">'+[['agg','Aggressive (+variance)'],['bal','Balanced'],['con','Conservative (-variance)']].map(([v,n])=>'<option value='+v+(SU.plan===v?' selected':'')+'>'+n+'</option>').join('')+'</select></label><label>Practice <select onchange="SU.practice=this.value">'+[['full','Full (XP+, injuries+)'],['bal','Balanced'],['lim','Limited (safer, less XP)']].map(([v,n])=>'<option value='+v+(SU.practice===v?' selected':'')+'>'+n+'</option>').join('')+'</select></label></div></div>'+
- '<div class=hc><div class=hhd><div class=hic>🏟️</div><div><div class=hk>Step 2</div><h2>Pick your school ('+S.teams.length+' FBS teams)</h2></div></div><div class=row><select onchange="SU.cf=this.value;setup()"><option value="">All conferences</option>'+CONFS.map(c=>'<option'+(SU.cf===c?' selected':'')+'>'+c+'</option>').join('')+'</select><button class="bt pri" '+(SU.team==null||!SU.rg?'disabled':'')+' onclick="startNew()">'+(!SU.rg?'Pick your primary region first':SU.team!=null?'Start Dynasty as '+S.teams[SU.team].name:'Choose a school to start')+'</button></div>'+tbl(['School','Conf','Prestige','OVR','OFF','DEF','Best offense','Best defense',SU.rg?SU.rg+' pipeline':'Pipeline','Budget (DP)','Available',''],ts.map(t=>{const r=tRt(t),so=r.o,sd=r.d,bo=t.po,bd=t.pd;return'<tr class="clk '+(SU.team===t.id?'me':'')+'" onclick="SU.team='+t.id+';setup()"><td>'+t.name+'</td><td>'+t.conf+'</td><td>'+pstars(t.prestige)+'</td><td><b>'+Math.round(r.v)+'</b></td><td>'+Math.round(so)+'</td><td>'+Math.round(sd)+'</td><td>'+bo+'</td><td>'+bd+'</td><td>'+(()=>{const A=PIPE[t.name],i=PRN.indexOf(SU.rg),x=A&&A.find(y=>y[0]===i);return SU.rg?(x?'Tier '+x[1]:'–'):''})()+'</td><td>'+baseDP(t)+'</td><td>'+(t.dpa!=null?t.dpa:'')+'</td><td>'+(SU.team===t.id?'✔':'')+'</td></tr>'}))+'</div></div>'}
+/* chalk boards: the selected offense (O) and defense (X) drawn as a play diagram */
+const OFMB={'Spread':{wl:1,tl:0,tr:1,wr:2,bk:[['QB','HB']]},'West Coast':{wl:1,tl:1,tr:0,wr:2,bk:[['QB','HB']]},'Air Raid':{wl:2,tl:0,tr:0,wr:2,bk:[['QB','HB']]},'Pro Style':{wl:1,tl:0,tr:1,wr:1,bk:[['QB'],['FB','HB']]},'Power Run':{wl:1,tl:1,tr:1,wr:0,bk:[['QB'],['FB','HB']]},'Triple Option':{wl:1,tl:0,tr:1,wr:0,bk:[['QB'],['HB','FB','HB2']]}};
+function playBoard(side,name){const W=240,H=150,C=120,los=side==='o'?64:86;let g='';
+ for(let x=0;x<=W;x+=20)g+='<line x1='+x+' y1=0 x2='+x+' y2='+H+' stroke="#ffffff0d"/>';
+ for(let y=10;y<H;y+=22)g+='<line x1=0 y1='+y+' x2='+W+' y2='+y+' stroke="#ffffff10" stroke-dasharray="2 6"/>';
+ g+='<line x1=0 y1='+los+' x2='+W+' y2='+los+' stroke="#9fd2ff" stroke-width=1.4 stroke-dasharray="5 4" opacity=.55 />';
+ const O=(x,y,l,c)=>'<g><circle cx='+x+' cy='+y+' r=7.5 fill="'+(c||'none')+'" stroke="#ffcf6b" stroke-width=1.8 />'+(l?'<text x='+x+' y='+(y+2.6)+' text-anchor=middle font-size=7 font-weight=700 fill="#ffe3a3">'+l+'</text>':'')+'</g>';
+ const X=(x,y,l)=>'<g><path d="M'+(x-6)+' '+(y-6)+'L'+(x+6)+' '+(y+6)+'M'+(x+6)+' '+(y-6)+'L'+(x-6)+' '+(y+6)+'" stroke="#bcd3ee" stroke-width=2.2 stroke-linecap=round />'+(l?'<text x='+x+' y='+(y+16)+' text-anchor=middle font-size=6.5 fill="#8fa8c6">'+l+'</text>':'')+'</g>';
+ const spread=(n,a,b)=>n===1?[(a+b)/2]:Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));
+ if(side==='o'){const f=OFMB[name]||OFMB.Spread,y=los+16;
+  [C-32,C-16,C,C+16,C+32].forEach(x=>g+=O(x,y,''));
+  if(f.tl)g+=O(C-48,y,'TE');if(f.tr)g+=O(C+48,y,'TE');
+  [[16,y],[40,y+16],[64,y+16]].slice(0,f.wl).forEach(([x,yy],i)=>g+=O(x,yy,'WR'));
+  [[W-16,y],[W-40,y+16],[W-64,y+16]].slice(0,f.wr).forEach(([x,yy])=>g+=O(x,yy,'WR'));
+  f.bk.forEach((r,ri)=>{const yy=y+22+ri*18;r.forEach((p,j)=>{const x=C+(j-(r.length-1)/2)*(r.length>1?24:0);g+=O(x,yy,p.replace('2',''),p==='QB'?'#f5a52455':'')})});
+ }else{const b=(PKGS[name]||PKGS['4-3 Multiple']).base,nD=b[0],nL=b[1],nC=b[2],nS=b[3],y=los-16;
+  spread(nD,C-(nD-1)*8,C+(nD-1)*8).forEach(x=>g+=X(x,y));
+  spread(nL,C-(nL-1)*22,C+(nL-1)*22).forEach(x=>g+=X(x,y-24));
+  const cbx=[16,W-16];if(nC>=3)cbx.push(58);cbx.slice(0,nC).forEach(x=>g+=X(x,x===58?y-18:y-6));
+  spread(nS,C-(nS-1)*28,C+(nS-1)*28).forEach(x=>g+=X(x,y-52));
+ }
+ return'<svg viewBox="0 0 '+W+' '+H+'" role=img aria-label="'+(side==='o'?'Offense':'Defense')+' formation: '+name+'">'+g+'</svg>'}
+const rbar=v=>{v=Math.round(v);const c=v>=90?'var(--g)':v>=80?'var(--a)':'#8b95a5';return'<div class="rb num"><b>'+v+'</b><i><s style="width:'+clamp((v-55)/45*100,4,100)+'%;background:'+c+'"></s></i></div>'};
+function setup(){const ts=S.teams.filter(t=>!SU.cf||t.conf===SU.cf).sort((a,b)=>b.prestige-a.prestige||tOvr(b)-tOvr(a)),sel=SU.team!=null?S.teams[SU.team]:null;
+ const fld=(l,inner,cls)=>'<label class="sf'+(cls?' '+cls:'')+'"><span>'+l+'</span>'+inner+'</label>';
+ const sl=(on,opts)=>'<select onchange="'+on+'">'+opts+'</select>';
+ const nsel=(on,list,cur,f)=>sl(on,list.map(([v,n])=>'<option value='+v+(cur==v?' selected':'')+'>'+n+'</option>').join(''));
+ const rs=sel?tRt(sel):null;
+ $('app').innerHTML='<div class="hm wide"><img class=sban src=banner.jpg alt="CFB Dynasty · New dynasty · Choose your coach and school" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'"><div class=hero style="display:none"><div class=hball>🏈</div><h1>CFB <b>Dynasty</b></h1><div class=hsub>New dynasty · Choose your coach and school</div><div class=hline></div></div><div class=su>'+
+ '<section class=pn><div class=ph><span class=no>1</span><h2>Build your coach</h2><span class=sub>Backstory sets your starting skill tree discount. Region sets where your name carries weight.</span></div>'+
+ '<div class=fl>'+fld('Coach name','<input value="'+SU.name+'" onchange="SU.name=this.value" autocomplete=off>')+
+ fld('Backstory',sl('SU.back=this.value',Object.keys(BACK).map(b=>'<option'+(SU.back===b?' selected':'')+'>'+b+'</option>').join('')))+
+ fld('Primary recruiting region',sl('SU.rg=this.value;setup()','<option value="">Choose a region…</option>'+PRN.map(r=>'<option'+(SU.rg===r?' selected':'')+'>'+r+'</option>').join('')),SU.rg?'':'need')+'</div>'+
+ '<p class=hint>The Recruiter, Tactician and Motivator trees are open from the start (<b>Recruiter</b>: recruiting · <b>Tactician</b>: schemes and game plan · <b>Motivator</b>: development and retention). Your backstory makes its tree 3 Coach Points cheaper per tier, and advanced archetypes unlock through career achievements. Your <b>primary region</b> adds to your school\'s pipeline there every offseason while you are head coach.</p>'+
+ '<div class=boards><div class=bd><div class=bh>'+fld('Offense',sl('SU.po=this.value;setup()',Object.keys(OFF).map(k=>'<option'+(SU.po===k?' selected':'')+'>'+k+'</option>').join('')))+'</div>'+playBoard('o',SU.po)+'<div class=bn>'+OFF[SU.po].d+'</div></div>'+
+ '<div class=bd><div class=bh>'+fld('Defense',sl('SU.pd=this.value;setup()',[...new Set(Object.keys(DEF))].map(k=>'<option'+(SU.pd===k?' selected':'')+'>'+k+'</option>').join('')))+'</div>'+playBoard('d',SU.pd)+'<div class=bn>'+DEF[SU.pd].d+'</div></div></div>'+
+ '<div class="fl five">'+fld('Defensive aggressiveness',nsel('SU.agg=+this.value',[[-1,'Conservative (fewer blitzes)'],[0,'Balanced'],[1,'Aggressive (more blitzes)']],SU.agg))+
+ fld('Coverage lean',nsel('SU.lean=+this.value',[[-1,'Zone'],[0,'Balanced'],[1,'Man']],SU.lean))+
+ fld('Run/pass tilt',nsel('SU.pass=+this.value',[-15,-10,-5,0,5,10,15].map(v=>[v,v>0?'+'+v+'% passing':v<0?(-v)+'% more running':'Scheme default']),SU.pass))+
+ fld('Game plan',sl('SU.plan=this.value',[['agg','Aggressive (+variance)'],['bal','Balanced'],['con','Conservative (-variance)']].map(([v,n])=>'<option value='+v+(SU.plan===v?' selected':'')+'>'+n+'</option>').join('')))+
+ fld('Practice',sl('SU.practice=this.value',[['full','Full (XP+, injuries+)'],['bal','Balanced'],['lim','Limited (safer, less XP)']].map(([v,n])=>'<option value='+v+(SU.practice===v?' selected':'')+'>'+n+'</option>').join('')))+'</div>'+
+ '<p class=hint>Whichever school you take will run the offense and defense you choose here.</p></section>'+
+ '<section class=pn><div class=ph><span class=no>2</span><h2>Pick your school</h2><span class=sub>'+S.teams.length+' FBS teams'+(SU.cf?' · '+ts.length+' in '+SU.cf:'')+'</span></div>'+
+ '<div class="sel'+(sel?'':' none')+'">'+(sel?'<div><div class=nm>'+sel.name+'</div><div class=cf><b class=stars style="color:var(--a)">'+pstars(sel.prestige)+'</b> &nbsp;'+sel.conf+'</div></div><div class=st><div><b>'+Math.round(rs.v)+'</b><small>Overall</small></div><div><b>'+Math.round(rs.o)+'</b><small>Offense</small></div><div><b>'+Math.round(rs.d)+'</b><small>Defense</small></div><div><b>'+baseDP(sel).toLocaleString()+'</b><small>Budget (DP)</small></div><div><b>'+(sel.dpa!=null?sel.dpa.toLocaleString():'-')+'</b><small>Available (DP)</small></div></div>':'<div>Select a school from the list to see its ratings and budget.</div>')+
+ '<button class=go '+(sel&&SU.rg?'':'disabled')+' onclick="startNew()">'+(!SU.rg?'Pick your primary region first':sel?'Start dynasty at '+sel.name:'Choose a school to start')+'</button></div>'+
+ '<div class=cfs><button class="'+(SU.cf?'':'on')+'" onclick="SU.cf=\'\';setup()">All</button>'+CONFS.map(c=>'<button class="'+(SU.cf===c?'on':'')+'" onclick="SU.cf=\''+c.replace(/\'/g,"\\'")+'\';setup()">'+c+'</button>').join('')+'</div>'+
+ '<div class=tw><table><tr>'+['School','Conference','Prestige','Overall','Offense','Defense','Best offense','Best defense',SU.rg?SU.rg+' pipeline':'Pipeline','Budget','Available'].map(x=>'<th>'+x+'</th>').join('')+'</tr>'+
+ ts.map(t=>{const r=tRt(t),A=PIPE[t.name],i=PRN.indexOf(SU.rg),x=A&&A.find(y=>y[0]===i);return'<tr class="clk '+(SU.team===t.id?'me':'')+'" onclick="SU.team='+t.id+';setup()"><td class=sn>'+t.name+'</td><td>'+t.conf+'</td><td class=stars>'+pstars(t.prestige)+'</td><td>'+rbar(r.v)+'</td><td class=num>'+Math.round(r.o)+'</td><td class=num>'+Math.round(r.d)+'</td><td>'+t.po+'</td><td>'+t.pd+'</td><td>'+(SU.rg?(x?'<span class=tier>Tier '+x[1]+'</span>':'<span class=m>–</span>'):'')+'</td><td class=num>'+baseDP(t).toLocaleString()+'</td><td class=num>'+(t.dpa!=null?t.dpa.toLocaleString():'')+'</td></tr>'}).join('')+'</table></div></section></div></div>'}
 function matAll(){if(!S||!S.teams||S.mv===2)return;S.teams.forEach(t=>t.roster.forEach(p=>{if(OWN[p.pos])mat(p)}));S.mv=2}
 function startNew(){if(SU.team==null||!SU.rg)return;matAll();S.uid=SU.team;S.coach={name:SU.name,back:SU.back,rg:SU.rg||null,po:SU.po,pd:SU.pd,xp:0,cp:100,ab:{},unl:[],sp:{},st:{},v2:1,wins:0,losses:0,titles:0,prestige:.4};Object.assign(S,{htv:2,hist:[],log:[],board:[],staff:[],practice:'bal',plan:'bal',facUpg:0,facTarget:U().fac,sec:70,fired:false,pros:[],keepPros:false});S.facStart=U().fac;S.hum=[S.uid];S.users={};S.pa=S.uid;if(OFF[SU.po])U().po=SU.po;if(DEF[SU.pd])U().pd=SU.pd;S.gp={agg:+SU.agg,lean:+SU.lean,pass:+SU.pass};S.plan=SU.plan;S.practice=SU.practice;
  S.stage='pre';startSeason(true);save();TAB='actions';SUB.actions='stage';render()}
