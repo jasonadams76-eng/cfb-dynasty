@@ -966,18 +966,41 @@ function updGrades(){const N=S.teams.length,sr=S.teams.map(t=>[t.id,S.ov?S.ov[t.
  const cv=Object.keys(cs).map(c=>[c,cs[c].reduce((a,b)=>a+b,0)/cs[c].length]).sort((a,b)=>b[1]-a[1]);const cvals=Object.keys(cs).map(c=>S.teams.find(t=>t.conf===c).g0conf).sort((a,b)=>b-a);
  cv.forEach(([c],i)=>S.teams.filter(t=>t.conf===c).forEach(t=>t.g.conference=clamp(t.g.conference*.7+.3*cvals[i],0,1)))}
 /* ===== schedule ===== */
+var REPN=4000;
 function genSched12(){const T=S.teams;S.sched={};T.forEach(t=>S.sched[t.id]=Array(12).fill(null));S.wk=Array.from({length:12},()=>[]);
  const played=new Set(),key=(a,b)=>a<b?a+'-'+b:b+'-'+a;
  const place=(w,h,a)=>{S.wk[w].push([h,a]);S.sched[h][w]={o:a,h:true,r:null};S.sched[a][w]={o:h,h:false,r:null};played.add(key(h,a))};
- const CW=[3,4,5,6,7,8,9,10,11];
- CONFS.filter(c=>c!=='Independent').forEach(c=>{const ids=T.filter(t=>t.conf===c).map(t=>t.id);if(ids.length%2)ids.push(-1);const n=ids.length,K=Math.min(n-1,9),arr=ids.slice(1);
+ const shuf=a=>a.slice().sort(()=>F()-.5),link=(x,y)=>{const fx=[],fy=[];for(let w=0;w<12;w++){if(!S.sched[x][w])fx.push(w);if(!S.sched[y][w])fy.push(w)}
+  const cm=fx.filter(w=>fy.includes(w));if(cm.length)return cm[Math.floor(F()*cm.length)];
+  for(const a of shuf(fx))for(const b of shuf(fy)){if(a===b)continue;const ed=[];let cur=y,col=a,bad=false;
+   while(true){const g=S.sched[cur][col];if(!g)break;if(g.o===x){bad=true;break}ed.push([cur,g.o,col]);cur=g.o;col=col===a?b:a;if(ed.length>400){bad=true;break}}
+   if(bad||!ed.length)continue;
+   const mv=ed.map(([u,v,c])=>[u,v,c,S.sched[u][c],S.sched[v][c]]);
+   mv.forEach(([u,v,c])=>{S.wk[c]=S.wk[c].filter(g=>!((g[0]===u&&g[1]===v)||(g[0]===v&&g[1]===u)));S.sched[u][c]=null;S.sched[v][c]=null});
+   mv.forEach(([u,v,c,gu,gv])=>{const n=c===a?b:a;S.sched[u][n]=gu;S.sched[v][n]=gv;S.wk[n].push(gu.h?[u,v]:[v,u])});
+   return a}
+  return null};
+ const CW0=[3,4,5,6,7,8,9,10,11],CWX={};
+ CONFS.filter(c=>c!=='Independent').forEach(c=>{const CW=CWX[c]||CW0;const ids=T.filter(t=>t.conf===c).map(t=>t.id);if(ids.length%2)ids.push(-1);const n=ids.length,K=Math.min(n-1,9),arr=ids.slice(1);
   for(let r=0;r<K;r++){const rot=arr.map((_,i)=>arr[(i+r)%(n-1)]),row=[ids[0],...rot];for(let i=0;i<n/2;i++){const x=row[i],y=row[n-1-i];if(x<0||y<0)continue;(r+i)%2?place(CW[r],x,y):place(CW[r],y,x)}}});
- {const fk=new Set(),fc={};T.forEach(t=>{const m=RIVM[t.name],o=m&&T.find(x=>x.name===m);if(!o)return;if(o.conf===t.conf&&t.conf!=='Independent')return;const a=Math.min(t.id,o.id),b=Math.max(t.id,o.id),k=key(a,b);if(played.has(k)||fk.has(k)||(fc[a]||0)>=2||(fc[b]||0)>=2)return;const fw=[];for(let w=0;w<12;w++)if(!S.sched[a][w]&&!S.sched[b][w])fw.push(w);if(!fw.length)return;fk.add(k);fc[a]=(fc[a]||0)+1;fc[b]=(fc[b]||0)+1;const w=fw[Math.floor(F()*fw.length)];(S.year+a+b)%2?place(w,a,b):place(w,b,a)})}
+ {const fk=new Set(),fc={};T.forEach(t=>{const m=RIVM[t.name],o=m&&T.find(x=>x.name===m);if(!o)return;if(o.conf===t.conf&&t.conf!=='Independent')return;const a=Math.min(t.id,o.id),b=Math.max(t.id,o.id),k=key(a,b);if(played.has(k)||fk.has(k)||(fc[a]||0)>=2||(fc[b]||0)>=2)return;const w=link(a,b);if(w==null)return;fk.add(k);fc[a]=(fc[a]||0)+1;fc[b]=(fc[b]||0)+1;(S.year+a+b)%2?place(w,a,b):place(w,b,a)})}
  const fr=Array.from({length:12},(_,w)=>T.filter(t=>!S.sched[t.id][w]).map(t=>t.id));let best=null;
  for(let a=0;a<25;a++){const pl=new Set(played),pairs=[],bc={};let un=0;
   for(let w=0;w<12;w++){const f=fr[w].slice().sort(()=>F()-.5),used=new Set();if(f.length%2){let m=0;f.forEach((x,i)=>{if((bc[x]||0)<(bc[f[m]]||0))m=i});bc[f[m]]=(bc[f[m]]||0)+1;f.splice(m,1)}for(const x of f){if(used.has(x))continue;const y=f.find(z=>z!==x&&!used.has(z)&&!pl.has(key(x,z))&&(T[x].conf!==T[z].conf||T[x].conf==='Independent'));if(y===undefined){un++;bc[x]=(bc[x]||0)+1;continue}used.add(x);used.add(y);pl.add(key(x,y));pairs.push([w,x,y])}}
   if(!best||un<best.un)best={un,pairs};if(un<=1)break}
- best.pairs.forEach(([w,x,y],i)=>i%2?place(w,x,y):place(w,y,x))}
+ best.pairs.forEach(([w,x,y],i)=>i%2?place(w,x,y):place(w,y,x));
+ /* repair: make sure every team has exactly 12 games */
+ {const cnt=t=>S.sched[t].filter(x=>x).length,nc=(x,y)=>T[x].conf!==T[y].conf||T[x].conf==='Independent',ok=(x,y)=>x!==y&&!played.has(key(x,y))&&nc(x,y);
+  const fk=new Set();T.forEach(t=>{const m=RIVM[t.name],o=m&&T.find(z=>z.name===m);if(o)fk.add(key(t.id,o.id))});
+  const unplace=(w,u,v)=>{S.wk[w]=S.wk[w].filter(g=>!((g[0]===u&&g[1]===v)||(g[0]===v&&g[1]===u)));S.sched[u][w]=null;S.sched[v][w]=null;played.delete(key(u,v))};
+  for(let it=0;it<REPN;it++){const sh=T.filter(t=>cnt(t.id)<12);if(!sh.length)break;const x=sh[Math.floor(F()*sh.length)].id;const fw=[];for(let w=0;w<12;w++)if(!S.sched[x][w])fw.push(w);if(!fw.length)continue;
+   let done=false;const fws=fw.slice().sort(()=>F()-.5);
+   for(const w of fws){const c=sh.filter(t=>t.id!==x&&!S.sched[t.id][w]&&ok(x,t.id));if(c.length){const y=c[Math.floor(F()*c.length)].id;F()<.5?place(w,x,y):place(w,y,x);done=true;break}}
+   if(!done){const c=shuf(sh.filter(t=>t.id!==x&&ok(x,t.id)));for(const t of c){const w=link(x,t.id);if(w!=null){F()<.5?place(w,x,t.id):place(w,t.id,x);done=true;break}}}
+   if(done)continue;
+   for(const w of fws){const c=[];T.forEach(t=>{const g=S.sched[t.id][w];if(!g||!ok(x,t.id))return;const z=g.o;if(z===x||!nc(t.id,z)||fk.has(key(t.id,z)))return;c.push([t.id,z])});if(c.length){const [y,z]=c[Math.floor(F()*c.length)];unplace(w,y,z);F()<.5?place(w,x,y):place(w,y,x);break}}}
+ }
+ if(T.some(t=>S.sched[t.id].filter(x=>x).length<12)&&(genSched12.n=(genSched12.n||0)+1)<40)return genSched12();genSched12.n=0}
 /* calendar: Week 0 to Week 14 (15 slots). Each team plays 12 games, so everyone gets 3 byes. Week 0 is a small kickoff slate. */
 function genSchedule(){genSched12();const T=S.teams,s12=S.sched,w12=S.wk;S.sched={};T.forEach(t=>S.sched[t.id]=Array(15).fill(null));S.wk=Array.from({length:15},()=>[]);
  const MAPR=[1,2,3,4,5,6,8,9,10,11,12,13,14];w12.forEach((games,r)=>{const wk0=new Set();if(r===0)games.map((g,i)=>[F(),i]).sort((a,b)=>a[0]-b[0]).slice(0,8).forEach(x=>wk0.add(x[1]));
