@@ -777,7 +777,7 @@ function dpkg(H,sch,name,gf,tm){const R=ROLES[sch],P=PKGS[sch][name]||PKGS[sch].
  const cbs=cbLine(H,nc,gf,tm);
  const x3=ns>=3?H.filter(p=>GP(p.pos)==='S'&&!SFf.includes(p)).sort((a,b)=>b.ovr-a.ovr)[0]||(gf?ghost('SS'):null):null;
  const sf=ns>=3?[SFf[0],SFf[1],x3]:ns>=2?SFf.slice(0,2):[SFf[1]],sw=w=>ns>=3?[w[0],w[1]*.55,w[1]*.45]:ns>=2?w:[1];
- const wv=(L,key,w)=>{let x=0;for(let i=0;i<w.length;i++)x+=w[i]*(L[i]?comp(L[i])[key]+(CAL[key]||0):48);return x};
+ const wv=(L,key,w)=>{let x=0;for(let i=0;i<w.length;i++){let v=48;if(L[i]){let q=comp(L[i])[key];if(q==null&&(key==='dp'||key==='dr'))q=CFN.DL(er(L[i]))[key];v=Number.isFinite(q)?q+(CAL[key]||0):48}x+=w[i]*v}return x};
  const bl=R.bl*(nl>=4?1.15:nl/3);
  const c={dp:(1-bl)*wv(dl,'dp',g3(R.dl.dp))+bl*wv(lb,'lp',fw(R.lb.lp)),dr:wv(dl,'dr',g3(R.dl.dr)),lr:wv(lb,'lr',fw(R.lb.lr)),lc:wv(lb,'lc',fw(R.lb.lc)),sc:wv(sf,'sc',sw(R.s.sc)),sr:wv(sf,'sr',sw(R.s.sr))};
  if(tm){const mb=L=>{const a=L.filter(Boolean);return a.length?a.reduce((x,p)=>x+sxB(p,tm),0)/a.length:0},bd=mb(dl),bl2=mb(lb),bs=mb(sf);c.dp+=bd;c.dr+=bd;c.lr+=bl2;c.lc+=bl2;c.sc+=bs;c.sr+=bs}
