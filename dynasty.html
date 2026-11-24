@@ -2343,7 +2343,7 @@ function specVal(H,rl){const a=(k,n,ex)=>{const L=roleFrom(H,rl,k,ex).slice(0,n)
  return{o:(a('d3',1)+a('pwr',1)+a('slw',2)*2)/4,d:(a('slc',2)*2+a('nlb',2)*2+(l?roleSc(l,'lre'):48)+(r?roleSc(r,'rre'):48)+a('rdt',2,ex)*2)/8,r:(a('kr',1)+a('pr',1))/2}}
 function roleFrom(list,rl,k,ex){const R=DROLES[k];let el=list.filter(p=>R.pos.includes(p.pos)&&!p.ghost);
  if(k==='slc'){const st=slotsOrd(list,'S',false);el=el.filter(p=>!st.includes(p))}/* the starting FS and SS stay at safety */
- const ov=(rl&&rl[k])||[],a=el.slice().sort((x,y)=>roleSc(y,k)-roleSc(x,k)),pin=ov.map(id=>el.find(p=>p.id===id)).filter(Boolean);let r=pin.concat(a.filter(p=>!pin.includes(p)));if(ex)r=r.filter(p=>!ex.includes(p));return r}
+ const ov=(rl&&rl[k])||[],edge=k==='lre'||k==='rre',a=el.slice().sort((x,y)=>edge&&(GP(x.pos)==='DL')!==(GP(y.pos)==='DL')?(GP(x.pos)==='DL'?-1:1):roleSc(y,k)-roleSc(x,k)),pin=ov.map(id=>el.find(p=>p.id===id)).filter(Boolean);let r=pin.concat(a.filter(p=>!pin.includes(p)));if(ex)r=r.filter(p=>!ex.includes(p));return r}
 /* a player starts at only one rush spot: left edge first, then right edge, then the rush tackles */
 function rushEx(list,rl,k){if(k==='rre')return[roleFrom(list,rl,'lre')[0]].filter(Boolean);if(k==='rdt'){const l=roleFrom(list,rl,'lre')[0],r=roleFrom(list,rl,'rre',l?[l]:[])[0];return[l,r].filter(Boolean)}return[]}
 function roleListFrom(list,rl,k){const r=roleFrom(list,rl,k),ex=rushEx(list,rl,k);return ex.length?r.filter(p=>!ex.includes(p)).concat(r.filter(p=>ex.includes(p))):r}
